@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.gvxwsur.tamabletool.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "tamabletool.refmap.json",
+  "mixins": [
+    "MonsterMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
