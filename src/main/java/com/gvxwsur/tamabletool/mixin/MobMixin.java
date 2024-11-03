@@ -13,8 +13,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -23,33 +21,37 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-@Mixin(Monster.class)
-public abstract class MonsterMixin extends PathfinderMob implements Enemy, OwnableEntity {
+@Mixin(Mob.class)
+public abstract class MobMixin extends LivingEntity implements Targeting, OwnableEntity {
 
     @Unique
-    private static final EntityDataAccessor<Byte> DATA_FLAGS_ID;
+    private static final EntityDataAccessor<Byte> tamabletool$DATA_FLAGS_ID;
     @Unique
-    private static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID;
+    private static final EntityDataAccessor<Optional<UUID>> tamabletool$DATA_OWNERUUID_ID;
     @Unique
     private boolean tamabletool$orderedToSit;
 
-    protected MonsterMixin(EntityType<? extends PathfinderMob> p_21683_, Level p_21684_) {
+    protected MobMixin(EntityType<? extends LivingEntity> p_21683_, Level p_21684_) {
         super(p_21683_, p_21684_);
     }
 
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DATA_FLAGS_ID, (byte)0);
-        this.entityData.define(DATA_OWNERUUID_ID, Optional.empty());
+    @Inject(method = "defineSynchedData", at = @At("TAIL"))
+    protected void defineSynchedData(CallbackInfo ci) {
+        this.entityData.define(tamabletool$DATA_FLAGS_ID, (byte)0);
+        this.entityData.define(tamabletool$DATA_OWNERUUID_ID, Optional.empty());
     }
 
-    public void addAdditionalSaveData(CompoundTag p_21819_) {
-        super.addAdditionalSaveData(p_21819_);
+    @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
+    public void addAdditionalSaveData(CompoundTag p_21819_, CallbackInfo ci) {
         if (this.getOwnerUUID() != null) {
             p_21819_.putUUID("Owner", this.getOwnerUUID());
         }
@@ -57,8 +59,8 @@ public abstract class MonsterMixin extends PathfinderMob implements Enemy, Ownab
         p_21819_.putBoolean("Sitting", this.tamabletool$orderedToSit);
     }
 
-    public void readAdditionalSaveData(CompoundTag p_21815_) {
-        super.readAdditionalSaveData(p_21815_);
+    @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
+    public void readAdditionalSaveData(CompoundTag p_21815_, CallbackInfo ci) {
         UUID uuid;
         if (p_21815_.hasUUID("Owner")) {
             uuid = p_21815_.getUUID("Owner");
@@ -78,10 +80,8 @@ public abstract class MonsterMixin extends PathfinderMob implements Enemy, Ownab
 
         this.tamabletool$orderedToSit = p_21815_.getBoolean("Sitting");
         this.tamabletool$setInSittingPose(this.tamabletool$orderedToSit);
-    }
 
-    public boolean canBeLeashed(Player p_21813_) {
-        return !this.isLeashed();
+
     }
 
     @Unique
@@ -100,44 +100,42 @@ public abstract class MonsterMixin extends PathfinderMob implements Enemy, Ownab
 
     }
 
-    public void handleEntityEvent(byte p_21807_) {
+    @Inject(method = "handleEntityEvent", at = @At("HEAD"))
+    public void handleEntityEvent(byte p_21807_, CallbackInfo ci) {
         if (p_21807_ == 7) {
             this.tamabletool$spawnTamingParticles(true);
         } else if (p_21807_ == 6) {
             this.tamabletool$spawnTamingParticles(false);
-        } else {
-            super.handleEntityEvent(p_21807_);
         }
-
     }
 
     @Unique
     public boolean tamabletool$isTame() {
-        return ((Byte)this.entityData.get(DATA_FLAGS_ID) & 4) != 0;
+        return ((Byte)this.entityData.get(tamabletool$DATA_FLAGS_ID) & 4) != 0;
     }
 
     @Unique
     public void tamabletool$setTame(boolean p_21836_) {
-        byte b0 = (Byte)this.entityData.get(DATA_FLAGS_ID);
+        byte b0 = (Byte)this.entityData.get(tamabletool$DATA_FLAGS_ID);
         if (p_21836_) {
-            this.entityData.set(DATA_FLAGS_ID, (byte)(b0 | 4));
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte)(b0 | 4));
         } else {
-            this.entityData.set(DATA_FLAGS_ID, (byte)(b0 & -5));
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte)(b0 & -5));
         }
     }
 
     @Unique
     public boolean tamabletool$isInSittingPose() {
-        return ((Byte)this.entityData.get(DATA_FLAGS_ID) & 1) != 0;
+        return ((Byte)this.entityData.get(tamabletool$DATA_FLAGS_ID) & 1) != 0;
     }
 
     @Unique
     public void tamabletool$setInSittingPose(boolean p_21838_) {
-        byte b0 = (Byte)this.entityData.get(DATA_FLAGS_ID);
+        byte b0 = (Byte)this.entityData.get(tamabletool$DATA_FLAGS_ID);
         if (p_21838_) {
-            this.entityData.set(DATA_FLAGS_ID, (byte)(b0 | 1));
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte)(b0 | 1));
         } else {
-            this.entityData.set(DATA_FLAGS_ID, (byte)(b0 & -2));
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte)(b0 & -2));
         }
 
     }
@@ -145,12 +143,12 @@ public abstract class MonsterMixin extends PathfinderMob implements Enemy, Ownab
     @Unique
     @Nullable
     public UUID getOwnerUUID() {
-        return (UUID)((Optional)this.entityData.get(DATA_OWNERUUID_ID)).orElse((UUID)null);
+        return (UUID)((Optional)this.entityData.get(tamabletool$DATA_OWNERUUID_ID)).orElse((UUID)null);
     }
 
     @Unique
     public void tamabletool$setOwnerUUID(@Nullable UUID p_21817_) {
-        this.entityData.set(DATA_OWNERUUID_ID, Optional.ofNullable(p_21817_));
+        this.entityData.set(tamabletool$DATA_OWNERUUID_ID, Optional.ofNullable(p_21817_));
     }
 
     @Unique
@@ -219,20 +217,20 @@ public abstract class MonsterMixin extends PathfinderMob implements Enemy, Ownab
     }
 
     static {
-        DATA_FLAGS_ID = SynchedEntityData.defineId(MonsterMixin.class, EntityDataSerializers.BYTE);
-        DATA_OWNERUUID_ID = SynchedEntityData.defineId(MonsterMixin.class, EntityDataSerializers.OPTIONAL_UUID);
+        tamabletool$DATA_FLAGS_ID = SynchedEntityData.defineId(MobMixin.class, EntityDataSerializers.BYTE);
+        tamabletool$DATA_OWNERUUID_ID = SynchedEntityData.defineId(MobMixin.class, EntityDataSerializers.OPTIONAL_UUID);
     }
 
-    public InteractionResult mobInteract(Player p_30412_, InteractionHand p_30413_) {
+    @Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true)
+    public void mobInteract(Player p_30412_, InteractionHand p_30413_, CallbackInfoReturnable<InteractionResult> cir) {
         ItemStack itemstack = p_30412_.getItemInHand(p_30413_);
         if (!this.level().isClientSide) {
             if (!this.tamabletool$isTame()) {
                 if (itemstack.is(Items.DEBUG_STICK)) {
                     this.tamabletool$tame(p_30412_);
-                    return InteractionResult.SUCCESS;
+                    cir.setReturnValue(InteractionResult.SUCCESS);
                 }
             }
         }
-        return super.mobInteract(p_30412_, p_30413_);
     }
 }

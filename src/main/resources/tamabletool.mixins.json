@@ -5,7 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "tamabletool.refmap.json",
   "mixins": [
-    "MonsterMixin"
+    "MobMixin"
   ],
   "client": [
   ],
