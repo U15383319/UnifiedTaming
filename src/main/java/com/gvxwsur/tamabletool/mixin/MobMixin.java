@@ -4,6 +4,7 @@ import com.gvxwsur.tamabletool.common.entity.goal.CustomFollowOwnerGoal;
 import com.gvxwsur.tamabletool.common.entity.goal.CustomOwnerHurtByTargetGoal;
 import com.gvxwsur.tamabletool.common.entity.goal.CustomOwnerHurtTargetGoal;
 import com.gvxwsur.tamabletool.common.entity.goal.CustomSitWhenOrderedToGoal;
+import com.gvxwsur.tamabletool.common.entity.helper.InteractEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -22,12 +23,15 @@ import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.scores.Team;
+import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,7 +46,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(Mob.class)
-public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity {
+public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity, InteractEntity {
+
+    @Shadow
+    protected PathNavigation navigation;
+
+    @Shadow
+    public abstract boolean isLeashed();
+
+    @Shadow
+    public abstract void setTarget(@Nullable LivingEntity p_21544_);
 
     @Unique
     private static final EntityDataAccessor<Byte> tamabletool$DATA_FLAGS_ID;
@@ -98,9 +111,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.targetSelector.addGoal(1, new CustomOwnerHurtByTargetGoal((Mob)(Object) this, this));
         this.targetSelector.addGoal(2, new CustomOwnerHurtTargetGoal((Mob)(Object) this, this));
     }
-
-    @Shadow
-    public abstract boolean isLeashed();
 
     @Shadow @Final public GoalSelector goalSelector;
 
@@ -241,15 +251,68 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         tamabletool$DATA_OWNERUUID_ID = SynchedEntityData.defineId(MobMixin.class, EntityDataSerializers.OPTIONAL_UUID);
     }
 
+    public boolean tamabletool$isFood(ItemStack p_30440_) {
+        Item item = p_30440_.getItem();
+        FoodProperties foodProperties = p_30440_.getFoodProperties(this);
+        return item.isEdible() && foodProperties != null && foodProperties.isMeat();
+    }
+
+    public boolean tamabletool$isControl(ItemStack p_30440_) {
+        return p_30440_.is(Items.STICK);
+    }
+
+    public boolean tamabletool$isTamingItem(ItemStack p_30440_) {
+        return p_30440_.is(Items.BONE);
+    }
+
     @Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true)
-    public void mobInteract(Player p_30412_, InteractionHand p_30413_, CallbackInfoReturnable<InteractionResult> cir) {
-        ItemStack itemstack = p_30412_.getItemInHand(p_30413_);
-        if (!this.level().isClientSide) {
-            if (!this.tamabletool$isTame()) {
-                if (itemstack.is(Items.DEBUG_STICK)) {
-                    this.tamabletool$tame(p_30412_);
-                    cir.setReturnValue(InteractionResult.SUCCESS);
+    public void mobInteract(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+        ItemStack itemstack = player.getItemInHand(hand);
+        ItemStack assistItemstack = hand == InteractionHand.MAIN_HAND ? player.getOffhandItem() : player.getMainHandItem();
+        if (this.tamabletool$isMark(assistItemstack)) {
+            if (this.level().isClientSide) {
+                boolean flag = this.tamabletool$isOwnedBy(player) || this.tamabletool$isTame() || this.tamabletool$isTamingItem(itemstack) && !this.tamabletool$isTame();
+                if (flag) {
+                    cir.setReturnValue(InteractionResult.CONSUME);
+                } else {
+                    cir.setReturnValue(InteractionResult.PASS);
                 }
+            } else if (this.tamabletool$isTame()) {
+                if (this.tamabletool$isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
+                    this.heal((float)itemstack.getFoodProperties(this).getNutrition());
+                    if (!player.getAbilities().instabuild) {
+                        itemstack.shrink(1);
+                    }
+
+                    this.gameEvent(GameEvent.EAT, this);
+                    cir.setReturnValue(InteractionResult.SUCCESS);
+                } else {
+                    if (this.tamabletool$isOwnedBy(player) && player.isShiftKeyDown() && this.tamabletool$isControl(itemstack)) {
+                        this.tamabletool$setOrderedToSit(!this.tamabletool$isOrderedToSit());
+                        this.jumping = false;
+                        this.navigation.stop();
+                        this.setTarget((LivingEntity)null);
+                        cir.setReturnValue(InteractionResult.SUCCESS);
+                    } else {
+                        cir.setReturnValue(InteractionResult.PASS);
+                    }
+                }
+            } else if (this.tamabletool$isTamingItem(itemstack) || this.tamabletool$isCreativeTamingItem(itemstack)) {
+                if (this.tamabletool$isTamingItem(itemstack) && !player.getAbilities().instabuild) {
+                    itemstack.shrink(1);
+                }
+
+                if (this.tamabletool$isCreativeTamingItem(itemstack) || this.random.nextInt(3) == 0) {
+                    this.tamabletool$tame(player);
+                    this.navigation.stop();
+                    this.setTarget((LivingEntity)null);
+                    // this.tamabletool$setOrderedToSit(true);
+                    this.level().broadcastEntityEvent(this, (byte)7);
+                } else {
+                    this.level().broadcastEntityEvent(this, (byte)6);
+                }
+
+                cir.setReturnValue(InteractionResult.SUCCESS);
             }
         }
     }
