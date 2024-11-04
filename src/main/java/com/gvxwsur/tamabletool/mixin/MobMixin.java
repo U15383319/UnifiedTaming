@@ -1,5 +1,10 @@
 package com.gvxwsur.tamabletool.mixin;
 
+import com.gvxwsur.tamabletool.common.entity.goal.CustomFollowOwnerGoal;
+import com.gvxwsur.tamabletool.common.entity.goal.CustomOwnerHurtByTargetGoal;
+import com.gvxwsur.tamabletool.common.entity.goal.CustomOwnerHurtTargetGoal;
+import com.gvxwsur.tamabletool.common.entity.goal.CustomSitWhenOrderedToGoal;
+import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -13,13 +18,19 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,7 +42,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(Mob.class)
-public abstract class MobMixin extends LivingEntity implements Targeting, OwnableEntity {
+public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity {
 
     @Unique
     private static final EntityDataAccessor<Byte> tamabletool$DATA_FLAGS_ID;
@@ -81,7 +92,23 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Ownabl
         this.tamabletool$orderedToSit = p_21815_.getBoolean("Sitting");
         this.tamabletool$setInSittingPose(this.tamabletool$orderedToSit);
 
+        this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob)(Object) this, this));
+        this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob)(Object) this, this, 1.0, 10.0F, 2.0F, false));
 
+        this.targetSelector.addGoal(1, new CustomOwnerHurtByTargetGoal((Mob)(Object) this, this));
+        this.targetSelector.addGoal(2, new CustomOwnerHurtTargetGoal((Mob)(Object) this, this));
+    }
+
+    @Shadow
+    public abstract boolean isLeashed();
+
+    @Shadow @Final public GoalSelector goalSelector;
+
+    @Shadow @Final public GoalSelector targetSelector;
+
+    @Inject(method = "canBeLeashed", at = @At("HEAD"), cancellable = true)
+    public void canBeLeashed(Player p_21813_, CallbackInfoReturnable<Boolean> cir) {
+        cir.setReturnValue(!this.isLeashed());
     }
 
     @Unique
@@ -109,14 +136,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Ownabl
         }
     }
 
-    @Unique
     public boolean tamabletool$isTame() {
-        return ((Byte)this.entityData.get(tamabletool$DATA_FLAGS_ID) & 4) != 0;
+        return (this.entityData.get(tamabletool$DATA_FLAGS_ID) & 4) != 0;
     }
 
-    @Unique
     public void tamabletool$setTame(boolean p_21836_) {
-        byte b0 = (Byte)this.entityData.get(tamabletool$DATA_FLAGS_ID);
+        byte b0 = this.entityData.get(tamabletool$DATA_FLAGS_ID);
         if (p_21836_) {
             this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte)(b0 | 4));
         } else {
@@ -124,14 +149,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Ownabl
         }
     }
 
-    @Unique
     public boolean tamabletool$isInSittingPose() {
-        return ((Byte)this.entityData.get(tamabletool$DATA_FLAGS_ID) & 1) != 0;
+        return (this.entityData.get(tamabletool$DATA_FLAGS_ID) & 1) != 0;
     }
 
-    @Unique
     public void tamabletool$setInSittingPose(boolean p_21838_) {
-        byte b0 = (Byte)this.entityData.get(tamabletool$DATA_FLAGS_ID);
+        byte b0 = this.entityData.get(tamabletool$DATA_FLAGS_ID);
         if (p_21838_) {
             this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte)(b0 | 1));
         } else {
@@ -143,30 +166,29 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Ownabl
     @Unique
     @Nullable
     public UUID getOwnerUUID() {
-        return (UUID)((Optional)this.entityData.get(tamabletool$DATA_OWNERUUID_ID)).orElse((UUID)null);
+        return (UUID)((Optional)this.entityData.get(tamabletool$DATA_OWNERUUID_ID)).orElse(null);
     }
 
-    @Unique
     public void tamabletool$setOwnerUUID(@Nullable UUID p_21817_) {
         this.entityData.set(tamabletool$DATA_OWNERUUID_ID, Optional.ofNullable(p_21817_));
     }
 
-    @Unique
     public void tamabletool$tame(Player p_21829_) {
         this.tamabletool$setTame(true);
         this.tamabletool$setOwnerUUID(p_21829_.getUUID());
     }
 
     public boolean canAttack(LivingEntity p_21822_) {
+        if (p_21822_ instanceof OwnableEntity owned && owned.getOwner() != null && this.tamabletool$isOwnedBy(owned.getOwner())) {
+            return false;
+        }
         return this.tamabletool$isOwnedBy(p_21822_) ? false : super.canAttack(p_21822_);
     }
 
-    @Unique
     public boolean tamabletool$isOwnedBy(LivingEntity p_21831_) {
         return p_21831_ == this.getOwner();
     }
 
-    @Unique
     public boolean tamabletool$wantsToAttack(LivingEntity p_21810_, LivingEntity p_21811_) {
         return true;
     }
@@ -206,12 +228,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Ownabl
 
     }
 
-    @Unique
     public boolean tamabletool$isOrderedToSit() {
         return this.tamabletool$orderedToSit;
     }
 
-    @Unique
     public void tamabletool$setOrderedToSit(boolean p_21840_) {
         this.tamabletool$orderedToSit = p_21840_;
     }
