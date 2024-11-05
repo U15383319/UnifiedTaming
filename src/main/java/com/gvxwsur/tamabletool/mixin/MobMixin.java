@@ -20,9 +20,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
-import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -31,7 +28,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.scores.Team;
-import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -265,11 +261,15 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return p_30440_.is(Items.BONE);
     }
 
+    public boolean tamabletool$isTamingConditionSatisfied() {
+        return this.getHealth() < Math.min(12.0, Math.max(this.getMaxHealth() / 4, 1.0));
+    }
+
     @Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true)
     public void mobInteract(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         ItemStack itemstack = player.getItemInHand(hand);
         ItemStack assistItemstack = hand == InteractionHand.MAIN_HAND ? player.getOffhandItem() : player.getMainHandItem();
-        if (this.tamabletool$isMark(assistItemstack)) {
+        if (this.tamabletool$isAssistItem(assistItemstack)) {
             if (this.level().isClientSide) {
                 boolean flag = this.tamabletool$isOwnedBy(player) || this.tamabletool$isTame() || this.tamabletool$isTamingItem(itemstack) && !this.tamabletool$isTame();
                 if (flag) {
@@ -297,15 +297,15 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                         cir.setReturnValue(InteractionResult.PASS);
                     }
                 }
-            } else if (this.tamabletool$isTamingItem(itemstack) || this.tamabletool$isCreativeTamingItem(itemstack)) {
+            } else if ((this.tamabletool$isTamingItem(itemstack) && this.tamabletool$isTamingConditionSatisfied()) || this.tamabletool$isCheatTamingItem(itemstack)) {
                 if (this.tamabletool$isTamingItem(itemstack) && !player.getAbilities().instabuild) {
                     itemstack.shrink(1);
                 }
 
-                if (this.tamabletool$isCreativeTamingItem(itemstack) || this.random.nextInt(3) == 0) {
+                if (this.tamabletool$isCheatTamingItem(itemstack) || this.random.nextInt(3) == 0) {
                     this.tamabletool$tame(player);
                     this.navigation.stop();
-                    this.setTarget((LivingEntity)null);
+                    this.setTarget(null);
                     // this.tamabletool$setOrderedToSit(true);
                     this.level().broadcastEntityEvent(this, (byte)7);
                 } else {
