@@ -48,6 +48,14 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     protected PathNavigation navigation;
 
     @Shadow
+    @Final
+    public GoalSelector goalSelector;
+
+    @Shadow
+    @Final
+    public GoalSelector targetSelector;
+
+    @Shadow
     public abstract boolean isLeashed();
 
     @Shadow
@@ -66,7 +74,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
     protected void defineSynchedData(CallbackInfo ci) {
-        this.entityData.define(tamabletool$DATA_FLAGS_ID, (byte)0);
+        this.entityData.define(tamabletool$DATA_FLAGS_ID, (byte) 0);
         this.entityData.define(tamabletool$DATA_OWNERUUID_ID, Optional.empty());
     }
 
@@ -101,16 +109,17 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.tamabletool$orderedToSit = p_21815_.getBoolean("Sitting");
         this.tamabletool$setInSittingPose(this.tamabletool$orderedToSit);
 
-        this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob)(Object) this, this));
-        this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob)(Object) this, this, 1.0, 10.0F, 2.0F, false));
+        this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob) (Object) this, this));
+        this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, this, 1.0, 10.0F, 2.0F, false));
 
-        this.targetSelector.addGoal(1, new CustomOwnerHurtByTargetGoal((Mob)(Object) this, this));
-        this.targetSelector.addGoal(2, new CustomOwnerHurtTargetGoal((Mob)(Object) this, this));
+        this.targetSelector.addGoal(1, new CustomOwnerHurtByTargetGoal((Mob) (Object) this, this));
+        this.targetSelector.addGoal(2, new CustomOwnerHurtTargetGoal((Mob) (Object) this, this));
     }
 
-    @Shadow @Final public GoalSelector goalSelector;
-
-    @Shadow @Final public GoalSelector targetSelector;
+    @Inject(method = "requiresCustomPersistence", at = @At("HEAD"), cancellable = true)
+    public void requiresCustomPersistence(CallbackInfoReturnable<Boolean> cir) {
+        cir.setReturnValue(this.isPassenger() || this.tamabletool$isTame());
+    }
 
     @Inject(method = "canBeLeashed", at = @At("HEAD"), cancellable = true)
     public void canBeLeashed(Player p_21813_, CallbackInfoReturnable<Boolean> cir) {
@@ -124,7 +133,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             particleoptions = ParticleTypes.SMOKE;
         }
 
-        for(int i = 0; i < 7; ++i) {
+        for (int i = 0; i < 7; ++i) {
             double d0 = this.random.nextGaussian() * 0.02;
             double d1 = this.random.nextGaussian() * 0.02;
             double d2 = this.random.nextGaussian() * 0.02;
@@ -149,9 +158,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public void tamabletool$setTame(boolean p_21836_) {
         byte b0 = this.entityData.get(tamabletool$DATA_FLAGS_ID);
         if (p_21836_) {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte)(b0 | 4));
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 | 4));
         } else {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte)(b0 & -5));
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 & -5));
         }
     }
 
@@ -162,9 +171,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public void tamabletool$setInSittingPose(boolean p_21838_) {
         byte b0 = this.entityData.get(tamabletool$DATA_FLAGS_ID);
         if (p_21838_) {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte)(b0 | 1));
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 | 1));
         } else {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte)(b0 & -2));
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 & -2));
         }
 
     }
@@ -172,7 +181,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     @Unique
     @Nullable
     public UUID getOwnerUUID() {
-        return (UUID)((Optional)this.entityData.get(tamabletool$DATA_OWNERUUID_ID)).orElse(null);
+        return (UUID) ((Optional) this.entityData.get(tamabletool$DATA_OWNERUUID_ID)).orElse(null);
     }
 
     public void tamabletool$setOwnerUUID(@Nullable UUID p_21817_) {
@@ -279,7 +288,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 }
             } else if (this.tamabletool$isTame()) {
                 if (this.tamabletool$isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
-                    this.heal((float)itemstack.getFoodProperties(this).getNutrition());
+                    this.heal((float) itemstack.getFoodProperties(this).getNutrition());
                     if (!player.getAbilities().instabuild) {
                         itemstack.shrink(1);
                     }
@@ -291,7 +300,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                         this.tamabletool$setOrderedToSit(!this.tamabletool$isOrderedToSit());
                         this.jumping = false;
                         this.navigation.stop();
-                        this.setTarget((LivingEntity)null);
+                        this.setTarget((LivingEntity) null);
                         cir.setReturnValue(InteractionResult.SUCCESS);
                     } else {
                         cir.setReturnValue(InteractionResult.PASS);
@@ -307,9 +316,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                     this.navigation.stop();
                     this.setTarget(null);
                     // this.tamabletool$setOrderedToSit(true);
-                    this.level().broadcastEntityEvent(this, (byte)7);
+                    this.level().broadcastEntityEvent(this, (byte) 7);
                 } else {
-                    this.level().broadcastEntityEvent(this, (byte)6);
+                    this.level().broadcastEntityEvent(this, (byte) 6);
                 }
 
                 cir.setReturnValue(InteractionResult.SUCCESS);

@@ -43,9 +43,11 @@ public class CustomFollowOwnerGoal extends Goal {
         this.stopDistance = p_25297_;
         this.canFly = p_25298_;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        /*
         if (!(p_25294_.getNavigation() instanceof GroundPathNavigation) && !(p_25294_.getNavigation() instanceof FlyingPathNavigation)) {
             throw new IllegalArgumentException("Unsupported mob type for FollowOwnerGoal");
         }
+         */
     }
 
     public boolean canUse() {
