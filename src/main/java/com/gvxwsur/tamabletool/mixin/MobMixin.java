@@ -6,6 +6,8 @@ import com.gvxwsur.tamabletool.common.entity.goal.CustomOwnerHurtTargetGoal;
 import com.gvxwsur.tamabletool.common.entity.goal.CustomSitWhenOrderedToGoal;
 import com.gvxwsur.tamabletool.common.entity.helper.InteractEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.TameAnimalTriggerHelper;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -191,6 +193,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public void tamabletool$tame(Player p_21829_) {
         this.tamabletool$setTame(true);
         this.tamabletool$setOwnerUUID(p_21829_.getUUID());
+        if (p_21829_ instanceof ServerPlayer) {
+            ((TameAnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).tamabletool$trigger((ServerPlayer)p_21829_, (Mob)(Object) this);
+        }
     }
 
     public boolean canAttack(LivingEntity p_21822_) {
