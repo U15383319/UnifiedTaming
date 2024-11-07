@@ -1,5 +1,6 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
+import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,6 +24,7 @@ public class CustomFollowOwnerGoal extends Goal {
     private static final int MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 1;
     private final Mob tamable;
     private final TamableEntity tamableHelper;
+    private final MinionEntity minionHelper;
     private LivingEntity owner;
     private final LevelReader level;
     private final double speedModifier;
@@ -33,10 +35,11 @@ public class CustomFollowOwnerGoal extends Goal {
     private float oldWaterCost;
     private final boolean canFly;
 
-    public CustomFollowOwnerGoal(Mob p_25294_, TamableEntity tamableHelper, double p_25295_, float p_25296_, float p_25297_, boolean p_25298_) {
+    public CustomFollowOwnerGoal(Mob p_25294_, double p_25295_, float p_25296_, float p_25297_, boolean p_25298_) {
         this.tamable = p_25294_;
         this.level = p_25294_.level();
-        this.tamableHelper = tamableHelper;
+        this.tamableHelper = (TamableEntity) p_25294_;
+        this.minionHelper = (MinionEntity) p_25294_;
         this.speedModifier = p_25295_;
         this.navigation = p_25294_.getNavigation();
         this.startDistance = p_25296_;
@@ -57,6 +60,8 @@ public class CustomFollowOwnerGoal extends Goal {
         } else if ($$0.isSpectator()) {
             return false;
         } else if (this.unableToMove()) {
+            return false;
+        } else if (this.minionHelper.tamabletool$isTameNonPlayer()) {
             return false;
         } else if (this.tamable.distanceToSqr($$0) < (double)(this.startDistance * this.startDistance)) {
             return false;

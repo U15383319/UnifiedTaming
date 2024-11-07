@@ -12,14 +12,13 @@ public class TamableUtils {
     }
 
     public static void tameMob(Mob mob1, Mob mob2) {
-        ((TamableEntity) mob1).tamabletool$setOwnerUUID(mob2.getUUID());
+        ((MinionEntity) mob1).tamabletool$tameNonPlayer(mob2);
+        tameMobOwner(mob1, mob2);
     }
 
-    public static void tameMob(Mob mob1, Mob mob2, boolean tameOwner) {
-        if (tameOwner && ((TamableEntity) mob2).tamabletool$isTame()) {
+    public static void tameMobOwner(Mob mob1, Mob mob2) {
+        if (((TamableEntity) mob2).tamabletool$isTame()) {
             ((TamableEntity) mob1).tamabletool$tame((Player) ((TamableEntity) mob2).getOwner());
-        } else {
-            tameMob(mob1, mob2);
         }
     }
 }

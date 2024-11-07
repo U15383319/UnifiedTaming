@@ -1,5 +1,6 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
+import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -10,10 +11,12 @@ import java.util.EnumSet;
 public class CustomSitWhenOrderedToGoal extends Goal {
     private final Mob mob;
     private final TamableEntity tamableHelper;
+    private final MinionEntity minionHelper;
 
-    public CustomSitWhenOrderedToGoal(Mob p_25898_, TamableEntity tamableHelper) {
+    public CustomSitWhenOrderedToGoal(Mob p_25898_) {
         this.mob = p_25898_;
-        this.tamableHelper = tamableHelper;
+        this.tamableHelper = (TamableEntity) p_25898_;
+        this.minionHelper = (MinionEntity) p_25898_;
         this.setFlags(EnumSet.of(Flag.JUMP, Flag.MOVE));
     }
 
@@ -23,6 +26,8 @@ public class CustomSitWhenOrderedToGoal extends Goal {
 
     public boolean canUse() {
         if (!this.tamableHelper.tamabletool$isTame()) {
+            return false;
+        } else if (this.minionHelper.tamabletool$isTameNonPlayer()) {
             return false;
         } else if (this.mob.isInWaterOrBubble()) {
             return false;

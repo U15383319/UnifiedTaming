@@ -5,6 +5,7 @@ import com.gvxwsur.tamabletool.common.entity.goal.CustomOwnerHurtByTargetGoal;
 import com.gvxwsur.tamabletool.common.entity.goal.CustomOwnerHurtTargetGoal;
 import com.gvxwsur.tamabletool.common.entity.goal.CustomSitWhenOrderedToGoal;
 import com.gvxwsur.tamabletool.common.entity.helper.InteractEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TameAnimalTriggerHelper;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -44,7 +45,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(Mob.class)
-public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity, InteractEntity {
+public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity, InteractEntity, MinionEntity {
 
     @Shadow
     protected PathNavigation navigation;
@@ -70,6 +71,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     @Unique
     private boolean tamabletool$orderedToSit;
 
+    @Unique
+    private static final EntityDataAccessor<Optional<UUID>> tamabletool$DATA_NONPLAYEROWNERUUID_ID;
+
     protected MobMixin(EntityType<? extends LivingEntity> p_21683_, Level p_21684_) {
         super(p_21683_, p_21684_);
     }
@@ -78,6 +82,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     protected void defineSynchedData(CallbackInfo ci) {
         this.entityData.define(tamabletool$DATA_FLAGS_ID, (byte) 0);
         this.entityData.define(tamabletool$DATA_OWNERUUID_ID, Optional.empty());
+        this.entityData.define(tamabletool$DATA_NONPLAYEROWNERUUID_ID, Optional.empty());
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
@@ -87,6 +92,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         }
 
         p_21819_.putBoolean("Sitting", this.tamabletool$orderedToSit);
+
+        if (this.tamabletool$getNonPlayerOwnerUUID() != null) {
+            p_21819_.putUUID("NonPlayerOwner", this.tamabletool$getNonPlayerOwnerUUID());
+        }
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
@@ -111,11 +120,27 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.tamabletool$orderedToSit = p_21815_.getBoolean("Sitting");
         this.tamabletool$setInSittingPose(this.tamabletool$orderedToSit);
 
-        this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob) (Object) this, this));
-        this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, this, 1.0, 10.0F, 2.0F, false));
+        UUID nonPlayerUUID;
+        if (p_21815_.hasUUID("NonPlayerOwner")) {
+            nonPlayerUUID = p_21815_.getUUID("NonPlayerOwner");
+        } else {
+            nonPlayerUUID = null;
+        }
 
-        this.targetSelector.addGoal(1, new CustomOwnerHurtByTargetGoal((Mob) (Object) this, this));
-        this.targetSelector.addGoal(2, new CustomOwnerHurtTargetGoal((Mob) (Object) this, this));
+        if (nonPlayerUUID != null) {
+            try {
+                this.tamabletool$setNonPlayerOwnerUUID(nonPlayerUUID);
+                this.tamabletool$setTameNonPlayer(true);
+            } catch (Throwable var4) {
+                this.tamabletool$setTameNonPlayer(false);
+            }
+        }
+
+        this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
+        this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, 1.0, 10.0F, 2.0F, false));
+
+        this.targetSelector.addGoal(1, new CustomOwnerHurtByTargetGoal((Mob) (Object) this));
+        this.targetSelector.addGoal(2, new CustomOwnerHurtTargetGoal((Mob) (Object) this));
     }
 
     @Inject(method = "requiresCustomPersistence", at = @At("HEAD"), cancellable = true)
@@ -242,7 +267,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public void die(DamageSource p_21809_) {
         Component deathMessage = this.getCombatTracker().getDeathMessage();
         super.die(p_21809_);
-        if (this.dead && !this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer) {
+        if (this.dead && !this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer && !this.tamabletool$isTameNonPlayer()) {
             this.getOwner().sendSystemMessage(deathMessage);
         }
 
@@ -257,8 +282,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     static {
-        tamabletool$DATA_FLAGS_ID = SynchedEntityData.defineId(MobMixin.class, EntityDataSerializers.BYTE);
-        tamabletool$DATA_OWNERUUID_ID = SynchedEntityData.defineId(MobMixin.class, EntityDataSerializers.OPTIONAL_UUID);
+        tamabletool$DATA_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
+        tamabletool$DATA_OWNERUUID_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.OPTIONAL_UUID);
+        tamabletool$DATA_NONPLAYEROWNERUUID_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.OPTIONAL_UUID);
     }
 
     public boolean tamabletool$isFood(ItemStack p_30440_) {
@@ -291,6 +317,8 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 } else {
                     cir.setReturnValue(InteractionResult.PASS);
                 }
+            } else if (this.tamabletool$isTameNonPlayer()) {
+              cir.setReturnValue(InteractionResult.PASS);
             } else if (this.tamabletool$isTame()) {
                 if (this.tamabletool$isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
                     this.heal((float) itemstack.getFoodProperties(this).getNutrition());
@@ -329,5 +357,31 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 cir.setReturnValue(InteractionResult.SUCCESS);
             }
         }
+    }
+
+    public UUID tamabletool$getNonPlayerOwnerUUID() {
+        return (UUID) ((Optional) this.entityData.get(tamabletool$DATA_NONPLAYEROWNERUUID_ID)).orElse(null);
+    }
+
+    public boolean tamabletool$isTameNonPlayer() {
+        return (this.entityData.get(tamabletool$DATA_FLAGS_ID) & 16) != 0;
+    }
+
+    public void tamabletool$setTameNonPlayer(boolean p_21836_) {
+        byte b0 = this.entityData.get(tamabletool$DATA_FLAGS_ID);
+        if (p_21836_) {
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 | 16));
+        } else {
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 & -17));
+        }
+    }
+
+    public void tamabletool$setNonPlayerOwnerUUID(@Nullable UUID p_21817_) {
+        this.entityData.set(tamabletool$DATA_NONPLAYEROWNERUUID_ID, Optional.ofNullable(p_21817_));
+    }
+
+    public void tamabletool$tameNonPlayer(Mob p_21829_) {
+        this.tamabletool$setTameNonPlayer(true);
+        this.tamabletool$setNonPlayerOwnerUUID(p_21829_.getUUID());
     }
 }

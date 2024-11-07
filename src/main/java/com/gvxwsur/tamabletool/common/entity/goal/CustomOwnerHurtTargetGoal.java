@@ -14,10 +14,10 @@ public class CustomOwnerHurtTargetGoal extends TargetGoal {
     private LivingEntity ownerLastHurt;
     private int timestamp;
 
-    public CustomOwnerHurtTargetGoal(Mob p_26114_, TamableEntity tamableHelper) {
+    public CustomOwnerHurtTargetGoal(Mob p_26114_) {
         super(p_26114_, false);
         this.tameAnimal = p_26114_;
-        this.tamableHelper = tamableHelper;
+        this.tamableHelper = (TamableEntity) p_26114_;
         this.setFlags(EnumSet.of(Flag.TARGET));
     }
 
