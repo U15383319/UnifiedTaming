@@ -18,6 +18,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -145,7 +146,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "requiresCustomPersistence", at = @At("HEAD"), cancellable = true)
     public void requiresCustomPersistence(CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(this.isPassenger() || this.tamabletool$isTame());
+        cir.setReturnValue(this.isPassenger() || (this.tamabletool$isTame() && !this.tamabletool$isTameNonPlayer()));
     }
 
     @Inject(method = "canBeLeashed", at = @At("HEAD"), cancellable = true)
@@ -302,7 +303,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     public boolean tamabletool$isTamingConditionSatisfied() {
-        return this.getHealth() < Math.min(12.0, Math.max(this.getMaxHealth() / 4, 1.0));
+        return this.getHealth() <= Mth.clamp(this.getMaxHealth() / 4, 4.0, 12.0);
     }
 
     @Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true)
