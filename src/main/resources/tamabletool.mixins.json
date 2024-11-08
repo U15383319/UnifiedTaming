@@ -6,6 +6,7 @@
   "refmap": "tamabletool.refmap.json",
   "mixins": [
     "MobMixin",
+    "PartEntityMixin",
     "TameAnimalTriggerMixin"
   ],
   "client": [

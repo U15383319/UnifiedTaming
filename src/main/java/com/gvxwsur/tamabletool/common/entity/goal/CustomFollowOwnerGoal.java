@@ -3,12 +3,14 @@ package com.gvxwsur.tamabletool.common.entity.goal;
 import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,23 +36,23 @@ public class CustomFollowOwnerGoal extends Goal {
     private final float startDistance;
     private float oldWaterCost;
     private final boolean canFly;
+    private final boolean canHighFly;
 
-    public CustomFollowOwnerGoal(Mob p_25294_, double p_25295_, float p_25296_, float p_25297_, boolean p_25298_) {
+    public CustomFollowOwnerGoal(Mob p_25294_, double p_25295_, float p_25296_, float p_25297_) {
         this.tamable = p_25294_;
         this.level = p_25294_.level();
         this.tamableHelper = (TamableEntity) p_25294_;
         this.minionHelper = (MinionEntity) p_25294_;
         this.speedModifier = p_25295_;
         this.navigation = p_25294_.getNavigation();
+        this.canFly = p_25294_ instanceof FlyingMob || p_25294_ instanceof FlyingAnimal;
+        this.canHighFly = p_25294_ instanceof FlyingMob;
         this.startDistance = p_25296_;
         this.stopDistance = p_25297_;
-        this.canFly = p_25298_;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
-        /*
-        if (!(p_25294_.getNavigation() instanceof GroundPathNavigation) && !(p_25294_.getNavigation() instanceof FlyingPathNavigation)) {
-            throw new IllegalArgumentException("Unsupported mob type for FollowOwnerGoal");
-        }
-         */
+//        if (!(p_25294_.getNavigation() instanceof GroundPathNavigation) && !(p_25294_.getNavigation() instanceof FlyingPathNavigation)) {
+//            throw new IllegalArgumentException("Unsupported mob type for FollowOwnerGoal");
+//        }
     }
 
     public boolean canUse() {
@@ -63,7 +65,7 @@ public class CustomFollowOwnerGoal extends Goal {
             return false;
         } else if (this.minionHelper.tamabletool$isTameNonPlayer()) {
             return false;
-        } else if (this.tamable.distanceToSqr($$0) < (double)(this.startDistance * this.startDistance)) {
+        } else if (this.adjustedDistanceToSqr($$0) < (double)(this.startDistance * this.startDistance)) {
             return false;
         } else {
             this.owner = $$0;
@@ -77,12 +79,16 @@ public class CustomFollowOwnerGoal extends Goal {
         } else if (this.unableToMove()) {
             return false;
         } else {
-            return !(this.tamable.distanceToSqr(this.owner) <= (double)(this.stopDistance * this.stopDistance));
+            return !(this.adjustedDistanceToSqr(this.owner) <= (double)(this.stopDistance * this.stopDistance));
         }
     }
 
     private boolean unableToMove() {
         return this.tamableHelper.tamabletool$isOrderedToSit() || this.tamable.isPassenger() || this.tamable.isLeashed();
+    }
+
+    private double adjustedDistanceToSqr(LivingEntity p_25310_) {
+        return !this.canHighFly ? this.tamable.distanceToSqr(p_25310_) : this.tamable.distanceToSqr(p_25310_.getX(), this.tamable.getY(), p_25310_.getZ()) / 8;
     }
 
     public void start() {
@@ -101,7 +107,7 @@ public class CustomFollowOwnerGoal extends Goal {
         this.tamable.getLookControl().setLookAt(this.owner, 10.0F, (float)this.tamable.getMaxHeadXRot());
         if (--this.timeToRecalcPath <= 0) {
             this.timeToRecalcPath = this.adjustedTickDelay(10);
-            if (this.tamable.distanceToSqr(this.owner) >= 144.0) {
+            if (this.adjustedDistanceToSqr(this.owner) >= TELEPORT_WHEN_DISTANCE_IS * TELEPORT_WHEN_DISTANCE_IS) {
                 this.teleportToOwner();
             } else {
                 this.navigation.moveTo(this.owner, this.speedModifier);
@@ -114,9 +120,9 @@ public class CustomFollowOwnerGoal extends Goal {
         BlockPos $$0 = this.owner.blockPosition();
 
         for(int $$1 = 0; $$1 < 10; ++$$1) {
-            int $$2 = this.randomIntInclusive(-3, 3);
-            int $$3 = this.randomIntInclusive(-1, 1);
-            int $$4 = this.randomIntInclusive(-3, 3);
+            int $$2 = this.randomIntInclusive(-MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING, MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING);
+            int $$3 = this.randomIntInclusive(-MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING, MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING);
+            int $$4 = this.randomIntInclusive(-MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING, MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING);
             boolean $$5 = this.maybeTeleportTo($$0.getX() + $$2, $$0.getY() + $$3, $$0.getZ() + $$4);
             if ($$5) {
                 return;
@@ -126,12 +132,12 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean maybeTeleportTo(int p_25304_, int p_25305_, int p_25306_) {
-        if (Math.abs((double)p_25304_ - this.owner.getX()) < 2.0 && Math.abs((double)p_25306_ - this.owner.getZ()) < 2.0) {
+        if (Math.abs((double)p_25304_ - this.owner.getX()) < MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING && Math.abs((double)p_25306_ - this.owner.getZ()) < MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING) {
             return false;
         } else if (!this.canTeleportTo(new BlockPos(p_25304_, p_25305_, p_25306_))) {
             return false;
         } else {
-            this.tamable.moveTo((double)p_25304_ + 0.5, (double)p_25305_, (double)p_25306_ + 0.5, this.tamable.getYRot(), this.tamable.getXRot());
+            this.tamable.moveTo((double)p_25304_ + 0.5, (double)p_25305_ + (!this.canHighFly ? 0 : 4.0), (double)p_25306_ + 0.5, this.tamable.getYRot(), this.tamable.getXRot());
             this.navigation.stop();
             return true;
         }
