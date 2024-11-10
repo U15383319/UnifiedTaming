@@ -21,10 +21,4 @@ public interface TamableEntity extends OwnableEntity {
     public boolean tamabletool$isOwnedBy(LivingEntity p_21831_);
 
     public boolean tamabletool$wantsToAttack(LivingEntity p_21810_, LivingEntity p_21811_);
-
-    public void tamabletool$setInSittingPose(boolean p_21838_);
-
-    public boolean tamabletool$isOrderedToSit();
-
-    public void tamabletool$setOrderedToSit(boolean p_21840_);
 }

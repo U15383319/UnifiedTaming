@@ -14,6 +14,8 @@ public interface InteractEntity {
 
     public boolean tamabletool$isControl(ItemStack p_30440_);
 
+    public boolean tamabletool$isRestrictPosition(ItemStack p_30440_);
+
     public boolean tamabletool$isTamingItem(ItemStack p_30440_);
 
     public boolean tamabletool$isTamingConditionSatisfied();

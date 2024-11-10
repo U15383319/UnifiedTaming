@@ -1,5 +1,6 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
+import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.world.entity.FlyingMob;
@@ -13,18 +14,20 @@ public class CustomSitWhenOrderedToGoal extends Goal {
     private final Mob mob;
     private final TamableEntity tamableHelper;
     private final MinionEntity minionHelper;
+    private final CommandEntity commandHelper;
     private final boolean canHighFly;
 
     public CustomSitWhenOrderedToGoal(Mob p_25898_) {
         this.mob = p_25898_;
         this.tamableHelper = (TamableEntity) p_25898_;
         this.minionHelper = (MinionEntity) p_25898_;
+        this.commandHelper = (CommandEntity) p_25898_;
         this.canHighFly = p_25898_ instanceof FlyingMob;
         this.setFlags(EnumSet.of(Flag.JUMP, Flag.MOVE));
     }
 
     public boolean canContinueToUse() {
-        return this.tamableHelper.tamabletool$isOrderedToSit();
+        return this.commandHelper.tamabletool$isOrderedToSit();
     }
 
     public boolean canUse() {
@@ -41,7 +44,7 @@ public class CustomSitWhenOrderedToGoal extends Goal {
             if ($$0 == null) {
                 return true;
             } else {
-                return this.adjustedDistanceToSqr($$0) < 144.0 && $$0.getLastHurtByMob() != null ? false : this.tamableHelper.tamabletool$isOrderedToSit();
+                return this.adjustedDistanceToSqr($$0) < 144.0 && $$0.getLastHurtByMob() != null ? false : this.commandHelper.tamabletool$isOrderedToSit();
             }
         }
     }
@@ -52,10 +55,10 @@ public class CustomSitWhenOrderedToGoal extends Goal {
 
     public void start() {
         this.mob.getNavigation().stop();
-        this.tamableHelper.tamabletool$setInSittingPose(true);
+        this.commandHelper.tamabletool$setInSittingPose(true);
     }
 
     public void stop() {
-        this.tamableHelper.tamabletool$setInSittingPose(false);
+        this.commandHelper.tamabletool$setInSittingPose(false);
     }
 }

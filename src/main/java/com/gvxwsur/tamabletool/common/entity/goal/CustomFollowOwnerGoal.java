@@ -1,5 +1,6 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
+import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.core.BlockPos;
@@ -27,6 +28,7 @@ public class CustomFollowOwnerGoal extends Goal {
     private final Mob tamable;
     private final TamableEntity tamableHelper;
     private final MinionEntity minionHelper;
+    private final CommandEntity commandHelper;
     private LivingEntity owner;
     private final LevelReader level;
     private final double speedModifier;
@@ -43,6 +45,7 @@ public class CustomFollowOwnerGoal extends Goal {
         this.level = p_25294_.level();
         this.tamableHelper = (TamableEntity) p_25294_;
         this.minionHelper = (MinionEntity) p_25294_;
+        this.commandHelper = (CommandEntity) p_25294_;
         this.speedModifier = p_25295_;
         this.navigation = p_25294_.getNavigation();
         this.canFly = p_25294_ instanceof FlyingMob || p_25294_ instanceof FlyingAnimal;
@@ -59,11 +62,13 @@ public class CustomFollowOwnerGoal extends Goal {
         LivingEntity $$0 = this.tamableHelper.getOwner();
         if ($$0 == null) {
             return false;
+        } else if (this.minionHelper.tamabletool$isTameNonPlayer()) {
+            return false;
         } else if ($$0.isSpectator()) {
             return false;
         } else if (this.unableToMove()) {
             return false;
-        } else if (this.minionHelper.tamabletool$isTameNonPlayer()) {
+        } else if (!this.commandHelper.tamabletool$isOrderedToFollow()) {
             return false;
         } else if (this.adjustedDistanceToSqr($$0) < (double)(this.startDistance * this.startDistance)) {
             return false;
@@ -84,7 +89,7 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean unableToMove() {
-        return this.tamableHelper.tamabletool$isOrderedToSit() || this.tamable.isPassenger() || this.tamable.isLeashed();
+        return this.commandHelper.tamabletool$isOrderedToSit() || this.tamable.isPassenger() || this.tamable.isLeashed();
     }
 
     private double adjustedDistanceToSqr(LivingEntity p_25310_) {
