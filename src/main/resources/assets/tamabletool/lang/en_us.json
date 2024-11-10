@@ -1,0 +1,5 @@
+{
+  "tamabletool.command.sit": "%1$s is stopping",
+  "tamabletool.command.follow": "%1$s is following",
+  "tamabletool.command.stroll": "%1$s is strolling"
+}

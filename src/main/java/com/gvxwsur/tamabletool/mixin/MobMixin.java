@@ -4,10 +4,7 @@ import com.gvxwsur.tamabletool.common.entity.goal.CustomFollowOwnerGoal;
 import com.gvxwsur.tamabletool.common.entity.goal.CustomOwnerHurtByTargetGoal;
 import com.gvxwsur.tamabletool.common.entity.goal.CustomOwnerHurtTargetGoal;
 import com.gvxwsur.tamabletool.common.entity.goal.CustomSitWhenOrderedToGoal;
-import com.gvxwsur.tamabletool.common.entity.helper.InteractEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.TameAnimalTriggerHelper;
+import com.gvxwsur.tamabletool.common.entity.helper.*;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -203,10 +200,8 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         } else {
             this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 & -2));
         }
-
     }
 
-    @Unique
     @Nullable
     public UUID getOwnerUUID() {
         return (UUID) ((Optional) this.entityData.get(tamabletool$DATA_OWNERUUID_ID)).orElse(null);
@@ -266,12 +261,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     public void die(DamageSource p_21809_) {
-        Component deathMessage = this.getCombatTracker().getDeathMessage();
         super.die(p_21809_);
-        if (this.dead && !this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer && !this.tamabletool$isTameNonPlayer()) {
-            this.getOwner().sendSystemMessage(deathMessage);
+        if (!this.level().isClientSide && this.dead) {
+            MessageSender.sendDeathMessage((Mob)(Object) this);
         }
-
     }
 
     public boolean tamabletool$isOrderedToSit() {
@@ -280,6 +273,13 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public void tamabletool$setOrderedToSit(boolean p_21840_) {
         this.tamabletool$orderedToSit = p_21840_;
+        if (!this.level().isClientSide) {
+            if (p_21840_) {
+                MessageSender.sendCommandMessage((Mob) (Object) this, "sit");
+            } else {
+                MessageSender.sendCommandMessage((Mob) (Object) this, "follow");
+            }
+        }
     }
 
     static {
@@ -292,6 +292,14 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         Item item = p_30440_.getItem();
         FoodProperties foodProperties = p_30440_.getFoodProperties(this);
         return item.isEdible() && foodProperties != null && foodProperties.isMeat();
+    }
+
+    public float tamabletool$healValue(ItemStack p_30440_) {
+        FoodProperties foodProperties = p_30440_.getFoodProperties(this);
+        if (foodProperties == null) {
+            return 1.0F;
+        }
+        return (float) foodProperties.getNutrition();
     }
 
     public boolean tamabletool$isControl(ItemStack p_30440_) {
@@ -312,8 +320,11 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         ItemStack assistItemstack = hand == InteractionHand.MAIN_HAND ? player.getOffhandItem() : player.getMainHandItem();
         if (this.tamabletool$isAssistItem(assistItemstack)) {
             if (this.level().isClientSide) {
-                boolean flag = this.tamabletool$isOwnedBy(player) || this.tamabletool$isTame() || this.tamabletool$isTamingItem(itemstack) && !this.tamabletool$isTame();
-                if (flag) {
+                boolean flag = this.tamabletool$isOwnedBy(player) || this.tamabletool$isTame() || (this.tamabletool$isTamingItem(itemstack) || this.tamabletool$isCheatTamingItem(itemstack)) && !this.tamabletool$isTame();
+                boolean flag2 = !this.isVehicle() && this.tamabletool$isOwnedBy(player) && this.tamabletool$isControl(itemstack) && !player.isSecondaryUseActive();
+                if (flag2) {
+                    cir.setReturnValue(InteractionResult.SUCCESS);
+                } else if (flag) {
                     cir.setReturnValue(InteractionResult.CONSUME);
                 } else {
                     cir.setReturnValue(InteractionResult.PASS);
@@ -322,7 +333,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
               cir.setReturnValue(InteractionResult.PASS);
             } else if (this.tamabletool$isTame()) {
                 if (this.tamabletool$isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
-                    this.heal((float) itemstack.getFoodProperties(this).getNutrition());
+                    this.heal(this.tamabletool$healValue(itemstack));
                     if (!player.getAbilities().instabuild) {
                         itemstack.shrink(1);
                     }
@@ -330,15 +341,19 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                     this.gameEvent(GameEvent.EAT, this);
                     cir.setReturnValue(InteractionResult.SUCCESS);
                 } else {
-                    if (this.tamabletool$isOwnedBy(player) && player.isShiftKeyDown() && this.tamabletool$isControl(itemstack)) {
-                        this.tamabletool$setOrderedToSit(!this.tamabletool$isOrderedToSit());
-                        this.jumping = false;
-                        this.navigation.stop();
-                        this.setTarget((LivingEntity) null);
-                        cir.setReturnValue(InteractionResult.SUCCESS);
-                    } else {
-                        cir.setReturnValue(InteractionResult.PASS);
+                    if (this.tamabletool$isOwnedBy(player) && this.tamabletool$isControl(itemstack)) {
+                        if (player.isSecondaryUseActive()) {
+                            this.tamabletool$setOrderedToSit(!this.tamabletool$isOrderedToSit());
+                            this.jumping = false;
+                            this.navigation.stop();
+                            this.setTarget((LivingEntity) null);
+                            cir.setReturnValue(InteractionResult.SUCCESS);
+                        } else if (!this.isVehicle()) {
+                            player.startRiding(this);
+                            cir.setReturnValue(InteractionResult.CONSUME);
+                        }
                     }
+                    cir.setReturnValue(InteractionResult.PASS);
                 }
             } else if ((this.tamabletool$isTamingItem(itemstack) && this.tamabletool$isTamingConditionSatisfied()) || this.tamabletool$isCheatTamingItem(itemstack)) {
                 if (this.tamabletool$isTamingItem(itemstack) && !player.getAbilities().instabuild) {

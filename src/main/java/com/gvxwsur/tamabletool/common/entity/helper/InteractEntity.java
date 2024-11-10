@@ -10,6 +10,8 @@ public interface InteractEntity {
 
     public boolean tamabletool$isFood(ItemStack p_30440_);
 
+    public float tamabletool$healValue(ItemStack p_30440_);
+
     public boolean tamabletool$isControl(ItemStack p_30440_);
 
     public boolean tamabletool$isTamingItem(ItemStack p_30440_);
@@ -25,7 +27,7 @@ public interface InteractEntity {
     }
 
     public default boolean tamabletool$isAssistItem(ItemStack p_30440_) {
-        ResourceLocation location = new ResourceLocation(TamableConfig.modAssitItem.get());
+        ResourceLocation location = new ResourceLocation(TamableConfig.modAssistItem.get());
         if (ForgeRegistries.ITEMS.containsKey(location)) {
             return p_30440_.is(ForgeRegistries.ITEMS.getValue(location));
         }
