@@ -59,16 +59,17 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     @Shadow
     public abstract void setTarget(@Nullable LivingEntity p_21544_);
 
-    @Shadow public abstract void restrictTo(BlockPos p_21447_, int p_21448_);
+    @Shadow
+    public abstract void restrictTo(BlockPos p_21447_, int p_21448_);
 
     @Unique
     private static final EntityDataAccessor<Byte> tamabletool$DATA_FLAGS_ID;
+
     @Unique
     private static final EntityDataAccessor<Optional<UUID>> tamabletool$DATA_OWNERUUID_ID;
 
     @Unique
     private TamableCommand tamabletool$command;
-    //private boolean tamabletool$orderedToSit;
 
     @Unique
     private static final EntityDataAccessor<Optional<UUID>> tamabletool$DATA_NONPLAYEROWNERUUID_ID;
@@ -91,7 +92,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         }
 
         p_21819_.putInt("Command", this.tamabletool$getCommandInt());
-        p_21819_.putBoolean("Sitting", this.tamabletool$isOrderedToSit());
 
         if (this.tamabletool$getNonPlayerOwnerUUID() != null) {
             p_21819_.putUUID("NonPlayerOwner", this.tamabletool$getNonPlayerOwnerUUID());
@@ -118,7 +118,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             }
         }
 
+        MessageSender.setQuiet(true);
         this.tamabletool$setCommandInt(p_21815_.getInt("Command"));
+        MessageSender.setQuiet(false);
         this.tamabletool$setInSittingPose(this.tamabletool$isOrderedToSit());
 
         UUID nonPlayerUUID;
@@ -295,8 +297,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public boolean tamabletool$isFood(ItemStack p_30440_) {
         Item item = p_30440_.getItem();
-        FoodProperties foodProperties = p_30440_.getFoodProperties(this);
-        return item.isEdible() && foodProperties != null && foodProperties.isMeat();
+        return item.isEdible();
     }
 
     public float tamabletool$healValue(ItemStack p_30440_) {
@@ -316,11 +317,11 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     public boolean tamabletool$isTamingItem(ItemStack p_30440_) {
-        return p_30440_.is(Items.BONE);
+        return p_30440_.is(Items.BOOK);
     }
 
     public boolean tamabletool$isTamingConditionSatisfied() {
-        return this.getHealth() <= Mth.clamp(this.getMaxHealth() / 4, 4.0, 12.0);
+        return this.getHealth() <= Mth.clamp(this.getMaxHealth() / 5, 4.0, 12.0);
     }
 
     @Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true)

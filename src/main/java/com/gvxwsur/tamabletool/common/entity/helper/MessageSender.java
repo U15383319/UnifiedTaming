@@ -7,8 +7,18 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.GameRules;
 
 public class MessageSender {
-    public static boolean checkSendCondition(Mob mob) {
-        return !((MinionEntity)mob).tamabletool$isTameNonPlayer() && TamableConfig.showTamableMessage.get();
+    private static boolean quiet = false;
+
+    public static boolean isQuiet() {
+        return quiet;
+    }
+
+    public static void setQuiet(boolean quiet) {
+        MessageSender.quiet = quiet;
+    }
+
+    private static boolean checkSendCondition(Mob mob) {
+        return !quiet && TamableConfig.showTamableMessage.get() && !((MinionEntity)mob).tamabletool$isTameNonPlayer();
     }
 
     public static void sendDeathMessage(Mob mob) {
