@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -18,7 +19,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -267,9 +267,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     public void die(DamageSource p_21809_) {
+        Component deathMessage = this.getCombatTracker().getDeathMessage();
         super.die(p_21809_);
         if (!this.level().isClientSide && this.dead) {
-            MessageSender.sendDeathMessage((Mob)(Object) this);
+            MessageSender.sendDeathMessage((Mob)(Object) this, deathMessage);
         }
     }
 

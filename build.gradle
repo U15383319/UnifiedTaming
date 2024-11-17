@@ -125,6 +125,9 @@ mixin {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    flatDir {
+        dir 'libs'
+    }
     maven {
         url "https://cursemaven.com"
         content {
@@ -140,11 +143,17 @@ dependencies {
 
     implementation fg.deobf("curse.maven:citadel-331936:5633260")
     implementation fg.deobf("curse.maven:curiosapi-309927:5843594")
+    implementation fg.deobf("curse.maven:geckolib-388172:5675221")
     implementation fg.deobf("curse.maven:patchouli-306770:4966125")
 
     implementation fg.deobf("curse.maven:lionfishapi-1001614:5363774")
     implementation fg.deobf("curse.maven:lenderscataclysm-551586:5885485")
     implementation fg.deobf("curse.maven:twilightforest-227639:5468648")
+    implementation fg.deobf("curse.maven:alexsmobs-426558:5698791")
+    implementation fg.deobf("curse.maven:mowziesmobs-250498:5399941")
+
+    implementation fg.deobf("curse.maven:entitytexturefeatures-568563:5874148")
+    implementation fg.deobf("curse.maven:entitymodelfeatures-844662:5722712")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

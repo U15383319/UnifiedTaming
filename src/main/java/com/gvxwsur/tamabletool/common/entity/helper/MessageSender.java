@@ -21,13 +21,12 @@ public class MessageSender {
         return !quiet && TamableConfig.showTamableMessage.get() && !((MinionEntity)mob).tamabletool$isTameNonPlayer();
     }
 
-    public static void sendDeathMessage(Mob mob) {
+    public static void sendDeathMessage(Mob mob, Component deathMessage) {
         if (!checkSendCondition(mob)) {
             return;
         }
         if (((TamableEntity)mob).getOwner() instanceof ServerPlayer player) {
             if (mob.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
-                Component deathMessage = mob.getCombatTracker().getDeathMessage();
                 player.sendSystemMessage(deathMessage);
             }
         }
