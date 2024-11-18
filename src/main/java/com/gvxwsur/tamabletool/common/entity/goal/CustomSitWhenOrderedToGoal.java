@@ -50,7 +50,7 @@ public class CustomSitWhenOrderedToGoal extends Goal {
     }
 
     private double adjustedDistanceToSqr(LivingEntity p_25310_) {
-        return !this.canHighFly ? this.mob.distanceToSqr(p_25310_) : this.mob.distanceToSqr(p_25310_.getX(), this.mob.getY(), p_25310_.getZ()) / 8;
+        return !this.canHighFly ? this.mob.distanceToSqr(p_25310_) : this.mob.distanceToSqr(p_25310_.getX(), this.mob.getY(), p_25310_.getZ());
     }
 
     public void start() {

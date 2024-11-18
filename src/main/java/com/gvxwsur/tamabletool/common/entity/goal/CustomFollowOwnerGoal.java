@@ -4,6 +4,7 @@ import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -21,7 +22,6 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import java.util.EnumSet;
 
 public class CustomFollowOwnerGoal extends Goal {
-    public static final int TELEPORT_WHEN_DISTANCE_IS = 12;
     private static final int MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2;
     private static final int MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 3;
     private static final int MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 1;
@@ -36,11 +36,16 @@ public class CustomFollowOwnerGoal extends Goal {
     private int timeToRecalcPath;
     private final float stopDistance;
     private final float startDistance;
+    private final float teleportDistance;
     private float oldWaterCost;
     private final boolean canFly;
     private final boolean canHighFly;
 
     public CustomFollowOwnerGoal(Mob p_25294_, double p_25295_, float p_25296_, float p_25297_) {
+        this(p_25294_, p_25295_, p_25296_, p_25297_, 12);
+    }
+
+    public CustomFollowOwnerGoal(Mob p_25294_, double p_25295_, float p_25296_, float p_25297_, float p_25298_) {
         this.tamable = p_25294_;
         this.level = p_25294_.level();
         this.tamableHelper = (TamableEntity) p_25294_;
@@ -50,8 +55,10 @@ public class CustomFollowOwnerGoal extends Goal {
         this.navigation = p_25294_.getNavigation();
         this.canFly = p_25294_ instanceof FlyingMob || p_25294_ instanceof FlyingAnimal;
         this.canHighFly = p_25294_ instanceof FlyingMob;
-        this.startDistance = p_25296_;
-        this.stopDistance = p_25297_;
+        float distanceFactor = 0.6F * (this.tamable.getBbWidth() / 0.6F - 1) + 1;
+        this.startDistance = p_25296_ * distanceFactor;
+        this.stopDistance = p_25297_ * distanceFactor;
+        this.teleportDistance = p_25298_ * distanceFactor;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
 //        if (!(p_25294_.getNavigation() instanceof GroundPathNavigation) && !(p_25294_.getNavigation() instanceof FlyingPathNavigation)) {
 //            throw new IllegalArgumentException("Unsupported mob type for FollowOwnerGoal");
@@ -93,7 +100,7 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private double adjustedDistanceToSqr(LivingEntity p_25310_) {
-        return !this.canHighFly ? this.tamable.distanceToSqr(p_25310_) : this.tamable.distanceToSqr(p_25310_.getX(), this.tamable.getY(), p_25310_.getZ()) / 8;
+        return !this.canHighFly ? this.tamable.distanceToSqr(p_25310_) : this.tamable.distanceToSqr(p_25310_.getX(), this.tamable.getY(), p_25310_.getZ());
     }
 
     public void start() {
@@ -112,7 +119,7 @@ public class CustomFollowOwnerGoal extends Goal {
         this.tamable.getLookControl().setLookAt(this.owner, 10.0F, (float)this.tamable.getMaxHeadXRot());
         if (--this.timeToRecalcPath <= 0) {
             this.timeToRecalcPath = this.adjustedTickDelay(10);
-            if (this.adjustedDistanceToSqr(this.owner) >= TELEPORT_WHEN_DISTANCE_IS * TELEPORT_WHEN_DISTANCE_IS) {
+            if (this.adjustedDistanceToSqr(this.owner) >= teleportDistance * teleportDistance) {
                 this.teleportToOwner();
             } else {
                 this.navigation.moveTo(this.owner, this.speedModifier);
