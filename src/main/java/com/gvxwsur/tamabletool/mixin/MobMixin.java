@@ -101,6 +101,8 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
     public void readAdditionalSaveData(CompoundTag p_21815_, CallbackInfo ci) {
+        MessageSender.setQuiet(true);
+
         UUID uuid;
         if (p_21815_.hasUUID("Owner")) {
             uuid = p_21815_.getUUID("Owner");
@@ -118,9 +120,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             }
         }
 
-        MessageSender.setQuiet(true);
         this.tamabletool$setCommandInt(p_21815_.getInt("Command"));
-        MessageSender.setQuiet(false);
         this.tamabletool$setInSittingPose(this.tamabletool$isOrderedToSit());
 
         UUID nonPlayerUUID;
@@ -138,6 +138,8 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 this.tamabletool$setTameNonPlayer(false);
             }
         }
+
+        MessageSender.setQuiet(false);
 
         this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
         this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, 1.0, 10.0F, 2.0F));
