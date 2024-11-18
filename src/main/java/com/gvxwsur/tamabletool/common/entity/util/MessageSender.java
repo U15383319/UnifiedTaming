@@ -1,6 +1,8 @@
-package com.gvxwsur.tamabletool.common.entity.helper;
+package com.gvxwsur.tamabletool.common.entity.util;
 
-import com.gvxwsur.tamabletool.common.config.TamableConfig;
+import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
+import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
@@ -18,7 +20,7 @@ public class MessageSender {
     }
 
     private static boolean checkSendCondition(Mob mob) {
-        return !quiet && TamableConfig.showTamableMessage.get() && !((MinionEntity)mob).tamabletool$isTameNonPlayer();
+        return !quiet && TamableToolConfig.showTamableMessage.get() && !((MinionEntity)mob).tamabletool$isTameNonPlayer();
     }
 
     public static void sendDeathMessage(Mob mob, Component deathMessage) {

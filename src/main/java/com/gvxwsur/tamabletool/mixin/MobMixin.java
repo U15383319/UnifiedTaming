@@ -2,6 +2,7 @@ package com.gvxwsur.tamabletool.mixin;
 
 import com.gvxwsur.tamabletool.common.entity.goal.*;
 import com.gvxwsur.tamabletool.common.entity.helper.*;
+import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -212,6 +213,11 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Nullable
     public UUID getOwnerUUID() {
+        return (UUID) ((Optional) this.entityData.get(tamabletool$DATA_OWNERUUID_ID)).orElse(null);
+    }
+
+    @Nullable
+    public UUID tamabletool$getOwnerUUID() {
         return (UUID) ((Optional) this.entityData.get(tamabletool$DATA_OWNERUUID_ID)).orElse(null);
     }
 

@@ -8,6 +8,8 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 
 public interface TamableEntity extends OwnableEntity {
+    public UUID tamabletool$getOwnerUUID();
+
     public boolean tamabletool$isTame();
 
     public void tamabletool$setTame(boolean p_21836_);

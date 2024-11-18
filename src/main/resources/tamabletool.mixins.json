@@ -8,6 +8,7 @@
     "CarvedPumpkinBlockMixin",
     "MobMixin",
     "PartEntityMixin",
+    "TamableAnimalMixin",
     "TameAnimalTriggerMixin"
   ],
   "client": [

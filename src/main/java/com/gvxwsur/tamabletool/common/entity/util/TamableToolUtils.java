@@ -1,9 +1,11 @@
-package com.gvxwsur.tamabletool.common.entity.helper;
+package com.gvxwsur.tamabletool.common.entity.util;
 
+import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 
-public class TamableUtils {
+public class TamableToolUtils {
     public static boolean isAlliedTo(Mob mob1, Mob mob2) {
         if (mob1.isAlliedTo(mob2)) {
             return true;

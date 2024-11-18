@@ -140,6 +140,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation fg.deobf("curse.maven:jei-238222:5846810")
     implementation fg.deobf("curse.maven:jade-324717:5672013")
+    implementation fg.deobf("curse.maven:forgeconfigscreen-544048:4672356")
 
     implementation fg.deobf("curse.maven:citadel-331936:5633260")
     implementation fg.deobf("curse.maven:curiosapi-309927:5843594")
