@@ -3,6 +3,7 @@ package com.gvxwsur.tamabletool.common.entity.goal;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
+import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -13,14 +14,12 @@ import java.util.EnumSet;
 public class CustomSitWhenOrderedToGoal extends Goal {
     private final Mob mob;
     private final TamableEntity tamableHelper;
-    private final MinionEntity minionHelper;
     private final CommandEntity commandHelper;
     private final boolean canHighFly;
 
     public CustomSitWhenOrderedToGoal(Mob p_25898_) {
         this.mob = p_25898_;
         this.tamableHelper = (TamableEntity) p_25898_;
-        this.minionHelper = (MinionEntity) p_25898_;
         this.commandHelper = (CommandEntity) p_25898_;
         this.canHighFly = p_25898_ instanceof FlyingMob;
         this.setFlags(EnumSet.of(Flag.JUMP, Flag.MOVE));
@@ -31,9 +30,7 @@ public class CustomSitWhenOrderedToGoal extends Goal {
     }
 
     public boolean canUse() {
-        if (!this.tamableHelper.tamabletool$isTame()) {
-            return false;
-        } else if (this.minionHelper.tamabletool$isTameNonPlayer()) {
+        if (!TamableToolUtils.isTame(mob)) {
             return false;
         } else if (this.mob.isInWaterOrBubble()) {
             return false;

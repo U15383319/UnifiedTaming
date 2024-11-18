@@ -3,14 +3,12 @@ package com.gvxwsur.tamabletool.common.entity.goal;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
+import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.level.LevelReader;
@@ -25,9 +23,8 @@ public class CustomFollowOwnerGoal extends Goal {
     private static final int MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2;
     private static final int MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 3;
     private static final int MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 1;
-    private final Mob tamable;
+    private final Mob mob;
     private final TamableEntity tamableHelper;
-    private final MinionEntity minionHelper;
     private final CommandEntity commandHelper;
     private LivingEntity owner;
     private final LevelReader level;
@@ -46,16 +43,15 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     public CustomFollowOwnerGoal(Mob p_25294_, double p_25295_, float p_25296_, float p_25297_, float p_25298_) {
-        this.tamable = p_25294_;
+        this.mob = p_25294_;
         this.level = p_25294_.level();
         this.tamableHelper = (TamableEntity) p_25294_;
-        this.minionHelper = (MinionEntity) p_25294_;
         this.commandHelper = (CommandEntity) p_25294_;
         this.speedModifier = p_25295_;
         this.navigation = p_25294_.getNavigation();
         this.canFly = p_25294_ instanceof FlyingMob || p_25294_ instanceof FlyingAnimal;
         this.canHighFly = p_25294_ instanceof FlyingMob;
-        float distanceFactor = 0.6F * (this.tamable.getBbWidth() / 0.6F - 1) + 1;
+        float distanceFactor = 0.6F * (this.mob.getBbWidth() / 0.6F - 1) + 1;
         this.startDistance = p_25296_ * distanceFactor;
         this.stopDistance = p_25297_ * distanceFactor;
         this.teleportDistance = p_25298_ * distanceFactor;
@@ -69,7 +65,7 @@ public class CustomFollowOwnerGoal extends Goal {
         LivingEntity $$0 = this.tamableHelper.getOwner();
         if ($$0 == null) {
             return false;
-        } else if (this.minionHelper.tamabletool$isTameNonPlayer()) {
+        } else if (!TamableToolUtils.isTame(mob)) {
             return false;
         } else if ($$0.isSpectator()) {
             return false;
@@ -96,27 +92,27 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean unableToMove() {
-        return this.commandHelper.tamabletool$isOrderedToSit() || this.tamable.isPassenger() || this.tamable.isLeashed();
+        return this.commandHelper.tamabletool$isOrderedToSit() || this.mob.isPassenger() || this.mob.isLeashed();
     }
 
     private double adjustedDistanceToSqr(LivingEntity p_25310_) {
-        return !this.canHighFly ? this.tamable.distanceToSqr(p_25310_) : this.tamable.distanceToSqr(p_25310_.getX(), this.tamable.getY(), p_25310_.getZ());
+        return !this.canHighFly ? this.mob.distanceToSqr(p_25310_) : this.mob.distanceToSqr(p_25310_.getX(), this.mob.getY(), p_25310_.getZ());
     }
 
     public void start() {
         this.timeToRecalcPath = 0;
-        this.oldWaterCost = this.tamable.getPathfindingMalus(BlockPathTypes.WATER);
-        this.tamable.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+        this.oldWaterCost = this.mob.getPathfindingMalus(BlockPathTypes.WATER);
+        this.mob.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
     }
 
     public void stop() {
         this.owner = null;
         this.navigation.stop();
-        this.tamable.setPathfindingMalus(BlockPathTypes.WATER, this.oldWaterCost);
+        this.mob.setPathfindingMalus(BlockPathTypes.WATER, this.oldWaterCost);
     }
 
     public void tick() {
-        this.tamable.getLookControl().setLookAt(this.owner, 10.0F, (float)this.tamable.getMaxHeadXRot());
+        this.mob.getLookControl().setLookAt(this.owner, 10.0F, (float)this.mob.getMaxHeadXRot());
         if (--this.timeToRecalcPath <= 0) {
             this.timeToRecalcPath = this.adjustedTickDelay(10);
             if (this.adjustedDistanceToSqr(this.owner) >= teleportDistance * teleportDistance) {
@@ -149,7 +145,7 @@ public class CustomFollowOwnerGoal extends Goal {
         } else if (!this.canTeleportTo(new BlockPos(p_25304_, p_25305_, p_25306_))) {
             return false;
         } else {
-            this.tamable.moveTo((double)p_25304_ + 0.5, (double)p_25305_ + (!this.canHighFly ? 0 : 4.0), (double)p_25306_ + 0.5, this.tamable.getYRot(), this.tamable.getXRot());
+            this.mob.moveTo((double)p_25304_ + 0.5, (double)p_25305_ + (!this.canHighFly ? 0 : 4.0), (double)p_25306_ + 0.5, this.mob.getYRot(), this.mob.getXRot());
             this.navigation.stop();
             return true;
         }
@@ -164,13 +160,13 @@ public class CustomFollowOwnerGoal extends Goal {
             if (!this.canFly && $$2.getBlock() instanceof LeavesBlock) {
                 return false;
             } else {
-                BlockPos $$3 = p_25308_.subtract(this.tamable.blockPosition());
-                return this.level.noCollision(this.tamable, this.tamable.getBoundingBox().move($$3));
+                BlockPos $$3 = p_25308_.subtract(this.mob.blockPosition());
+                return this.level.noCollision(this.mob, this.mob.getBoundingBox().move($$3));
             }
         }
     }
 
     private int randomIntInclusive(int p_25301_, int p_25302_) {
-        return this.tamable.getRandom().nextInt(p_25302_ - p_25301_ + 1) + p_25301_;
+        return this.mob.getRandom().nextInt(p_25302_ - p_25301_ + 1) + p_25301_;
     }
 }

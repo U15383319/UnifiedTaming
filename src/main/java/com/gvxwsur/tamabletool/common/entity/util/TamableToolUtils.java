@@ -1,8 +1,10 @@
 package com.gvxwsur.tamabletool.common.entity.util;
 
+import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 
 public class TamableToolUtils {

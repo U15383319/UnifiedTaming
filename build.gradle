@@ -152,6 +152,7 @@ dependencies {
     implementation fg.deobf("curse.maven:twilightforest-227639:5468648")
     implementation fg.deobf("curse.maven:alexsmobs-426558:5698791")
     implementation fg.deobf("curse.maven:mowziesmobs-250498:5399941")
+    implementation fg.deobf("curse.maven:touhoulittlemaid-355044:5896969")
 
     implementation fg.deobf("curse.maven:entitytexturefeatures-568563:5874148")
     implementation fg.deobf("curse.maven:entitymodelfeatures-844662:5722712")

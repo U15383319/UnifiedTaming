@@ -3,6 +3,7 @@ package com.gvxwsur.tamabletool.common.entity.goal;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
+import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -17,7 +18,6 @@ public class CustomRandomStrollGoal extends Goal {
     protected final Mob rawMob;
     protected final PathfinderMob mob;
     protected final TamableEntity tamableHelper;
-    protected final MinionEntity minionHelper;
     protected final CommandEntity commandHelper;
     protected double wantedX;
     protected double wantedY;
@@ -40,12 +40,10 @@ public class CustomRandomStrollGoal extends Goal {
         if (this.rawMob instanceof PathfinderMob) {
             this.mob = (PathfinderMob) this.rawMob;
             this.tamableHelper = (TamableEntity) this.mob;
-            this.minionHelper = (MinionEntity) this.mob;
             this.commandHelper = (CommandEntity) this.mob;
         } else {
             this.mob = null;
             this.tamableHelper = null;
-            this.minionHelper = null;
             this.commandHelper = null;
         }
         this.speedModifier = p_25742_;
@@ -57,9 +55,7 @@ public class CustomRandomStrollGoal extends Goal {
     public boolean canUse() {
         if (this.mob == null) {
             return false;
-        } else if (!this.tamableHelper.tamabletool$isTame()) {
-            return false;
-        } else if (this.minionHelper.tamabletool$isTameNonPlayer()) {
+        } else if (!TamableToolUtils.isTame(mob)) {
             return false;
         } else if (this.mob.isVehicle()) {
             return false;

@@ -92,7 +92,13 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             p_21819_.putUUID("Owner", this.getOwnerUUID());
         }
 
-        p_21819_.putInt("Command", this.tamabletool$getCommandInt());
+        if (this.tamabletool$getOwnerUUID() != null) {
+            p_21819_.putUUID("PlayerOwner", this.tamabletool$getOwnerUUID());
+        }
+
+        if (this.tamabletool$getOwnerUUID() != null) {
+            p_21819_.putInt("Command", this.tamabletool$getCommandInt());
+        }
 
         if (this.tamabletool$getNonPlayerOwnerUUID() != null) {
             p_21819_.putUUID("NonPlayerOwner", this.tamabletool$getNonPlayerOwnerUUID());
@@ -104,11 +110,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public void readAdditionalSaveData(CompoundTag p_21815_, CallbackInfo ci) {
         MessageSender.setQuiet(true);
 
+        // UUID Owner will be ignored to ensure that this mod will not influence vanilla TamableAnimal
         UUID uuid;
-        if (p_21815_.hasUUID("Owner")) {
-            uuid = p_21815_.getUUID("Owner");
+        if (p_21815_.hasUUID("PlayerOwner")) {
+            uuid = p_21815_.getUUID("PlayerOwner");
         } else {
-            String s = p_21815_.getString("Owner");
+            String s = p_21815_.getString("PlayerOwner");
             uuid = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), s);
         }
 
@@ -121,8 +128,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             }
         }
 
-        this.tamabletool$setCommandInt(p_21815_.getInt("Command"));
-        this.tamabletool$setInSittingPose(this.tamabletool$isOrderedToSit());
+        if (uuid != null) {
+            this.tamabletool$setCommandInt(p_21815_.getInt("Command"));
+            this.tamabletool$setInSittingPose(this.tamabletool$isOrderedToSit());
+        }
 
         UUID nonPlayerUUID;
         if (p_21815_.hasUUID("NonPlayerOwner")) {
