@@ -6,8 +6,8 @@
   "refmap": "tamabletool.refmap.json",
   "mixins": [
     "CarvedPumpkinBlockMixin",
+    "EntityMixin",
     "MobMixin",
-    "PartEntityMixin",
     "TamableAnimalMixin",
     "TameAnimalTriggerMixin"
   ],

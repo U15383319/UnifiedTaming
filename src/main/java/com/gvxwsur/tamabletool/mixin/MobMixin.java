@@ -1,5 +1,6 @@
 package com.gvxwsur.tamabletool.mixin;
 
+import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.goal.*;
 import com.gvxwsur.tamabletool.common.entity.helper.*;
 import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
@@ -238,8 +239,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public void tamabletool$tame(Player p_21829_) {
         this.tamabletool$setTame(true);
         this.tamabletool$setOwnerUUID(p_21829_.getUUID());
-        if (p_21829_ instanceof ServerPlayer) {
-            ((TameAnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).tamabletool$trigger((ServerPlayer)p_21829_, (Mob)(Object) this);
+        if (p_21829_ instanceof ServerPlayer player) {
+            MessageSender.sendTamingMessage((Mob)(Object) this, player);
+            ((TameAnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).tamabletool$trigger(player, (Mob)(Object) this);
         }
     }
 
@@ -247,7 +249,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         if (p_21822_ instanceof OwnableEntity owned && owned.getOwner() != null && this.tamabletool$isOwnedBy(owned.getOwner())) {
             return false;
         }
-        return this.tamabletool$isOwnedBy(p_21822_) ? false : super.canAttack(p_21822_);
+        return !this.tamabletool$isOwnedBy(p_21822_) && super.canAttack(p_21822_);
     }
 
     public boolean tamabletool$isOwnedBy(LivingEntity p_21831_) {
