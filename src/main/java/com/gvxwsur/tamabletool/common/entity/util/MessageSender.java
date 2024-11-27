@@ -29,7 +29,7 @@ public class MessageSender {
         }
         if (((TamableEntity)mob).getOwner() instanceof ServerPlayer player) {
             if (mob.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
-                player.sendSystemMessage(deathMessage);
+                player.displayClientMessage(deathMessage, false);
             }
         }
     }
@@ -39,7 +39,7 @@ public class MessageSender {
             return;
         }
         if (((TamableEntity)mob).getOwner() instanceof ServerPlayer player) {
-            player.sendSystemMessage(Component.translatable("tamabletool.command." + command, mob.getDisplayName()));
+            player.displayClientMessage(Component.translatable("tamabletool.command." + command, mob.getDisplayName()), true);
         }
     }
 }

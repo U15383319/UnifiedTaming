@@ -154,6 +154,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
         this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, 1.0, 8.0F, 2.0F));
         this.goalSelector.addGoal(8, new CustomRandomStrollGoal((Mob) (Object) this, 1.0));
+        this.goalSelector.addGoal(10, new CustomLookAtOwnerGoal((Mob) (Object) this, Player.class, 8.0F));
 
         this.targetSelector.addGoal(1, new CustomOwnerHurtByTargetGoal((Mob) (Object) this));
         this.targetSelector.addGoal(2, new CustomOwnerHurtTargetGoal((Mob) (Object) this));
