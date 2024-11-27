@@ -12,23 +12,30 @@ public interface InteractEntity {
 
     public float tamabletool$healValue(ItemStack p_30440_);
 
-    public boolean tamabletool$isControl(ItemStack p_30440_);
+    public boolean tamabletool$isRider(ItemStack p_30440_);
 
-    public boolean tamabletool$isRestrictPosition(ItemStack p_30440_);
+    public boolean tamabletool$isCommander(ItemStack p_30440_);
 
-    public boolean tamabletool$isTamingItem(ItemStack p_30440_);
+    public boolean tamabletool$isRideModeSwitcher(ItemStack p_30440_);
+
+    public boolean tamabletool$isMoveModeSwitcher(ItemStack p_30440_);
+
+    public boolean tamabletool$isTamer(ItemStack p_30440_);
 
     public boolean tamabletool$isTamingConditionSatisfied();
 
-    public default boolean tamabletool$isCheatTamingItem(ItemStack p_30440_) {
-        ResourceLocation location = new ResourceLocation(TamableToolConfig.cheatTamingItem.get());
+    public default boolean tamabletool$isCheatTamer(ItemStack p_30440_) {
+        ResourceLocation location = new ResourceLocation(TamableToolConfig.cheatTameItem.get());
         if (ForgeRegistries.ITEMS.containsKey(location)) {
             return p_30440_.is(ForgeRegistries.ITEMS.getValue(location));
         }
         return p_30440_.is(Items.DEBUG_STICK);
     }
 
-    public default boolean tamabletool$isAssistItem(ItemStack p_30440_) {
+    public default boolean tamabletool$isModAssistant(ItemStack p_30440_) {
+        if (!TamableToolConfig.needModAssistItem.get()) {
+            return true;
+        }
         ResourceLocation location = new ResourceLocation(TamableToolConfig.modAssistItem.get());
         if (ForgeRegistries.ITEMS.containsKey(location)) {
             return p_30440_.is(ForgeRegistries.ITEMS.getValue(location));
