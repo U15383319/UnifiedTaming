@@ -4,13 +4,14 @@ import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public interface InteractEntity {
 
-    public boolean tamabletool$isFood(ItemStack p_30440_);
+    public ItemStack tamabletool$eat(Level level, ItemStack food);
 
-    public float tamabletool$healValue(ItemStack p_30440_);
+    public boolean tamabletool$isFood(ItemStack p_30440_);
 
     public boolean tamabletool$isRider(ItemStack p_30440_);
 

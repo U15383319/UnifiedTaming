@@ -15,6 +15,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.scores.Team;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -316,17 +318,17 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         tamabletool$DATA_NONPLAYEROWNERUUID_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.OPTIONAL_UUID);
     }
 
-    public boolean tamabletool$isFood(ItemStack p_30440_) {
-        Item item = p_30440_.getItem();
-        return item.isEdible();
+    public @NotNull ItemStack tamabletool$eat(Level level, ItemStack food) {
+        ItemStack foodAfterEat = super.eat(level, food);
+        if (food.isEdible()) {
+            this.heal(food.getFoodProperties(this).getNutrition());
+        }
+        // TODO: compatible for non edible item
+        return foodAfterEat;
     }
 
-    public float tamabletool$healValue(ItemStack p_30440_) {
-        FoodProperties foodProperties = p_30440_.getFoodProperties(this);
-        if (foodProperties == null) {
-            return 1.0F;
-        }
-        return (float) foodProperties.getNutrition();
+    public boolean tamabletool$isFood(ItemStack p_30440_) {
+        return p_30440_.isEdible();
     }
 
     public boolean tamabletool$isRider(ItemStack p_30440_) {
@@ -372,12 +374,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
               cir.setReturnValue(InteractionResult.PASS);
             } else if (this.tamabletool$isTame()) {
                 if (this.tamabletool$isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
-                    this.heal(this.tamabletool$healValue(itemstack));
-                    if (!player.getAbilities().instabuild) {
-                        itemstack.shrink(1);
-                    }
-
-                    this.gameEvent(GameEvent.EAT, this);
+                    this.tamabletool$eat(this.level(), itemstack);
                     cir.setReturnValue(InteractionResult.SUCCESS);
                 } else {
                     if (this.tamabletool$isOwnedBy(player)) {
