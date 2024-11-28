@@ -11,7 +11,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.level.LevelReader;
@@ -39,8 +38,8 @@ public class CustomFollowOwnerGoal extends Goal {
     private final float startDistance;
     private final float teleportDistance;
     private float oldWaterCost;
-    private final boolean canFly;
-    private final boolean canHighFly;
+    private final boolean canWanderFly;
+    private final boolean canPathFly;
     private final boolean canSwim;
 
     public CustomFollowOwnerGoal(Mob p_25294_, double p_25295_, float p_25296_, float p_25297_) {
@@ -55,14 +54,26 @@ public class CustomFollowOwnerGoal extends Goal {
         this.speedModifier = p_25295_;
         this.navigation = p_25294_.getNavigation();
         // FlyingMob use default GroundPathNavigation
-        this.canHighFly = p_25294_ instanceof FlyingMob;
-        this.canFly = this.canHighFly || p_25294_.getNavigation() instanceof FlyingPathNavigation;
+        this.canWanderFly = p_25294_ instanceof FlyingMob;
+        this.canPathFly = p_25294_.getNavigation() instanceof FlyingPathNavigation;
         this.canSwim = p_25294_.getNavigation() instanceof WaterBoundPathNavigation;
-        float distanceFactor = 0.6F * (this.mob.getBbWidth() / 0.6F - 1) + 1;
+        float distanceFactor = this.getScaleFactor();
         this.startDistance = p_25296_ * distanceFactor;
         this.stopDistance = p_25297_ * distanceFactor;
         this.teleportDistance = p_25298_ * distanceFactor;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+    }
+
+    private float getScaleFactor() {
+        double basicFactor = this.mob.getBoundingBox().getSize();
+        double resultFactor = 0.6 * (basicFactor / 1.05 - 1) + 1;
+        if (this.canPathFly || this.canSwim) {
+            resultFactor *= 1.05;
+        }
+        if (this.canWanderFly) {
+            resultFactor *= 1.44;
+        }
+        return (float) resultFactor;
     }
 
     public boolean canUse() {
@@ -100,7 +111,7 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private double adjustedDistanceToSqr(LivingEntity p_25310_) {
-        return !this.canHighFly ? this.mob.distanceToSqr(p_25310_) : this.mob.distanceToSqr(p_25310_.getX(), this.mob.getY(), p_25310_.getZ());
+        return !this.canWanderFly ? this.mob.distanceToSqr(p_25310_) : this.mob.distanceToSqr(p_25310_.getX(), this.mob.getY(), p_25310_.getZ());
     }
 
     public void start() {
@@ -143,7 +154,7 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean maybeTeleportTo(int p_25304_, int p_25305_, int p_25306_) {
-        if (this.canHighFly) {
+        if (this.canWanderFly) {
             p_25305_ += Mth.ceil(this.mob.getBbHeight() + this.owner.getBbHeight() + 0.5F);
         }
         if (Math.abs((double) p_25304_ - this.owner.getX()) < MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING && Math.abs((double) p_25306_ - this.owner.getZ()) < MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING) {
@@ -158,11 +169,11 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean canTeleportTo(BlockPos p_25308_) {
-        if (this.canHighFly) {
+        if (this.canWanderFly) {
             BlockState $$2 = this.level.getBlockState(p_25308_.below());
             if (!$$2.getFluidState().isEmpty()) {
                 return this.mob.isPushedByFluid(ForgeMod.WATER_TYPE.get()) && $$2.getFluidState().is(FluidTags.WATER)
-                || this.mob.fireImmune() && $$2.getFluidState().is(FluidTags.LAVA);
+                        || this.mob.fireImmune() && $$2.getFluidState().is(FluidTags.LAVA);
             } else {
                 BlockPos $$3 = p_25308_.subtract(this.mob.blockPosition());
                 return this.level.noCollision(this.mob, this.mob.getBoundingBox().move($$3));
@@ -177,10 +188,20 @@ public class CustomFollowOwnerGoal extends Goal {
         }
         BlockPathTypes $$1 = WalkNodeEvaluator.getBlockPathTypeStatic(this.level, p_25308_.mutable());
         if ($$1 != BlockPathTypes.WALKABLE) {
-            return false;
+            if (this.canPathFly) {
+                p_25308_ = p_25308_.above(Mth.ceil(this.mob.getBbHeight() + this.owner.getBbHeight() + 0.5F));
+                BlockState $$2 = this.level.getBlockState(p_25308_.below());
+                if (!$$2.isAir()) {
+                    return false;
+                }
+                BlockPos $$3 = p_25308_.subtract(this.mob.blockPosition());
+                return this.level.noCollision(this.mob, this.mob.getBoundingBox().move($$3));
+            } else {
+                return false;
+            }
         } else {
             BlockState $$2 = this.level.getBlockState(p_25308_.below());
-            if (!this.canFly && $$2.getBlock() instanceof LeavesBlock) {
+            if (!this.canPathFly && $$2.getBlock() instanceof LeavesBlock) {
                 return false;
             } else {
                 BlockPos $$3 = p_25308_.subtract(this.mob.blockPosition());
