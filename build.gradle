@@ -138,24 +138,25 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    implementation fg.deobf("curse.maven:jei-238222:5846810")
-    implementation fg.deobf("curse.maven:jade-324717:5672013")
-    implementation fg.deobf("curse.maven:forgeconfigscreen-544048:4672356")
+    implementation fg.deobf("curse.maven:jei-238222:${jei_id}")
+    implementation fg.deobf("curse.maven:jade-324717:${jade_id}")
+    implementation fg.deobf("curse.maven:forgeconfigscreen-544048:${configscreen_id}")
 
-    implementation fg.deobf("curse.maven:citadel-331936:5633260")
-    implementation fg.deobf("curse.maven:curiosapi-309927:5843594")
-    implementation fg.deobf("curse.maven:geckolib-388172:5675221")
-    implementation fg.deobf("curse.maven:patchouli-306770:4966125")
+    implementation fg.deobf("curse.maven:citadel-331936:${citadel_id}")
+    implementation fg.deobf("curse.maven:curiosapi-309927:${curios_id}")
+    implementation fg.deobf("curse.maven:geckolib-388172:${geckolib_id}")
+    implementation fg.deobf("curse.maven:patchouli-306770:${patchouli_id}")
 
-    implementation fg.deobf("curse.maven:lionfishapi-1001614:5363774")
-    implementation fg.deobf("curse.maven:lenderscataclysm-551586:5885485")
-    implementation fg.deobf("curse.maven:twilightforest-227639:5468648")
-    implementation fg.deobf("curse.maven:alexsmobs-426558:5698791")
-    implementation fg.deobf("curse.maven:mowziesmobs-250498:5399941")
-    implementation fg.deobf("curse.maven:touhoulittlemaid-355044:5896969")
+    implementation fg.deobf("curse.maven:lionfishapi-1001614:${lionfish_id}")
+    implementation fg.deobf("curse.maven:lenderscataclysm-551586:${cataclysm_id}")
+    implementation fg.deobf("curse.maven:twilightforest-227639:${twilight_id}")
+    implementation fg.deobf("curse.maven:alexsmobs-426558:${alexsmobs_id}")
+    implementation fg.deobf("curse.maven:mowziesmobs-250498:${mowziesmobs_id}")
+    implementation fg.deobf("curse.maven:touhoulittlemaid-355044:${touhou_id}")
+    implementation fg.deobf("curse.maven:grimoireofgaia-228948:${gaia_id}")
 
-    implementation fg.deobf("curse.maven:entitytexturefeatures-568563:5874148")
-    implementation fg.deobf("curse.maven:entitymodelfeatures-844662:5722712")
+    implementation fg.deobf("curse.maven:entitytexturefeatures-568563:${texturefeature_id}")
+    implementation fg.deobf("curse.maven:entitymodelfeatures-844662:${modelfeature_id}")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

@@ -1,20 +1,23 @@
 package com.gvxwsur.tamabletool.common.event;
 
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
+import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.NeutralEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.UniformPartEntity;
+import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber
-public class ForgeEventHandler {
+public class LivingEventHandler {
     @SubscribeEvent
     public static void onLivingTargetChanged(LivingChangeTargetEvent event) {
         LivingEntity living = event.getEntity();
@@ -62,6 +65,16 @@ public class ForgeEventHandler {
                 } else {
                     living.setLastHurtByPlayer(null);
                 }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityTeleport(EntityTeleportEvent event) {
+        Entity entity = event.getEntity();
+        if (!entity.level().isClientSide && entity instanceof Mob mob && TamableToolUtils.isTame(mob)) {
+            if (((CommandEntity) mob).tamabletool$unableToMove()) {
+                event.setCanceled(true);
             }
         }
     }

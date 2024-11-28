@@ -1,6 +1,5 @@
 package com.gvxwsur.tamabletool.mixin;
 
-import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.goal.*;
 import com.gvxwsur.tamabletool.common.entity.helper.*;
 import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
@@ -164,12 +163,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "requiresCustomPersistence", at = @At("HEAD"), cancellable = true)
     public void requiresCustomPersistence(CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(this.isPassenger() || (this.tamabletool$isTame() && !this.tamabletool$isTameNonPlayer()));
+        cir.setReturnValue(this.isPassenger() || TamableToolUtils.isTame((Mob) (Object) this));
     }
 
     @Inject(method = "canBeLeashed", at = @At("HEAD"), cancellable = true)
     public void canBeLeashed(Player p_21813_, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(!this.isLeashed());
+        cir.setReturnValue(TamableToolUtils.isTame((Mob) (Object) this) && !this.isLeashed());
     }
 
     @Unique
@@ -456,5 +455,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public void tamabletool$tameNonPlayer(Mob p_21829_) {
         this.tamabletool$setTameNonPlayer(true);
         this.tamabletool$setNonPlayerOwnerUUID(p_21829_.getUUID());
+    }
+
+    @Unique
+    public boolean tamabletool$unableToMove() {
+        return this.tamabletool$isOrderedToSit() || this.isPassenger() || this.isLeashed();
     }
 }

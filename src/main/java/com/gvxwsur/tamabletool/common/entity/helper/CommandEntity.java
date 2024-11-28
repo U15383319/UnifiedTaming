@@ -38,5 +38,7 @@ public interface CommandEntity {
     public default void tamabletool$setOrderedToStroll(boolean p_21840_) {
         tamabletool$setCommand(p_21840_ ? TamableCommand.STROLL : TamableCommand.FOLLOW);
     }
+
+    public boolean tamabletool$unableToMove();
 }
 

@@ -1,7 +1,6 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.core.BlockPos;
@@ -92,7 +91,7 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean unableToMove() {
-        return this.commandHelper.tamabletool$isOrderedToSit() || this.mob.isPassenger() || this.mob.isLeashed();
+        return this.commandHelper.tamabletool$unableToMove();
     }
 
     private double adjustedDistanceToSqr(LivingEntity p_25310_) {
