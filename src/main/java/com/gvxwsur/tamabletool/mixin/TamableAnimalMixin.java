@@ -3,6 +3,7 @@ package com.gvxwsur.tamabletool.mixin;
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.TamableAnimal;
@@ -34,6 +35,13 @@ public abstract class TamableAnimalMixin extends Animal implements OwnableEntity
     public void setOrderedToSit(boolean p_21840_, CallbackInfo ci) {
         if (TamableToolConfig.compatibleVanillaTamable.get()) {
             ((CommandEntity) this).tamabletool$setOrderedToSit(p_21840_);
+        }
+    }
+
+    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;sendSystemMessage(Lnet/minecraft/network/chat/Component;)V"), cancellable = true)
+    public void die(DamageSource p_21809_, CallbackInfo ci) {
+        if (TamableToolConfig.compatibleVanillaTamable.get()) {
+            ci.cancel();
         }
     }
 }

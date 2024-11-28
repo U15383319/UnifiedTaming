@@ -6,6 +6,7 @@ import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 
@@ -39,6 +40,9 @@ public class MessageSender {
         }
         if (((TamableEntity)mob).getOwner() instanceof ServerPlayer player) {
             if (mob.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
+                if (!TamableToolConfig.compatibleVanillaTamable.get() && mob instanceof TamableAnimal) {
+                    return;
+                }
                 player.displayClientMessage(deathMessage, false);
             }
         }

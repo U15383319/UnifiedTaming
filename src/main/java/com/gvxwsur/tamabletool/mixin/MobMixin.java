@@ -4,6 +4,7 @@ import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.goal.*;
 import com.gvxwsur.tamabletool.common.entity.helper.*;
 import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
+import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
