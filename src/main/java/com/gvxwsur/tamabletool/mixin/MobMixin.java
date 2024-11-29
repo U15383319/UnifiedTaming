@@ -178,7 +178,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "canBeLeashed", at = @At("HEAD"), cancellable = true)
     public void canBeLeashed(Player p_21813_, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(!this.isLeashed() && (!TamableToolConfig.leashedNeedTamed.get() || TamableToolUtils.isTame((Mob) (Object) this)));
+        cir.setReturnValue(!this.isLeashed() && (!TamableToolConfig.leashedNeedTamed.get() || TamableToolUtils.isOwnedBy((Mob) (Object) this, p_21813_)));
     }
 
     @Unique

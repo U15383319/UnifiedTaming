@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "tamabletool.refmap.json",
   "mixins": [
+    "AbstractVillagerMixin",
     "CarvedPumpkinBlockMixin",
     "EntityMixin",
     "LivingEntityMixin",
