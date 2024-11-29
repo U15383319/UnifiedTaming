@@ -1,5 +1,6 @@
 package com.gvxwsur.tamabletool.mixin;
 
+import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.goal.*;
 import com.gvxwsur.tamabletool.common.entity.helper.*;
 import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
@@ -21,13 +22,16 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
@@ -65,6 +69,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Shadow
     public abstract void restrictTo(BlockPos p_21447_, int p_21448_);
+
+    @Shadow @Nullable public abstract Entity getLeashHolder();
+
+    @Shadow public abstract PathNavigation getNavigation();
 
     @Unique
     private static final EntityDataAccessor<Byte> tamabletool$DATA_FLAGS_ID;
@@ -170,7 +178,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "canBeLeashed", at = @At("HEAD"), cancellable = true)
     public void canBeLeashed(Player p_21813_, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(TamableToolUtils.isTame((Mob) (Object) this) && !this.isLeashed());
+        cir.setReturnValue(!this.isLeashed() && (!TamableToolConfig.leashedNeedTamed.get() || TamableToolUtils.isTame((Mob) (Object) this)));
     }
 
     @Unique
@@ -424,6 +432,35 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 }
 
                 cir.setReturnValue(InteractionResult.SUCCESS);
+            }
+        }
+    }
+
+    @Inject(method = "tickLeash", at = @At("TAIL"))
+    protected void tickLeash(CallbackInfo ci) {
+        if (!TamableToolConfig.compatibleAnimalLeashed.get() && (Mob) (Object) this instanceof Animal) {
+            return;
+        }
+        Entity $$0 = this.getLeashHolder();
+        if ($$0 != null && $$0.level() == this.level()) {
+            float distanceFactor = TamableToolUtils.getScaleFactor((Mob) (Object) this);
+            int restrictRadius = (int) (5.0 * distanceFactor);
+            float limitDistance = 6.0F * distanceFactor;
+            double deltaSpeed = 0.4 * distanceFactor;
+            float stopDistance = 2.0F * distanceFactor;
+            double followSpeed = 1.0 * distanceFactor;
+            this.restrictTo($$0.blockPosition(), restrictRadius);
+            float $$1 = this.distanceTo($$0);
+            if ($$1 > limitDistance) {
+                double $$2 = ($$0.getX() - this.getX()) / (double)$$1;
+                double $$3 = ($$0.getY() - this.getY()) / (double)$$1;
+                double $$4 = ($$0.getZ() - this.getZ()) / (double)$$1;
+                this.setDeltaMovement(this.getDeltaMovement().add(Math.copySign($$2 * $$2 * deltaSpeed, $$2), Math.copySign($$3 * $$3 * deltaSpeed, $$3), Math.copySign($$4 * $$4 * deltaSpeed, $$4)));
+                this.checkSlowFallDistance();
+            } else {
+                this.goalSelector.enableControlFlag(Goal.Flag.MOVE);
+                Vec3 $$6 = (new Vec3($$0.getX() - this.getX(), $$0.getY() - this.getY(), $$0.getZ() - this.getZ())).normalize().scale((double)Math.max($$1 - stopDistance, 0.0F));
+                this.getNavigation().moveTo(this.getX() + $$6.x, this.getY() + $$6.y, this.getZ() + $$6.z, followSpeed);
             }
         }
     }

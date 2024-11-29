@@ -2,15 +2,14 @@ package com.gvxwsur.tamabletool.common.entity.goal;
 
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.TamableEnvironment;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.level.LevelReader;
@@ -53,27 +52,15 @@ public class CustomFollowOwnerGoal extends Goal {
         this.commandHelper = (CommandEntity) p_25294_;
         this.speedModifier = p_25295_;
         this.navigation = p_25294_.getNavigation();
-        // FlyingMob use default GroundPathNavigation
-        this.canWanderFly = p_25294_ instanceof FlyingMob;
-        this.canPathFly = p_25294_.getNavigation() instanceof FlyingPathNavigation;
-        this.canSwim = p_25294_.getNavigation() instanceof WaterBoundPathNavigation;
-        float distanceFactor = this.getScaleFactor();
+        TamableEnvironment environment = TamableToolUtils.getMobEnvironment(p_25294_);
+        this.canWanderFly = environment == TamableEnvironment.FLY_WANDER;
+        this.canPathFly = environment == TamableEnvironment.FLY_PATH;
+        this.canSwim = environment == TamableEnvironment.WATER;
+        float distanceFactor = TamableToolUtils.getScaleFactor(p_25294_);
         this.startDistance = p_25296_ * distanceFactor;
         this.stopDistance = p_25297_ * distanceFactor;
         this.teleportDistance = p_25298_ * distanceFactor;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
-    }
-
-    private float getScaleFactor() {
-        double basicFactor = this.mob.getBoundingBox().getSize();
-        double resultFactor = 0.6 * (basicFactor / 1.05 - 1) + 1;
-        if (this.canPathFly || this.canSwim) {
-            resultFactor *= 1.05;
-        }
-        if (this.canWanderFly) {
-            resultFactor *= 1.44;
-        }
-        return (float) resultFactor;
     }
 
     public boolean canUse() {
