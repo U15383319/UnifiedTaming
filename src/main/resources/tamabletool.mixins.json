@@ -6,7 +6,6 @@
   "refmap": "tamabletool.refmap.json",
   "mixins": [
     "AbstractVillagerMixin",
-    "CarvedPumpkinBlockMixin",
     "EntityMixin",
     "LivingEntityMixin",
     "MobMixin",

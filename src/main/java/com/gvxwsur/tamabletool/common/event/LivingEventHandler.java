@@ -9,7 +9,10 @@ import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
@@ -75,6 +78,21 @@ public class LivingEventHandler {
         if (!entity.level().isClientSide && entity instanceof Mob mob && TamableToolUtils.isTame(mob)) {
             if (((CommandEntity) mob).tamabletool$unableToMove()) {
                 event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
+        Entity entity = event.getEntity();
+        boolean isLoadedFromDisk = event.loadedFromDisk();
+        Level level = entity.level();
+        if (!level.isClientSide && entity instanceof Mob mob) {
+            if (TamableToolConfig.compatibleGolemTamed.get() && mob instanceof AbstractGolem && !isLoadedFromDisk) {
+                Player player = level.getNearestPlayer(mob, 6);
+                if (player != null) {
+                    ((TamableEntity) mob).tamabletool$tame(player);
+                }
             }
         }
     }

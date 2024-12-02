@@ -154,6 +154,8 @@ dependencies {
     implementation fg.deobf("curse.maven:mowziesmobs-250498:${mowziesmobs_id}")
     implementation fg.deobf("curse.maven:touhoulittlemaid-355044:${touhou_id}")
     implementation fg.deobf("curse.maven:grimoireofgaia-228948:${gaia_id}")
+    implementation fg.deobf("curse.maven:l2library-620203:${l2_id}")
+    implementation fg.deobf("curse.maven:modulargolems-690937:${modulargolems_id}")
 
     implementation fg.deobf("curse.maven:entitytexturefeatures-568563:${texturefeature_id}")
     implementation fg.deobf("curse.maven:entitymodelfeatures-844662:${modelfeature_id}")
