@@ -9,6 +9,8 @@ import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -83,7 +85,13 @@ public class LivingEventHandler {
         boolean isLoadedFromDisk = event.loadedFromDisk();
         Level level = entity.level();
         if (!level.isClientSide && entity instanceof Mob mob) {
-            if (TamableToolConfig.compatibleGolemTamed.get() && mob instanceof AbstractGolem && !isLoadedFromDisk) {
+            if (TamableToolConfig.compatibleMobSummonedTamed.get() && mob.getSpawnType() == MobSpawnType.MOB_SUMMONED && !isLoadedFromDisk) {
+                Mob mobOwner = level.getNearestEntity(Mob.class, TargetingConditions.forNonCombat().copy().range(8).selector(owner -> owner.getClass() != mob.getClass()), mob, mob.getX(), mob.getY(), mob.getZ(), mob.getBoundingBox().inflate(8));
+                if (mobOwner != null) {
+                    TamableToolUtils.tameMob(mob, mobOwner);
+                }
+            }
+            if (TamableToolConfig.compatibleGolemTamed.get() && mob instanceof AbstractGolem && mob.getSpawnType() != MobSpawnType.COMMAND && !isLoadedFromDisk) {
                 Player player = level.getNearestPlayer(mob, 6);
                 if (player != null) {
                     ((TamableEntity) mob).tamabletool$tame(player);

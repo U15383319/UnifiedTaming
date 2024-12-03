@@ -12,6 +12,7 @@ public class TamableToolConfig {
     public static final ForgeConfigSpec.BooleanValue compatibleVanillaTamable;
     public static final ForgeConfigSpec.BooleanValue compatiblePartEntity;
     public static final ForgeConfigSpec.BooleanValue compatibleAnimalLeashed;
+    public static final ForgeConfigSpec.BooleanValue compatibleMobSummonedTamed;
     public static final ForgeConfigSpec.BooleanValue compatibleGolemTamed;
 
     static {
@@ -29,6 +30,7 @@ public class TamableToolConfig {
         compatibleVanillaTamable = builder.comment("Whether vanilla tamable mobs will use taming system of this mod").define("compatibleVanillaTamable", false);
         compatiblePartEntity = builder.comment("Whether multipart mobs will use taming system of this mod").define("compatiblePartEntity", true);
         compatibleAnimalLeashed = builder.comment("Whether animal will use leashed system of this mod").define("compatibleAnimalLeashed", false);
+        compatibleMobSummonedTamed = builder.comment("Whether a mob summoned by another mob will be tamed by the nearest mob").define("compatibleMobSummonedTamed", true);
         compatibleGolemTamed = builder.comment("Whether golem will be tamed by the nearest player when created").define("compatibleGolemTamed", true);
         builder.pop();
         CFG = builder.build();
