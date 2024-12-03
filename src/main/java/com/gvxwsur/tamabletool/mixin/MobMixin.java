@@ -16,7 +16,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -27,7 +26,6 @@ import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -363,8 +361,17 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return this.getHealth() <= Mth.clamp(this.getMaxHealth() / 5, 4.0, 12.0);
     }
 
-    @Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true)
-    public void mobInteract(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+    @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
+    public final void interact(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+        InteractionResult interactionresult = this.tamabletool$tameInteract(player, hand);
+        if (interactionresult.consumesAction()) {
+            this.gameEvent(GameEvent.ENTITY_INTERACT, player);
+            cir.setReturnValue(interactionresult);
+        }
+    }
+
+    @Unique
+    public InteractionResult tamabletool$tameInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         ItemStack assistItemstack = hand == InteractionHand.MAIN_HAND ? player.getOffhandItem() : player.getMainHandItem();
         if (this.tamabletool$isModAssistant(assistItemstack)) {
@@ -372,18 +379,18 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 boolean flag = this.tamabletool$isOwnedBy(player) || this.tamabletool$isTame() || (this.tamabletool$isTamer(itemstack) || this.tamabletool$isCheatTamer(itemstack)) && !this.tamabletool$isTame();
                 boolean flag2 = !this.isVehicle() && this.tamabletool$isOwnedBy(player) && this.tamabletool$isRider(itemstack) && !player.isSecondaryUseActive();
                 if (flag2) {
-                    cir.setReturnValue(InteractionResult.SUCCESS);
+                    return InteractionResult.SUCCESS;
                 } else if (flag) {
-                    cir.setReturnValue(InteractionResult.CONSUME);
+                    return InteractionResult.CONSUME;
                 } else {
-                    cir.setReturnValue(InteractionResult.PASS);
+                    return InteractionResult.PASS;
                 }
             } else if (this.tamabletool$isTameNonPlayer()) {
-              cir.setReturnValue(InteractionResult.PASS);
+              return InteractionResult.PASS;
             } else if (this.tamabletool$isTame()) {
                 if (this.tamabletool$isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
                     this.tamabletool$eat(this.level(), itemstack);
-                    cir.setReturnValue(InteractionResult.SUCCESS);
+                    return InteractionResult.SUCCESS;
                 } else {
                     if (this.tamabletool$isOwnedBy(player)) {
                         if (this.tamabletool$isCommander(itemstack)) {
@@ -392,13 +399,13 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                                 this.jumping = false;
                                 this.navigation.stop();
                                 this.setTarget(null);
-                                cir.setReturnValue(InteractionResult.SUCCESS);
+                                return InteractionResult.SUCCESS;
                             }
                         }
                         if (this.tamabletool$isRider(itemstack)) {
                             if (!player.isSecondaryUseActive() && !this.isVehicle()) {
                                 player.startRiding(this);
-                                cir.setReturnValue(InteractionResult.CONSUME);
+                                return InteractionResult.CONSUME;
                             }
                         }
                         if (this.tamabletool$isMoveModeSwitcher(itemstack)) {
@@ -407,14 +414,14 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                                 this.jumping = false;
                                 this.navigation.stop();
                                 this.setTarget(null);
-                                cir.setReturnValue(InteractionResult.SUCCESS);
+                                return InteractionResult.SUCCESS;
                             }
                         }
                         if (this.tamabletool$isRideModeSwitcher(itemstack)) {
                             // TODO: switch ride mode?
                         }
                     }
-                    cir.setReturnValue(InteractionResult.PASS);
+                    return InteractionResult.PASS;
                 }
             } else if ((this.tamabletool$isTamer(itemstack) && this.tamabletool$isTamingConditionSatisfied()) || this.tamabletool$isCheatTamer(itemstack)) {
                 if (this.tamabletool$isTamer(itemstack) && !player.getAbilities().instabuild) {
@@ -431,9 +438,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                     this.level().broadcastEntityEvent(this, (byte) 6);
                 }
 
-                cir.setReturnValue(InteractionResult.SUCCESS);
+                return InteractionResult.SUCCESS;
             }
         }
+        return InteractionResult.PASS;
     }
 
     @Inject(method = "tickLeash", at = @At("TAIL"))

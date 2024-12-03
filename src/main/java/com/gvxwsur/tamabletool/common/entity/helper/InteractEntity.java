@@ -2,12 +2,17 @@ package com.gvxwsur.tamabletool.common.entity.helper;
 
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public interface InteractEntity {
+
+    public InteractionResult tamabletool$tameInteract(Player player, InteractionHand hand);
 
     public ItemStack tamabletool$eat(Level level, ItemStack food);
 
