@@ -33,21 +33,16 @@ public class LivingEventHandler {
                 }
             }
 
-            if (newTarget != null && TamableToolConfig.compatiblePartEntity.get()) {
-                Entity livingParent = living, newTargetParent = newTarget;
+            if (TamableToolConfig.compatiblePartEntity.get() && newTarget != null && !(living instanceof Mob)) {
+                Entity livingParent = living;
                 while (livingParent != null && !(livingParent instanceof Mob)) {
                     livingParent = ((UniformPartEntity) livingParent).getParent();
                 }
-                while (newTargetParent != null && !(newTargetParent instanceof Mob)) {
-                    newTargetParent = ((UniformPartEntity) newTargetParent).getParent();
-                }
 
-                if (livingParent == null || newTargetParent == null) {
-                    return;
-                } else {
-                    Mob livingParentMob = (Mob) livingParent, newTargetParentMob = (Mob) newTargetParent;
+                if (livingParent != null)  {
+                    Mob livingParentMob = (Mob) livingParent;
                     if (((TamableEntity) livingParentMob).tamabletool$isTame()) {
-                        if (livingParentMob == newTargetParentMob || !livingParentMob.canAttack(newTargetParentMob)) {
+                        if (livingParentMob == newTarget || !livingParentMob.canAttack(newTarget)) {
                             event.setCanceled(true);
                         }
                     }

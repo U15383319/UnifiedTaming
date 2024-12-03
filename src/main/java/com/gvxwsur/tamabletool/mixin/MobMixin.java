@@ -254,10 +254,28 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     public boolean canAttack(LivingEntity p_21822_) {
-        if (p_21822_ instanceof OwnableEntity owned && owned.getOwner() != null && this.tamabletool$isOwnedBy(owned.getOwner())) {
+        if (this.tamabletool$isOwnedBy(p_21822_)) {
             return false;
         }
-        return !this.tamabletool$isOwnedBy(p_21822_) && super.canAttack(p_21822_);
+        if (p_21822_ instanceof Mob mob && TamableToolUtils.hasSameOwner((Mob) (Object) this, mob)) {
+            return false;
+        }
+        if (TamableToolConfig.compatiblePartEntity.get() && !(p_21822_ instanceof Mob)) {
+            Entity targetParent = p_21822_;
+            while (targetParent != null && !(targetParent instanceof Mob)) {
+                targetParent = ((UniformPartEntity) targetParent).getParent();
+            }
+            if (targetParent != null) {
+                Mob targetParentMob = (Mob) targetParent;
+                if ((Object) this == targetParentMob) {
+                    return false;
+                }
+                if (TamableToolUtils.hasSameOwner((Mob) (Object) this, targetParentMob)) {
+                    return false;
+                }
+            }
+        }
+        return super.canAttack(p_21822_);
     }
 
     public boolean tamabletool$isOwnedBy(LivingEntity p_21831_) {
