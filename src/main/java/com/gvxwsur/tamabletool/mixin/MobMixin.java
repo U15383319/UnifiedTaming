@@ -144,6 +144,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
         if (this.tamabletool$getOwnerUUID() != null) {
             p_21819_.putInt("Command", this.tamabletool$getCommandInt());
+            p_21819_.putBoolean("RideMode", this.tamabletool$isManual());
         }
 
         if (this.tamabletool$getNonPlayerOwnerUUID() != null) {
@@ -176,6 +177,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         if (uuid != null) {
             this.tamabletool$setCommandInt(p_21815_.getInt("Command"));
             this.tamabletool$setInSittingPose(this.tamabletool$isOrderedToSit());
+            this.tamabletool$setManual(p_21815_.getBoolean("RideMode"));
         }
 
         UUID nonPlayerUUID;
@@ -478,9 +480,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 boolean flag = this.tamabletool$isOwnedBy(player) || this.tamabletool$isTame() || (this.tamabletool$isTamer(itemstack) || this.tamabletool$isCheatTamer(itemstack)) && !this.tamabletool$isTame();
                 boolean flag2 = this.tamabletool$isOwnedBy(player) && this.tamabletool$isRider(itemstack) && !this.isVehicle() && !player.isSecondaryUseActive();
                 boolean flag3 = this.tamabletool$isOwnedBy(player) && this.tamabletool$isRideModeSwitcher(itemstack) && !player.isSecondaryUseActive();
-                if (flag3) {
-                    this.tamabletool$setManual(!this.tamabletool$isManual());
-                }
                 if (flag2 || flag3) {
                     return InteractionResult.SUCCESS;
                 } else if (flag) {
@@ -610,11 +609,21 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     public boolean tamabletool$isManual() {
-        return tamabletool$isManual;
+        if (this.level().isClientSide) {
+            return (this.entityData.get(tamabletool$DATA_FLAGS_ID) & 2) != 0;
+        } else {
+            return tamabletool$isManual;
+        }
     }
 
-    public void tamabletool$setManual(boolean manual) {
-        this.tamabletool$isManual = manual;
+    public void tamabletool$setManual(boolean p_21836_) {
+        this.tamabletool$isManual = p_21836_;
+        byte b0 = this.entityData.get(tamabletool$DATA_FLAGS_ID);
+        if (p_21836_) {
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 | 2));
+        } else {
+            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 & -3));
+        }
         if (!this.level().isClientSide) {
             MessageSender.sendRideModeSwitchMessage((Mob) (Object) this, this.tamabletool$isManual());
         }
