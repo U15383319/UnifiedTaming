@@ -56,4 +56,13 @@ public class MessageSender {
             player.displayClientMessage(Component.translatable("tamabletool.command." + command, mob.getDisplayName()), true);
         }
     }
+
+    public static void sendRideModeSwitchMessage(Mob mob, boolean manual) {
+        if (!checkSendCondition(mob)) {
+            return;
+        }
+        if (((TamableEntity)mob).getOwner() instanceof ServerPlayer player) {
+            player.displayClientMessage(Component.translatable("tamabletool.ride." + (manual ? "manual" : "automatic"), mob.getDisplayName()), true);
+        }
+    }
 }

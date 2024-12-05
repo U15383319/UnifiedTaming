@@ -70,6 +70,21 @@ public class TamableToolUtils {
         return TamableEnvironment.GROUND;
     }
 
+    public static boolean canWalk(Mob mob) {
+        TamableEnvironment environment = getMobEnvironment(mob);
+        return environment == TamableEnvironment.GROUND || environment == TamableEnvironment.AMPHIBIOUS;
+    }
+
+    public static boolean canFly(Mob mob) {
+        TamableEnvironment environment = getMobEnvironment(mob);
+        return environment == TamableEnvironment.FLY_PATH || environment == TamableEnvironment.FLY_WANDER;
+    }
+
+    public static boolean canSwim(Mob mob) {
+        TamableEnvironment environment = getMobEnvironment(mob);
+        return environment == TamableEnvironment.WATER || environment == TamableEnvironment.AMPHIBIOUS;
+    }
+
     public static float getScaleFactor(Mob mob) {
         return getScaleFactor(mob, 0.6, 1.05, 1.44);
     }

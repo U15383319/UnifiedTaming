@@ -2,5 +2,7 @@
   "tamabletool.tame": "%1$s 被你驯服",
   "tamabletool.command.sit": "%1$s 正在停留",
   "tamabletool.command.follow": "%1$s 正在跟随",
-  "tamabletool.command.stroll": "%1$s 正在漫步"
+  "tamabletool.command.stroll": "%1$s 正在漫步",
+  "tamabletool.ride.manual": "%1$s 处于手动骑乘模式",
+  "tamabletool.ride.automatic": "%1$s 处于自动骑乘模式"
 }
