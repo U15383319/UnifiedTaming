@@ -6,6 +6,8 @@
   "refmap": "tamabletool.refmap.json",
   "mixins": [
     "AbstractVillagerMixin",
+    "AmbientCreatureMixin",
+    "BredAnimalsTriggerMixin",
     "EntityMixin",
     "LivingEntityMixin",
     "MobMixin",

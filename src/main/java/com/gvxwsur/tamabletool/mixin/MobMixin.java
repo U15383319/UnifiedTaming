@@ -18,6 +18,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -29,6 +30,7 @@ import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -38,7 +40,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -71,7 +72,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Shadow public abstract PathNavigation getNavigation();
 
-    @Shadow @Nullable private LivingEntity target;
     @Unique
     private static final EntityDataAccessor<Byte> tamabletool$DATA_FLAGS_ID;
 
@@ -211,7 +211,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
         this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
         this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, 1.0, 8.0F, 2.0F));
-        this.goalSelector.addGoal(7, new CustomBreedPlayerGoal((Mob) (Object) this, 1.0));
+        this.goalSelector.addGoal(7, new CustomBreedGoal((Mob) (Object) this, 1.0));
         this.goalSelector.addGoal(8, new CustomRandomStrollGoal((Mob) (Object) this, 1.0));
         this.goalSelector.addGoal(10, new CustomLookAtOwnerGoal((Mob) (Object) this, Player.class, 8.0F));
 
@@ -366,10 +366,11 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.tamabletool$setOwnerUUID(p_21829_.getUUID());
         if (p_21829_ instanceof ServerPlayer player) {
             MessageSender.sendTamingMessage((Mob)(Object) this, player);
-            ((TameAnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).tamabletool$trigger(player, (Mob)(Object) this);
+            ((AnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).tamabletool$TameAnimal$trigger(player, (Mob)(Object) this);
         }
     }
 
+    @Override
     public boolean canAttack(LivingEntity p_21822_) {
         if (this.tamabletool$isOwnedBy(p_21822_)) {
             return false;
@@ -403,6 +404,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return true;
     }
 
+    @Override
     public Team getTeam() {
         if (this.tamabletool$isTame()) {
             LivingEntity livingentity = this.getOwner();
@@ -414,6 +416,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return super.getTeam();
     }
 
+    @Override
     public boolean isAlliedTo(Entity p_21833_) {
         if (this.tamabletool$isTame()) {
             LivingEntity livingentity = this.getOwner();
@@ -429,6 +432,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return super.isAlliedTo(p_21833_);
     }
 
+    @Override
     public void die(DamageSource p_21809_) {
         Component deathMessage = this.getCombatTracker().getDeathMessage();
         super.die(p_21809_);
@@ -518,10 +522,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             } else if (this.tamabletool$isTame()) {
                 if (this.tamabletool$isFood(itemstack)) {
                     if (this.getHealth() < this.getMaxHealth()) {
-                        this.eat(this.level(), itemstack);
                         if (itemstack.isEdible()) {
-                            this.heal(itemstack.getFoodProperties(this).getNutrition());
+                            FoodProperties foodProperties = itemstack.getFoodProperties(this);
+                            float totalValue = foodProperties.getNutrition() + foodProperties.getNutrition() * foodProperties.getSaturationModifier() * 2;
+                            this.heal(totalValue);
                         }
+                        this.eat(this.level(), itemstack);
                         return InteractionResult.SUCCESS;
                     }
                     if (this.isBaby()) {
@@ -750,7 +756,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     public boolean tamabletool$canMate(Player p_27569_) {
-        return TamableToolUtils.isOwnedBy((Mob) (Object) this, p_27569_) && this.tamabletool$isInLove() && p_27569_.getMainHandItem().isEmpty();
+        return TamableToolUtils.isOwnedBy((Mob) (Object) this, p_27569_) && this.tamabletool$isInLove() && (p_27569_.isCreative() || p_27569_.getHealth() >= p_27569_.getMaxHealth()) && p_27569_.getMainHandItem().isEmpty();
     }
 
     public Mob tamabletool$getBreedOffspring(ServerLevel serverLevel, Player player) {
@@ -777,8 +783,8 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     public void tamabletool$finalizeSpawnChildFromBreeding(ServerLevel p_277963_, Player p_277357_, @Nullable Mob p_277516_) {
-        // p_277357_.awardStat(Stats.ANIMALS_BRED);
-        // CriteriaTriggers.BRED_ANIMALS.trigger(p_277357_, this, p_277357_, p_277516_);
+        p_277357_.awardStat(Stats.ANIMALS_BRED);
+        ((AnimalTriggerHelper) CriteriaTriggers.BRED_ANIMALS).tamabletool$BredAnimals$trigger((ServerPlayer) p_277357_, (Mob) (Object) this, p_277357_, p_277516_);
         this.tamabletool$setAge(6000);
         this.tamabletool$resetLove();
         p_277963_.broadcastEntityEvent(this, (byte)18);

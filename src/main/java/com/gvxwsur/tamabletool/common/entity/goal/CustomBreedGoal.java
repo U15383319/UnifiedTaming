@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class CustomBreedPlayerGoal extends Goal {
+public class CustomBreedGoal extends Goal {
     protected final Mob mob;
     protected final TamableEntity tamableHelper;
     protected final AgeableEntity ageableHelper;
@@ -22,7 +22,7 @@ public class CustomBreedPlayerGoal extends Goal {
     private int loveTime;
     private final double speedModifier;
 
-    public CustomBreedPlayerGoal(Mob p_25125_, double p_25126_) {
+    public CustomBreedGoal(Mob p_25125_, double p_25126_) {
         this.mob = p_25125_;
         this.tamableHelper = (TamableEntity) p_25125_;
         this.ageableHelper = (AgeableEntity) p_25125_;
@@ -43,7 +43,7 @@ public class CustomBreedPlayerGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
-        return this.partner.isAlive() && this.ageableHelper.tamabletool$isInLove() && this.loveTime < 60;
+        return this.partner != null && this.partner.isAlive() && this.ageableHelper.tamabletool$isInLove() && this.loveTime < 60;
     }
 
     public void stop() {

@@ -12,10 +12,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public interface InteractEntity {
 
-    public InteractionResult tamabletool$tameInteract(Player player, InteractionHand hand);
-
-    public ItemStack tamabletool$eat(Level level, ItemStack food);
-
     public boolean tamabletool$isFood(ItemStack p_30440_);
 
     public boolean tamabletool$isRider(ItemStack p_30440_);
