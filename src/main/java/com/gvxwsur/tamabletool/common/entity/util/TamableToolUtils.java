@@ -6,6 +6,7 @@ import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEnvironment;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.FlyingMob;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
@@ -28,7 +29,11 @@ public class TamableToolUtils {
     }
 
     public static boolean isOwnedBy(Mob mob, Player player) {
-        return ((TamableEntity) mob).tamabletool$isOwnedBy(player) && !((MinionEntity) mob).tamabletool$isTameNonPlayer();
+        return isTame(mob) && ((TamableEntity) mob).tamabletool$isOwnedBy(player);
+    }
+
+    public static LivingEntity getOwner(Mob mob) {
+        return isTame(mob) ? ((TamableEntity) mob).getOwner() : null;
     }
 
     public static boolean hasSameOwner(Mob mob1, Mob mob2) {

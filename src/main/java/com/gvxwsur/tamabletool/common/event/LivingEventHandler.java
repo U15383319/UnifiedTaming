@@ -6,6 +6,8 @@ import com.gvxwsur.tamabletool.common.entity.helper.NeutralEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.UniformPartEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -18,6 +20,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -91,10 +94,26 @@ public class LivingEventHandler {
                     TamableToolUtils.tameMob(mob, mobOwner);
                 }
             }
-            if (TamableToolConfig.compatibleGolemTamed.get() && mob instanceof AbstractGolem && mob.getSpawnType() != MobSpawnType.COMMAND && !isLoadedFromDisk) {
+            if (TamableToolConfig.golemCreatedTamed.get() && mob instanceof AbstractGolem && mob.getSpawnType() != MobSpawnType.COMMAND && !isLoadedFromDisk) {
                 Player player = level.getNearestPlayer(mob, 6);
                 if (player != null) {
                     ((TamableEntity) mob).tamabletool$tame(player);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingHurtEvent(LivingHurtEvent event) {
+        LivingEntity living = event.getEntity();
+        DamageSource source = event.getSource();
+        if (!living.level().isClientSide && living instanceof ServerPlayer player) {
+            Entity attacker = source.getEntity();
+            if (attacker != null) {
+                if (attacker instanceof Mob mob) {
+                    if (TamableToolUtils.isOwnedBy(mob, player)) {
+                        event.setCanceled(true);
+                    }
                 }
             }
         }

@@ -164,7 +164,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
     public void readAdditionalSaveData(CompoundTag p_21815_, CallbackInfo ci) {
-        MessageSender.setQuiet(true);
+        MessageSender.setQuiet(true, (Mob) (Object) this);
 
         // UUID Owner will be ignored to ensure that this mod will not influence vanilla TamableAnimal
         UUID uuid;
@@ -207,7 +207,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             }
         }
 
-        MessageSender.setQuiet(false);
+        MessageSender.setQuiet(false, (Mob) (Object) this);
 
         this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
         this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, 1.0, 8.0F, 2.0F));
@@ -756,17 +756,17 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     public boolean tamabletool$canMate(Player p_27569_) {
-        return TamableToolUtils.isOwnedBy((Mob) (Object) this, p_27569_) && this.tamabletool$isInLove() && (p_27569_.isCreative() || p_27569_.getHealth() >= p_27569_.getMaxHealth()) && p_27569_.getMainHandItem().isEmpty();
+        return TamableToolUtils.isOwnedBy((Mob) (Object) this, p_27569_) && this.tamabletool$isInLove() && p_27569_.getHealth() >= p_27569_.getMaxHealth() && p_27569_.getMainHandItem().isEmpty() && p_27569_.getOffhandItem().isEmpty();
     }
 
     public Mob tamabletool$getBreedOffspring(ServerLevel serverLevel, Player player) {
         Entity entity = this.getType().create(serverLevel, null, null, this.blockPosition(), MobSpawnType.BREEDING, false, false);
         if (entity instanceof Mob mob) {
-            MessageSender.setQuiet(true);
+            MessageSender.setQuiet(true, mob);
             if (TamableToolUtils.isOwnedBy((Mob) (Object) this, player)) {
                 ((TamableEntity) mob).tamabletool$tame(player);
             }
-            MessageSender.setQuiet(false);
+            MessageSender.setQuiet(false, mob);
             return mob;
         }
         return null;

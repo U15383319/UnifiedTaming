@@ -9,11 +9,11 @@ public class TamableToolConfig {
     public static final ForgeConfigSpec.ConfigValue<String> cheatTameItem;
     public static final ForgeConfigSpec.BooleanValue showTamableMessage;
     public static final ForgeConfigSpec.BooleanValue leashedNeedTamed;
+    public static final ForgeConfigSpec.BooleanValue golemCreatedTamed;
     public static final ForgeConfigSpec.BooleanValue compatibleVanillaTamable;
     public static final ForgeConfigSpec.BooleanValue compatiblePartEntity;
     public static final ForgeConfigSpec.BooleanValue compatibleAnimalLeashed;
     public static final ForgeConfigSpec.BooleanValue compatibleMobSummonedTamed;
-    public static final ForgeConfigSpec.BooleanValue compatibleGolemTamed;
 
     static {
         final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -24,14 +24,14 @@ public class TamableToolConfig {
         cheatTameItem = builder.comment("The item that used to tame mobs without any cost").define("cheatTameItem", "minecraft:debug_stick");
         showTamableMessage = builder.comment("Whether messages should be sent to players when something happened to their pets").define("showTamableMessage", true);
         leashedNeedTamed = builder.comment("Whether leash mobs need to be tamed").define("leashedNeedTamed", true);
+        golemCreatedTamed = builder.comment("Whether golem will be tamed by the nearest player when created").define("golemCreatedTamed", true);
         builder.pop();
         builder.push("Tamable Permission");
         builder.comment("Some of these configs are dangerous and increase the risk of mods conflicts, please use them with caution");
         compatibleVanillaTamable = builder.comment("Whether vanilla tamable mobs will use taming system of this mod").define("compatibleVanillaTamable", false);
         compatiblePartEntity = builder.comment("Whether multipart mobs will use taming system of this mod").define("compatiblePartEntity", true);
-        compatibleAnimalLeashed = builder.comment("Whether animal will use leashed system of this mod").define("compatibleAnimalLeashed", false);
+        compatibleAnimalLeashed = builder.comment("Whether animal will use leashed system of this mod").define("compatibleAnimalLeashed", true);
         compatibleMobSummonedTamed = builder.comment("Whether a mob summoned by another mob will be tamed by the nearest mob").define("compatibleMobSummonedTamed", true);
-        compatibleGolemTamed = builder.comment("Whether golem will be tamed by the nearest player when created").define("compatibleGolemTamed", true);
         builder.pop();
         CFG = builder.build();
     }
