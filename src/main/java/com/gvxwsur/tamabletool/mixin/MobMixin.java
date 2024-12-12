@@ -209,6 +209,11 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
         MessageSender.setQuiet(false, (Mob) (Object) this);
 
+        this.tamabletool$registerTameGoals();
+    }
+
+    @Unique
+    public void tamabletool$registerTameGoals() {
         this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
         this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, 1.0, 8.0F, 2.0F));
         this.goalSelector.addGoal(7, new CustomBreedGoal((Mob) (Object) this, 1.0));
@@ -371,29 +376,25 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     @Override
-    public boolean canAttack(LivingEntity p_21822_) {
-        if (this.tamabletool$isOwnedBy(p_21822_)) {
+    public boolean canAttack(LivingEntity livingEntity) {
+        if (this.tamabletool$isOwnedBy(livingEntity)) {
             return false;
         }
-        if (p_21822_ instanceof Mob mob && TamableToolUtils.hasSameOwner((Mob) (Object) this, mob)) {
+        if (livingEntity instanceof Mob mob && TamableToolUtils.hasSameOwner((Mob) (Object) this, mob)) {
             return false;
         }
-        if (TamableToolConfig.compatiblePartEntity.get() && !(p_21822_ instanceof Mob)) {
-            Entity targetParent = p_21822_;
-            while (targetParent != null && !(targetParent instanceof Mob)) {
-                targetParent = ((UniformPartEntity) targetParent).getParent();
-            }
-            if (targetParent != null) {
-                Mob targetParentMob = (Mob) targetParent;
-                if ((Object) this == targetParentMob) {
+        if (TamableToolConfig.compatiblePartEntity.get() && !(livingEntity instanceof Mob)) {
+            Entity targetAncestry = ((UniformPartEntity) livingEntity).getAncestry();
+            if (targetAncestry instanceof Mob targetAncestryMob) {
+                if ((Object) this == targetAncestryMob) {
                     return false;
                 }
-                if (TamableToolUtils.hasSameOwner((Mob) (Object) this, targetParentMob)) {
+                if (TamableToolUtils.hasSameOwner((Mob) (Object) this, targetAncestryMob)) {
                     return false;
                 }
             }
         }
-        return super.canAttack(p_21822_);
+        return super.canAttack(livingEntity);
     }
 
     public boolean tamabletool$isOwnedBy(LivingEntity p_21831_) {
@@ -762,11 +763,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public Mob tamabletool$getBreedOffspring(ServerLevel serverLevel, Player player) {
         Entity entity = this.getType().create(serverLevel, null, null, this.blockPosition(), MobSpawnType.BREEDING, false, false);
         if (entity instanceof Mob mob) {
-            MessageSender.setQuiet(true, mob);
+            MessageSender.setQuiet(true, (Mob) (Object) this);
             if (TamableToolUtils.isOwnedBy((Mob) (Object) this, player)) {
                 ((TamableEntity) mob).tamabletool$tame(player);
+                ((TamableEntity) mob).tamabletool$registerTameGoals();
             }
-            MessageSender.setQuiet(false, mob);
+            MessageSender.setQuiet(false, (Mob) (Object) this);
             return mob;
         }
         return null;

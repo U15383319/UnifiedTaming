@@ -23,4 +23,6 @@ public interface TamableEntity extends OwnableEntity {
     public boolean tamabletool$isOwnedBy(LivingEntity p_21831_);
 
     public boolean tamabletool$wantsToAttack(LivingEntity p_21810_, LivingEntity p_21811_);
+
+    public void tamabletool$registerTameGoals();
 }

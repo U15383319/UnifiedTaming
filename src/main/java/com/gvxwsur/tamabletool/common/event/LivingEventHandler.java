@@ -39,15 +39,10 @@ public class LivingEventHandler {
             }
 
             if (TamableToolConfig.compatiblePartEntity.get() && newTarget != null && !(living instanceof Mob)) {
-                Entity livingParent = living;
-                while (livingParent != null && !(livingParent instanceof Mob)) {
-                    livingParent = ((UniformPartEntity) livingParent).getParent();
-                }
-
-                if (livingParent != null)  {
-                    Mob livingParentMob = (Mob) livingParent;
-                    if (((TamableEntity) livingParentMob).tamabletool$isTame()) {
-                        if (livingParentMob == newTarget || !livingParentMob.canAttack(newTarget)) {
+                Entity livingAncestry = ((UniformPartEntity) living).getAncestry();
+                if (livingAncestry instanceof Mob livingAncestryMob)  {
+                    if (((TamableEntity) livingAncestryMob).tamabletool$isTame()) {
+                        if (livingAncestryMob == newTarget || !livingAncestryMob.canAttack(newTarget)) {
                             event.setCanceled(true);
                         }
                     }
@@ -103,20 +98,6 @@ public class LivingEventHandler {
         }
     }
 
-    @SubscribeEvent
-    public static void onLivingHurtEvent(LivingHurtEvent event) {
-        LivingEntity living = event.getEntity();
-        DamageSource source = event.getSource();
-        if (!living.level().isClientSide && living instanceof ServerPlayer player) {
-            Entity attacker = source.getEntity();
-            if (attacker != null) {
-                if (attacker instanceof Mob mob) {
-                    if (TamableToolUtils.isOwnedBy(mob, player)) {
-                        event.setCanceled(true);
-                    }
-                }
-            }
-        }
-    }
+
 
 }
