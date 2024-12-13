@@ -8,6 +8,7 @@ public class TamableToolConfig {
     public static final ForgeConfigSpec.ConfigValue<String> modAssistItem;
     public static final ForgeConfigSpec.ConfigValue<String> cheatTameItem;
     public static final ForgeConfigSpec.BooleanValue showTamableMessage;
+    public static final ForgeConfigSpec.BooleanValue playerFriendlyFire;
     public static final ForgeConfigSpec.BooleanValue leashedNeedTamed;
     public static final ForgeConfigSpec.BooleanValue golemCreatedTamed;
     public static final ForgeConfigSpec.BooleanValue compatibleVanillaTamable;
@@ -23,6 +24,7 @@ public class TamableToolConfig {
         modAssistItem = builder.comment("The item that held in the player's assisting hand to perform interactions in this mod").define("modAssistItem", "minecraft:clock");
         cheatTameItem = builder.comment("The item that used to tame mobs without any cost").define("cheatTameItem", "minecraft:debug_stick");
         showTamableMessage = builder.comment("Whether messages should be sent to players when something happened to their pets").define("showTamableMessage", true);
+        playerFriendlyFire = builder.comment("Whether players can attack their own pets").define("playerFriendlyFire", false);
         leashedNeedTamed = builder.comment("Whether leash mobs need to be tamed").define("leashedNeedTamed", true);
         golemCreatedTamed = builder.comment("Whether golem will be tamed by the nearest player when created").define("golemCreatedTamed", true);
         builder.pop();

@@ -21,6 +21,7 @@ import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -98,6 +99,78 @@ public class LivingEventHandler {
         }
     }
 
+    @SubscribeEvent
+    public static void onLivingHurtEvent(LivingHurtEvent event) {
+        LivingEntity living = event.getEntity();
+        DamageSource source = event.getSource();
+        if (!living.level().isClientSide) {
+            Entity attacker = source.getEntity();
+            if (attacker != null) {
+                if (TamableToolConfig.playerFriendlyFire.get() && attacker instanceof ServerPlayer player) {
+                    if (living instanceof Mob mob && ((TamableEntity) mob).tamabletool$isOwnedBy(player)) {
+                        event.setCanceled(true);
+                    }
+                    if (TamableToolConfig.compatiblePartEntity.get() && !(living instanceof Mob)) {
+                        Entity livingAncestry = ((UniformPartEntity) living).getAncestry();
+                        if (livingAncestry instanceof Mob livingAncestryMob) {
+                            if (((TamableEntity) livingAncestryMob).tamabletool$isOwnedBy(player)) {
+                                event.setCanceled(true);
+                            }
+                        }
+                    }
+                }
+                if (attacker instanceof Mob mob && ((TamableEntity) mob).tamabletool$isTame()) {
+                    if (!mob.canAttack(living)) {
+                        event.setCanceled(true);
+                    }
+                }
+                if (TamableToolConfig.compatiblePartEntity.get() && !(attacker instanceof Mob)) {
+                    Entity attackerAncestry = ((UniformPartEntity) attacker).getAncestry();
+                    if (attackerAncestry instanceof Mob attackerAncestryMob) {
+                        if (((TamableEntity) attackerAncestryMob).tamabletool$isTame()) {
+                            if (attackerAncestryMob == living || !attackerAncestryMob.canAttack(living)) {
+                                event.setCanceled(true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-
+    @SubscribeEvent
+    public static void onMobEffect(MobEffectEvent.Added event) {
+        LivingEntity living = event.getEntity();
+        Entity source = event.getEffectSource();
+        if (!living.level().isClientSide && source != null) {
+            if (TamableToolConfig.playerFriendlyFire.get() && source instanceof ServerPlayer player) {
+                if (living instanceof Mob mob && ((TamableEntity) mob).tamabletool$isOwnedBy(player)) {
+                    event.getEffectInstance().duration = 0;
+                }
+                if (TamableToolConfig.compatiblePartEntity.get() && !(living instanceof Mob)) {
+                    Entity livingAncestry = ((UniformPartEntity) living).getAncestry();
+                    if (livingAncestry instanceof Mob livingAncestryMob) {
+                        if (((TamableEntity) livingAncestryMob).tamabletool$isOwnedBy(player)) {
+                            event.getEffectInstance().duration = 0;
+                        }
+                    }
+                }
+            }
+            if (source instanceof Mob mob && ((TamableEntity) mob).tamabletool$isTame()) {
+                if (!mob.canAttack(living)) {
+                    event.getEffectInstance().duration = 0;
+                }
+            }
+            if (TamableToolConfig.compatiblePartEntity.get() && !(source instanceof Mob)) {
+                Entity sourceAncestry = ((UniformPartEntity) source).getAncestry();
+                if (sourceAncestry instanceof Mob sourceAncestryMob) {
+                    if (((TamableEntity) sourceAncestryMob).tamabletool$isTame()) {
+                        if (sourceAncestryMob == living || !sourceAncestryMob.canAttack(living)) {
+                            event.getEffectInstance().duration = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
