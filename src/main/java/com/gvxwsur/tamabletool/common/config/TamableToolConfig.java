@@ -11,6 +11,7 @@ public class TamableToolConfig {
     public static final ForgeConfigSpec.BooleanValue playerFriendlyFire;
     public static final ForgeConfigSpec.BooleanValue leashedNeedTamed;
     public static final ForgeConfigSpec.BooleanValue golemCreatedTamed;
+    public static final ForgeConfigSpec.IntValue merchantTamedReputation;
     public static final ForgeConfigSpec.BooleanValue compatibleVanillaTamable;
     public static final ForgeConfigSpec.BooleanValue compatiblePartEntity;
     public static final ForgeConfigSpec.BooleanValue compatibleAnimalLeashed;
@@ -27,6 +28,7 @@ public class TamableToolConfig {
         playerFriendlyFire = builder.comment("Whether players can attack their own pets").define("playerFriendlyFire", false);
         leashedNeedTamed = builder.comment("Whether leash mobs need to be tamed").define("leashedNeedTamed", true);
         golemCreatedTamed = builder.comment("Whether golem will be tamed by the nearest player when created").define("golemCreatedTamed", true);
+        merchantTamedReputation = builder.comment("The reputation value of the merchant tamed by player").defineInRange("merchantTamedReputation", 10, 0, 1000);
         builder.pop();
         builder.push("Tamable Permission");
         builder.comment("Some of these configs are dangerous and increase the risk of mods conflicts, please use them with caution");
