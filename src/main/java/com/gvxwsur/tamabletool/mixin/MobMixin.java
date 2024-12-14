@@ -214,7 +214,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Unique
     public void tamabletool$registerTameGoals() {
-        this.goalSelector.addGoal(2, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
+        this.goalSelector.addGoal(1, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
         this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, 1.0, 8.0F, 2.0F));
         this.goalSelector.addGoal(7, new CustomBreedGoal((Mob) (Object) this, 1.0));
         this.goalSelector.addGoal(8, new CustomRandomStrollGoal((Mob) (Object) this, 1.0));
@@ -236,6 +236,18 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 this.tamabletool$setAge($$0);
             }
         }
+    }
+
+    @Override
+    public boolean hurt(DamageSource p_21016_, float p_21017_) {
+        this.tamabletool$resetLove();
+        Entity source = p_21016_.getEntity();
+        if (!(source instanceof Player player && this.tamabletool$isOwnedBy(player))) {
+            if (!this.tamabletool$isOrderedToFollow()) {
+                this.tamabletool$setOrderedToFollow(true);
+            }
+        }
+        return super.hurt(p_21016_, p_21017_);
     }
 
     @Override
@@ -370,7 +382,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.tamabletool$setTame(true);
         this.tamabletool$setOwnerUUID(p_21829_.getUUID());
         if (p_21829_ instanceof ServerPlayer player) {
-            MessageSender.sendTamingMessage((Mob)(Object) this, player);
             ((AnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).tamabletool$TameAnimal$trigger(player, (Mob)(Object) this);
         }
     }
@@ -589,6 +600,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
                 if (this.tamabletool$isCheatTamer(itemstack) || this.random.nextInt(3) == 0) {
                     this.tamabletool$tame(player);
+                    MessageSender.sendTamingMessage((Mob) (Object) this, player);
                     this.navigation.stop();
                     this.setTarget(null);
                     // this.tamabletool$setOrderedToSit(true);
@@ -763,12 +775,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public Mob tamabletool$getBreedOffspring(ServerLevel serverLevel, Player player) {
         Entity entity = this.getType().create(serverLevel, null, null, this.blockPosition(), MobSpawnType.BREEDING, false, false);
         if (entity instanceof Mob mob) {
-            MessageSender.setQuiet(true, (Mob) (Object) this);
             if (TamableToolUtils.isOwnedBy((Mob) (Object) this, player)) {
                 ((TamableEntity) mob).tamabletool$tame(player);
                 ((TamableEntity) mob).tamabletool$registerTameGoals();
             }
-            MessageSender.setQuiet(false, (Mob) (Object) this);
             return mob;
         }
         return null;

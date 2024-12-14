@@ -33,6 +33,7 @@ public class MessageSender {
         return owner != null && !quietMap.getOrDefault(owner.getUUID(), false);
     }
 
+    // taming message will not be sent automatically
     public static void sendTamingMessage(Mob mob, Player player) {
         if (!checkSendCondition(mob)) {
             return;
@@ -69,6 +70,15 @@ public class MessageSender {
         }
         if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
             player.displayClientMessage(Component.translatable("tamabletool.ride." + (manual ? "manual" : "automatic"), mob.getDisplayName()), true);
+        }
+    }
+
+    public static void sendConvertingMessage(Mob mob, Mob outcomeMob) {
+        if (!checkSendCondition(mob)) {
+            return;
+        }
+        if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
+            player.displayClientMessage(Component.translatable("tamabletool.convert", mob.getDisplayName(), outcomeMob.getDisplayName()), false);
         }
     }
 }

@@ -5,6 +5,7 @@ import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.NeutralEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.UniformPartEntity;
+import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -18,10 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.MobEffectEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -79,10 +77,27 @@ public class LivingEventHandler {
                     TamableToolUtils.tameMob(mob, mobOwner);
                 }
             }
-            if (TamableToolConfig.golemCreatedTamed.get() && mob instanceof AbstractGolem && mob.getSpawnType() != MobSpawnType.COMMAND && !isLoadedFromDisk) {
-                Player player = level.getNearestPlayer(mob, 6);
-                if (player != null) {
-                    ((TamableEntity) mob).tamabletool$tame(player);
+            if (TamableToolConfig.golemCreatedTamed.get() && mob instanceof AbstractGolem && !isLoadedFromDisk) {
+                if (mob.getSpawnType() != MobSpawnType.COMMAND && mob.getSpawnType() != MobSpawnType.MOB_SUMMONED && mob.getSpawnType() != MobSpawnType.SPAWN_EGG && mob.getSpawnType() != MobSpawnType.SPAWNER) {
+                    Player player = level.getNearestPlayer(mob, 6);
+                    if (player != null) {
+                        ((TamableEntity) mob).tamabletool$tame(player);
+                        MessageSender.sendTamingMessage(mob, player);
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingConversion(LivingConversionEvent.Post event) {
+        LivingEntity living = event.getEntity();
+        LivingEntity outcome = event.getOutcome();
+        if (!living.level().isClientSide) {
+            if (living instanceof Mob mob && outcome instanceof Mob outcomeMob) {
+                if (TamableToolUtils.getOwner(mob) instanceof ServerPlayer player) {
+                    ((TamableEntity) outcomeMob).tamabletool$tame(player);
+                    MessageSender.sendConvertingMessage(mob, outcomeMob);
                 }
             }
         }

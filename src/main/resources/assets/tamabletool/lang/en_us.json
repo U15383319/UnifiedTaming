@@ -4,5 +4,6 @@
   "tamabletool.command.follow": "%1$s is following",
   "tamabletool.command.stroll": "%1$s is strolling",
   "tamabletool.ride.manual": "%1$s is in manual riding mode",
-  "tamabletool.ride.automatic": "%1$s is in automatic riding mode"
+  "tamabletool.ride.automatic": "%1$s is in automatic riding mode",
+  "tamabletool.convert": "%1$s is converting to %2$s"
 }
