@@ -4,11 +4,9 @@ import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEnvironment;
+import com.gvxwsur.tamabletool.common.entity.helper.UniformPartEntity;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.FlyingMob;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -108,5 +106,37 @@ public class TamableToolUtils {
             resultFactor *= mul3;
         }
         return (float) resultFactor;
+    }
+
+    public static boolean shouldMobFriendly(Entity attacker, LivingEntity target) {
+        if (attacker instanceof Mob mob && ((TamableEntity) mob).tamabletool$isTame()) {
+            return !mob.canAttack(target);
+        }
+        if (TamableToolConfig.compatiblePartEntity.get() && !(attacker instanceof Mob)) {
+            Entity attackerAncestry = ((UniformPartEntity) attacker).getAncestry();
+            if (attackerAncestry instanceof Mob attackerAncestryMob) {
+                if (((TamableEntity) attackerAncestryMob).tamabletool$isTame()) {
+                    return attackerAncestryMob == target || !attackerAncestryMob.canAttack(target);
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean shouldFireFriendly(Entity attacker, LivingEntity target) {
+        if (TamableToolConfig.playerFriendlyFire.get() && attacker instanceof ServerPlayer player) {
+            if (target instanceof Mob mob && ((TamableEntity) mob).tamabletool$isOwnedBy(player)) {
+                return true;
+            }
+            if (TamableToolConfig.compatiblePartEntity.get() && !(target instanceof Mob)) {
+                Entity targetAncestry = ((UniformPartEntity) target).getAncestry();
+                if (targetAncestry instanceof Mob targetAncestryMob) {
+                    if (((TamableEntity) targetAncestryMob).tamabletool$isOwnedBy(player)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return shouldMobFriendly(attacker, target);
     }
 }

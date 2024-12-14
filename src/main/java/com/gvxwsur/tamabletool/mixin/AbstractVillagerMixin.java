@@ -2,7 +2,6 @@ package com.gvxwsur.tamabletool.mixin;
 
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.MerchantHelper;
-import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AgeableMob;

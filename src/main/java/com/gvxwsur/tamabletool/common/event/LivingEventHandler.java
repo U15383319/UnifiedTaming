@@ -33,20 +33,9 @@ public class LivingEventHandler {
         LivingEntity newTarget = event.getNewTarget();
 
         if (!living.level().isClientSide) {
-            if (newTarget != null && living instanceof Mob mob && ((TamableEntity) mob).tamabletool$isTame()) {
-                if (!mob.canAttack(newTarget)) {
+            if (newTarget != null) {
+                if (TamableToolUtils.shouldMobFriendly(living, newTarget)) {
                     event.setCanceled(true);
-                }
-            }
-
-            if (TamableToolConfig.compatiblePartEntity.get() && newTarget != null && !(living instanceof Mob)) {
-                Entity livingAncestry = ((UniformPartEntity) living).getAncestry();
-                if (livingAncestry instanceof Mob livingAncestryMob)  {
-                    if (((TamableEntity) livingAncestryMob).tamabletool$isTame()) {
-                        if (livingAncestryMob == newTarget || !livingAncestryMob.canAttack(newTarget)) {
-                            event.setCanceled(true);
-                        }
-                    }
                 }
             }
         }
@@ -85,7 +74,7 @@ public class LivingEventHandler {
         Level level = entity.level();
         if (!level.isClientSide && entity instanceof Mob mob) {
             if (TamableToolConfig.compatibleMobSummonedTamed.get() && mob.getSpawnType() == MobSpawnType.MOB_SUMMONED && !isLoadedFromDisk) {
-                Mob mobOwner = level.getNearestEntity(Mob.class, TargetingConditions.forNonCombat().copy().range(8).selector(owner -> owner.getClass() != mob.getClass() && owner.getType().getCategory() == mob.getType().getCategory()), mob, mob.getX(), mob.getY(), mob.getZ(), mob.getBoundingBox().inflate(8));
+                Mob mobOwner = level.getNearestEntity(Mob.class, TargetingConditions.forNonCombat().copy().range(8).selector(owner -> owner.getClass() != mob.getClass() && owner.getType().getCategory().isFriendly() == mob.getType().getCategory().isFriendly()), mob, mob.getX(), mob.getY(), mob.getZ(), mob.getBoundingBox().inflate(8));
                 if (mobOwner != null) {
                     TamableToolUtils.tameMob(mob, mobOwner);
                 }
@@ -106,33 +95,8 @@ public class LivingEventHandler {
         if (!living.level().isClientSide) {
             Entity attacker = source.getEntity();
             if (attacker != null) {
-                if (TamableToolConfig.playerFriendlyFire.get() && attacker instanceof ServerPlayer player) {
-                    if (living instanceof Mob mob && ((TamableEntity) mob).tamabletool$isOwnedBy(player)) {
-                        event.setCanceled(true);
-                    }
-                    if (TamableToolConfig.compatiblePartEntity.get() && !(living instanceof Mob)) {
-                        Entity livingAncestry = ((UniformPartEntity) living).getAncestry();
-                        if (livingAncestry instanceof Mob livingAncestryMob) {
-                            if (((TamableEntity) livingAncestryMob).tamabletool$isOwnedBy(player)) {
-                                event.setCanceled(true);
-                            }
-                        }
-                    }
-                }
-                if (attacker instanceof Mob mob && ((TamableEntity) mob).tamabletool$isTame()) {
-                    if (!mob.canAttack(living)) {
-                        event.setCanceled(true);
-                    }
-                }
-                if (TamableToolConfig.compatiblePartEntity.get() && !(attacker instanceof Mob)) {
-                    Entity attackerAncestry = ((UniformPartEntity) attacker).getAncestry();
-                    if (attackerAncestry instanceof Mob attackerAncestryMob) {
-                        if (((TamableEntity) attackerAncestryMob).tamabletool$isTame()) {
-                            if (attackerAncestryMob == living || !attackerAncestryMob.canAttack(living)) {
-                                event.setCanceled(true);
-                            }
-                        }
-                    }
+                if (TamableToolUtils.shouldFireFriendly(attacker, living)) {
+                    event.setCanceled(true);
                 }
             }
         }
@@ -143,33 +107,8 @@ public class LivingEventHandler {
         LivingEntity living = event.getEntity();
         Entity source = event.getEffectSource();
         if (!living.level().isClientSide && source != null) {
-            if (TamableToolConfig.playerFriendlyFire.get() && source instanceof ServerPlayer player) {
-                if (living instanceof Mob mob && ((TamableEntity) mob).tamabletool$isOwnedBy(player)) {
-                    event.getEffectInstance().duration = 0;
-                }
-                if (TamableToolConfig.compatiblePartEntity.get() && !(living instanceof Mob)) {
-                    Entity livingAncestry = ((UniformPartEntity) living).getAncestry();
-                    if (livingAncestry instanceof Mob livingAncestryMob) {
-                        if (((TamableEntity) livingAncestryMob).tamabletool$isOwnedBy(player)) {
-                            event.getEffectInstance().duration = 0;
-                        }
-                    }
-                }
-            }
-            if (source instanceof Mob mob && ((TamableEntity) mob).tamabletool$isTame()) {
-                if (!mob.canAttack(living)) {
-                    event.getEffectInstance().duration = 0;
-                }
-            }
-            if (TamableToolConfig.compatiblePartEntity.get() && !(source instanceof Mob)) {
-                Entity sourceAncestry = ((UniformPartEntity) source).getAncestry();
-                if (sourceAncestry instanceof Mob sourceAncestryMob) {
-                    if (((TamableEntity) sourceAncestryMob).tamabletool$isTame()) {
-                        if (sourceAncestryMob == living || !sourceAncestryMob.canAttack(living)) {
-                            event.getEffectInstance().duration = 0;
-                        }
-                    }
-                }
+            if (TamableToolUtils.shouldFireFriendly(source, living)) {
+                event.getEffectInstance().duration = 0;
             }
         }
     }
