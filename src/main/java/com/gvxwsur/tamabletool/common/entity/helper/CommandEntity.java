@@ -5,14 +5,6 @@ public interface CommandEntity {
 
     public void tamabletool$setCommand(TamableCommand command);
 
-    public default int tamabletool$getCommandInt() {
-        return tamabletool$getCommand().ordinal();
-    }
-
-    public default void tamabletool$setCommandInt(int command) {
-        tamabletool$setCommand(TamableCommand.values()[command]);
-    }
-
     public void tamabletool$setInSittingPose(boolean p_21838_);
 
     public default boolean tamabletool$isOrderedToSit() {

@@ -1,6 +1,7 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.EnvironmentHelper;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEnvironment;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
@@ -11,7 +12,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,9 +22,9 @@ import net.minecraftforge.common.ForgeMod;
 import java.util.EnumSet;
 
 public class CustomFollowOwnerGoal extends Goal {
-    private static final int MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2;
-    private static final int MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 3;
-    private static final int MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 1;
+    private final int MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING;
+    private final int MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING;
+    private final int MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING;
     private final Mob mob;
     private final TamableEntity tamableHelper;
     private final CommandEntity commandHelper;
@@ -37,9 +37,6 @@ public class CustomFollowOwnerGoal extends Goal {
     private final float startDistance;
     private final float teleportDistance;
     private float oldWaterCost;
-    private final boolean canWanderFly;
-    private final boolean canPathFly;
-    private final boolean canSwim;
 
     public CustomFollowOwnerGoal(Mob p_25294_, double p_25295_, float p_25296_, float p_25297_) {
         this(p_25294_, p_25295_, p_25296_, p_25297_, 12);
@@ -52,11 +49,10 @@ public class CustomFollowOwnerGoal extends Goal {
         this.commandHelper = (CommandEntity) p_25294_;
         this.speedModifier = p_25295_;
         this.navigation = p_25294_.getNavigation();
-        TamableEnvironment environment = TamableToolUtils.getMobEnvironment(p_25294_);
-        this.canWanderFly = environment == TamableEnvironment.FLY_WANDER;
-        this.canPathFly = environment == TamableEnvironment.FLY_PATH;
-        this.canSwim = environment == TamableEnvironment.WATER;
         float distanceFactor = TamableToolUtils.getScaleFactor(p_25294_);
+        this.MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2 * (int) distanceFactor;
+        this.MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 3 * (int) distanceFactor;
+        this.MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 1 * (int) distanceFactor;
         this.startDistance = p_25296_ * distanceFactor;
         this.stopDistance = p_25297_ * distanceFactor;
         this.teleportDistance = p_25298_ * distanceFactor;
@@ -75,11 +71,13 @@ public class CustomFollowOwnerGoal extends Goal {
             return false;
         } else if (!this.commandHelper.tamabletool$isOrderedToFollow()) {
             return false;
-        } else if (this.adjustedDistanceToSqr($$0) < (double) (this.startDistance * this.startDistance)) {
-            return false;
         } else {
-            this.owner = $$0;
-            return true;
+            if (this.adjustedDistanceToSqr($$0) < (double) (this.startDistance * this.startDistance)) {
+                return false;
+            } else {
+                this.owner = $$0;
+                return true;
+            }
         }
     }
 
@@ -98,12 +96,12 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private double adjustedDistanceToSqr(LivingEntity p_25310_) {
-        return !this.canWanderFly ? this.mob.distanceToSqr(p_25310_) : this.mob.distanceToSqr(p_25310_.getX(), this.mob.getY(), p_25310_.getZ());
+        return !this.canWanderFly() ? this.mob.distanceToSqr(p_25310_) : this.mob.distanceToSqr(p_25310_.getX(), this.mob.getY(), p_25310_.getZ());
     }
 
     public void start() {
         this.timeToRecalcPath = 0;
-        this.oldWaterCost = this.canSwim ? 0.0F : this.mob.getPathfindingMalus(BlockPathTypes.WATER);
+        this.oldWaterCost = this.mob.getPathfindingMalus(BlockPathTypes.WATER);
         this.mob.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
     }
 
@@ -141,7 +139,7 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean maybeTeleportTo(int p_25304_, int p_25305_, int p_25306_) {
-        if (this.canWanderFly) {
+        if (this.canWanderFly()) {
             p_25305_ += Mth.ceil(this.mob.getBbHeight() + this.owner.getBbHeight() + 0.5F);
         }
         if (Math.abs((double) p_25304_ - this.owner.getX()) < MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING && Math.abs((double) p_25306_ - this.owner.getZ()) < MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING) {
@@ -156,7 +154,7 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean canTeleportTo(BlockPos p_25308_) {
-        if (this.canWanderFly) {
+        if (this.canWanderFly()) {
             BlockState $$2 = this.level.getBlockState(p_25308_.below());
             if (!$$2.getFluidState().isEmpty()) {
                 return this.mob.isPushedByFluid(ForgeMod.WATER_TYPE.get()) && $$2.getFluidState().is(FluidTags.WATER)
@@ -166,16 +164,16 @@ public class CustomFollowOwnerGoal extends Goal {
                 return this.level.noCollision(this.mob, this.mob.getBoundingBox().move($$3));
             }
         }
-        if (this.canSwim) {
+        if (this.canSwim()) {
             if (level.isWaterAt(p_25308_)) {
                 return true;
-            } else if (this.mob.getNavigation() instanceof WaterBoundPathNavigation) {
+            } else if (!this.canWalk()) {
                 return false;
             }
         }
         BlockPathTypes $$1 = WalkNodeEvaluator.getBlockPathTypeStatic(this.level, p_25308_.mutable());
         if ($$1 != BlockPathTypes.WALKABLE) {
-            if (this.canPathFly) {
+            if (this.canPathFly()) {
                 p_25308_ = p_25308_.above(Mth.ceil(this.mob.getBbHeight() + this.owner.getBbHeight() + 0.5F));
                 BlockState $$2 = this.level.getBlockState(p_25308_.below());
                 if (!$$2.isAir()) {
@@ -188,7 +186,7 @@ public class CustomFollowOwnerGoal extends Goal {
             }
         } else {
             BlockState $$2 = this.level.getBlockState(p_25308_.below());
-            if (!this.canPathFly && $$2.getBlock() instanceof LeavesBlock) {
+            if (!this.canPathFly() && $$2.getBlock() instanceof LeavesBlock) {
                 return false;
             } else {
                 BlockPos $$3 = p_25308_.subtract(this.mob.blockPosition());
@@ -199,5 +197,25 @@ public class CustomFollowOwnerGoal extends Goal {
 
     private int randomIntInclusive(int p_25301_, int p_25302_) {
         return this.mob.getRandom().nextInt(p_25302_ - p_25301_ + 1) + p_25301_;
+    }
+
+    private boolean canWanderFly() {
+        TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
+        return environment == TamableEnvironment.FLY_WANDER;
+    }
+
+    private boolean canPathFly() {
+        TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
+        return environment == TamableEnvironment.FLY_PATH;
+    }
+
+    private boolean canSwim() {
+        TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
+        return environment.isSwim();
+    }
+
+    private boolean canWalk() {
+        TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
+        return environment.isWalk();
     }
 }

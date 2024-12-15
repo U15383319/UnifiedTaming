@@ -54,7 +54,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(Mob.class)
-public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity, InteractEntity, MinionEntity, CommandEntity, RideableEntity, AgeableEntity {
+public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity, InteractEntity, MinionEntity, CommandEntity, RideableEntity, AgeableEntity, EnvironmentHelper {
 
     @Shadow protected PathNavigation navigation;
 
@@ -73,7 +73,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     @Shadow public abstract PathNavigation getNavigation();
 
     @Unique
-    private static final EntityDataAccessor<Byte> tamabletool$DATA_FLAGS_ID;
+    private static final EntityDataAccessor<Byte> tamabletool$DATA_FLAGS_ID; // sit 0 manual 1 tame(0) 2 tame(1) 3 baby 4
 
     @Unique
     private static final EntityDataAccessor<Optional<UUID>> tamabletool$DATA_OWNERUUID_ID;
@@ -83,6 +83,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Unique
     private static final EntityDataAccessor<Optional<UUID>> tamabletool$DATA_NONPLAYEROWNERUUID_ID;
+
+    @Unique
+    private static final EntityDataAccessor<Byte> tamabletool$DATA_TYPES_ID;
 
     @Unique
     private boolean tamabletool$keyForward;
@@ -96,6 +99,8 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     @Unique
     private boolean tamabletool$isManual;
 
+    @Unique
+    private TamableEnvironment tamabletool$environment;
     @Unique
     private int tamabletool$age;
     @Unique
@@ -139,6 +144,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.entityData.define(tamabletool$DATA_FLAGS_ID, (byte) 0);
         this.entityData.define(tamabletool$DATA_OWNERUUID_ID, Optional.empty());
         this.entityData.define(tamabletool$DATA_NONPLAYEROWNERUUID_ID, Optional.empty());
+        this.entityData.define(tamabletool$DATA_TYPES_ID, (byte) 0);
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
@@ -152,9 +158,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         }
 
         if (this.tamabletool$getOwnerUUID() != null) {
-            p_21819_.putInt("Command", this.tamabletool$getCommandInt());
+            p_21819_.putInt("Command", this.tamabletool$getCommand().ordinal());
             p_21819_.putBoolean("RideMode", this.tamabletool$isManual());
             p_21819_.putInt("Age", this.tamabletool$getAge());
+            p_21819_.putInt("Environment", this.tamabletool$getEnvironment().ordinal());
         }
 
         if (this.tamabletool$getNonPlayerOwnerUUID() != null) {
@@ -185,10 +192,11 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         MessageSender.setQuiet(true, (Mob) (Object) this);
 
         if (uuid != null) {
-            this.tamabletool$setCommandInt(p_21815_.getInt("Command"));
+            this.tamabletool$setCommand(TamableCommand.values()[p_21815_.getInt("Command")]);
             this.tamabletool$setInSittingPose(this.tamabletool$isOrderedToSit());
             this.tamabletool$setManual(p_21815_.getBoolean("RideMode"));
             this.tamabletool$setAge(p_21815_.getInt("Age"));
+            this.tamabletool$setEnvironment(TamableEnvironment.values()[p_21815_.getInt("Environment")]);
         }
 
         MessageSender.setQuiet(false, (Mob) (Object) this);
@@ -227,6 +235,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     @Inject(method = "aiStep", at = @At("TAIL"))
     public void aiStep(CallbackInfo ci) {
         if (this.isAlive()) {
+            if (this.tickCount % 40 == 0) {
+                this.tamabletool$updateEnvironment();
+            }
+
             int $$0 = this.tamabletool$getAge();
             if ($$0 < 0) {
                 ++$$0;
@@ -265,7 +277,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             float vertical = tamabletool$keyForward ? -(player.getXRot() - 10) / 22.5f : 0;
             float forward = tamabletool$keyForward ? 3 : (tamabletool$keyBack ? -0.5f : 0);
 
-            boolean canVerticalMove = TamableToolUtils.canFly((Mob) (Object) this) || (TamableToolUtils.canSwim((Mob) (Object) this) && this.isInWater());
+            boolean canVerticalMove = this.tamabletool$getEnvironment().isFly() || (this.tamabletool$getEnvironment().isSwim() && this.isInWater());
             vertical = canVerticalMove ? vertical : 0;
 
             float speed = (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
@@ -473,6 +485,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         tamabletool$DATA_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
         tamabletool$DATA_OWNERUUID_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.OPTIONAL_UUID);
         tamabletool$DATA_NONPLAYEROWNERUUID_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.OPTIONAL_UUID);
+        tamabletool$DATA_TYPES_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
     }
 
     public boolean tamabletool$isFood(ItemStack p_30440_) {
@@ -804,5 +817,38 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             p_277963_.addFreshEntity(new ExperienceOrb(p_277963_, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
         }
 
+    }
+
+    public TamableEnvironment tamabletool$getEnvironment() {
+        if (this.level().isClientSide) {
+            int ordinal = this.entityData.get(tamabletool$DATA_TYPES_ID) & 7;
+            return TamableEnvironment.values()[ordinal];
+        } else {
+            if (this.tamabletool$environment == null) {
+                this.tamabletool$setEnvironment(TamableToolUtils.getMobEnvironment((Mob) (Object) this));
+            }
+            return this.tamabletool$environment;
+        }
+    }
+
+    public void tamabletool$setEnvironment(TamableEnvironment environment) {
+        byte b0 = this.entityData.get(tamabletool$DATA_TYPES_ID);
+        this.entityData.set(tamabletool$DATA_TYPES_ID, (byte) (b0 & -8 | environment.ordinal() & 7));
+        this.tamabletool$environment = environment;
+    }
+
+    public void tamabletool$updateEnvironment() {
+        TamableEnvironment oldEnvironment = this.tamabletool$getEnvironment();
+        TamableEnvironment newEnvironment = TamableToolUtils.getMobEnvironment((Mob) (Object) this);
+        if (oldEnvironment != newEnvironment) {
+            if (oldEnvironment == TamableEnvironment.AMPHIBIOUS) {
+                return;
+            }
+            if ((oldEnvironment == TamableEnvironment.GROUND && newEnvironment == TamableEnvironment.WATER) || (oldEnvironment == TamableEnvironment.WATER && newEnvironment == TamableEnvironment.GROUND)) {
+                this.tamabletool$setEnvironment(TamableEnvironment.AMPHIBIOUS);
+            } else {
+                this.tamabletool$setEnvironment(newEnvironment);
+            }
+        }
     }
 }

@@ -1,18 +1,12 @@
 package com.gvxwsur.tamabletool.common.entity.util;
 
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
-import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.TamableEnvironment;
-import com.gvxwsur.tamabletool.common.entity.helper.UniformPartEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
-import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.pathfinder.*;
 
 public class TamableToolUtils {
     public static boolean isAlliedTo(Mob mob1, Mob mob2) {
@@ -50,42 +44,26 @@ public class TamableToolUtils {
     }
 
     public static TamableEnvironment getMobEnvironment(Mob mob) {
-        if (mob.getNavigation() instanceof GroundPathNavigation) {
-            if (mob instanceof FlyingMob) {
-                // FlyingMob use default GroundPathNavigation
-                return TamableEnvironment.FLY_WANDER;
-            } else {
-                return TamableEnvironment.GROUND;
-            }
-        }
-        if (mob.getNavigation() instanceof FlyingPathNavigation) {
+        if (mob.getNavigation().getNodeEvaluator() instanceof FlyNodeEvaluator) {
             return TamableEnvironment.FLY_PATH;
         }
-        if (mob.getNavigation() instanceof WaterBoundPathNavigation) {
+        if (mob.getNavigation().getNodeEvaluator() instanceof SwimNodeEvaluator) {
             return TamableEnvironment.WATER;
         }
-        if (mob.getNavigation() instanceof AmphibiousPathNavigation) {
+        if (mob.getNavigation().getNodeEvaluator() instanceof AmphibiousNodeEvaluator) {
             return TamableEnvironment.AMPHIBIOUS;
         }
-        if (mob instanceof Strider) {
-            return TamableEnvironment.LAVA;
+        if (mob.getNavigation() instanceof GroundPathNavigation groundPathNavigation) {
+            if (mob instanceof FlyingMob) {
+                return TamableEnvironment.FLY_WANDER;
+            } else if (groundPathNavigation.hasValidPathType(BlockPathTypes.LAVA)) {
+                return TamableEnvironment.LAVA;
+            }
+        }
+        if (mob.isNoGravity()) {
+            return TamableEnvironment.FLY_WANDER;
         }
         return TamableEnvironment.GROUND;
-    }
-
-    public static boolean canWalk(Mob mob) {
-        TamableEnvironment environment = getMobEnvironment(mob);
-        return environment == TamableEnvironment.GROUND || environment == TamableEnvironment.AMPHIBIOUS;
-    }
-
-    public static boolean canFly(Mob mob) {
-        TamableEnvironment environment = getMobEnvironment(mob);
-        return environment == TamableEnvironment.FLY_PATH || environment == TamableEnvironment.FLY_WANDER;
-    }
-
-    public static boolean canSwim(Mob mob) {
-        TamableEnvironment environment = getMobEnvironment(mob);
-        return environment == TamableEnvironment.WATER || environment == TamableEnvironment.AMPHIBIOUS;
     }
 
     public static float getScaleFactor(Mob mob) {
@@ -95,7 +73,7 @@ public class TamableToolUtils {
     public static float getScaleFactor(Mob mob, double mul1, double mul2, double mul3) {
         double basicFactor = mob.getBoundingBox().getSize();
         double resultFactor = mul1 * (basicFactor / 1.05 - 1) + 1;
-        TamableEnvironment environment = getMobEnvironment(mob);
+        TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
         boolean canPathFly = environment == TamableEnvironment.FLY_PATH;
         boolean canSwim = environment == TamableEnvironment.WATER;
         boolean canWanderFly = environment == TamableEnvironment.FLY_WANDER;

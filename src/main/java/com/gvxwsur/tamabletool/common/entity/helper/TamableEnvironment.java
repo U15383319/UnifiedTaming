@@ -6,5 +6,17 @@ public enum TamableEnvironment {
     WATER,
     FLY_PATH,
     AMPHIBIOUS,
-    LAVA
+    LAVA;
+
+    public boolean isWalk() {
+        return this == GROUND || this == AMPHIBIOUS;
+    }
+
+    public boolean isSwim() {
+        return this == WATER || this == AMPHIBIOUS;
+    }
+
+    public boolean isFly() {
+        return this == FLY_WANDER || this == FLY_PATH;
+    }
 }
