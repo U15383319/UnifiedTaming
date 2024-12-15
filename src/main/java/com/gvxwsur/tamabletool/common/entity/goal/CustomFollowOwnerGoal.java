@@ -200,22 +200,18 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean canWanderFly() {
-        TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
-        return environment == TamableEnvironment.FLY_WANDER;
+        return ((EnvironmentHelper) mob).tamabletool$getEnvironment() == TamableEnvironment.FLY_WANDER;
     }
 
     private boolean canPathFly() {
-        TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
-        return environment == TamableEnvironment.FLY_PATH;
+        return ((EnvironmentHelper) mob).tamabletool$getEnvironment() == TamableEnvironment.FLY_PATH;
     }
 
     private boolean canSwim() {
-        TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
-        return environment.isSwim();
+        return ((EnvironmentHelper) mob).tamabletool$getEnvironment().isSwim();
     }
 
     private boolean canWalk() {
-        TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
-        return environment.isWalk();
+        return ((EnvironmentHelper) mob).tamabletool$getEnvironment().isWalk();
     }
 }

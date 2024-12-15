@@ -10,7 +10,6 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import java.util.EnumSet;
 
 public class CustomOwnerHurtTargetGoal extends TargetGoal {
-    private final Mob tameAnimal;
     private final TamableEntity tamableHelper;
     private final CommandEntity commandHelper;
     private LivingEntity ownerLastHurt;
@@ -18,7 +17,6 @@ public class CustomOwnerHurtTargetGoal extends TargetGoal {
 
     public CustomOwnerHurtTargetGoal(Mob p_26114_) {
         super(p_26114_, false);
-        this.tameAnimal = p_26114_;
         this.tamableHelper = (TamableEntity) p_26114_;
         this.commandHelper = (CommandEntity) p_26114_;
         this.setFlags(EnumSet.of(Flag.TARGET));
@@ -32,7 +30,7 @@ public class CustomOwnerHurtTargetGoal extends TargetGoal {
             } else {
                 this.ownerLastHurt = $$0.getLastHurtMob();
                 int $$1 = $$0.getLastHurtMobTimestamp();
-                return $$1 != this.timestamp && this.canAttack(this.ownerLastHurt, TargetingConditions.DEFAULT) && this.tamableHelper.tamabletool$wantsToAttack(this.ownerLastHurt, $$0);
+                return $$1 != this.timestamp && this.canAttack(this.ownerLastHurt, TargetingConditions.DEFAULT);
             }
         } else {
             return false;

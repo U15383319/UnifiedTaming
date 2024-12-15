@@ -262,8 +262,8 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return super.hurt(p_21016_, p_21017_);
     }
 
-    @Override
-    public void travel(Vec3 vec3) {
+    @Unique
+    public void tamabletool$travel(Vec3 vec3) {
         Entity entity = this.getControllingPassenger();
         if (entity instanceof Player player && this.isVehicle()) {
             if (level().isClientSide) {
@@ -283,9 +283,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             float speed = (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
             this.moveRelative(speed / 2.0F, new Vec3(strafe, vertical, forward));
             this.move(MoverType.SELF, this.getDeltaMovement());
-            // return;
         }
-        super.travel(vec3);
     }
 
     @Override
@@ -422,10 +420,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public boolean tamabletool$isOwnedBy(LivingEntity p_21831_) {
         return p_21831_ == this.getOwner();
-    }
-
-    public boolean tamabletool$wantsToAttack(LivingEntity p_21810_, LivingEntity p_21811_) {
-        return true;
     }
 
     @Override
