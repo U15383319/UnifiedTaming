@@ -2,6 +2,11 @@ package com.gvxwsur.tamabletool.common.entity.util;
 
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.AgeableListModel;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -9,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.*;
 
 public class TamableToolUtils {
+
     public static boolean isAlliedTo(Mob mob1, Mob mob2) {
         if (mob1.isAlliedTo(mob2)) {
             return true;
@@ -67,10 +73,10 @@ public class TamableToolUtils {
     }
 
     public static float getScaleFactor(Mob mob) {
-        return getScaleFactor(mob, 0.6, 1.05, 1.44);
+        return getScaleFactor(mob, 0.6, 1.05, 1.44, 2.0);
     }
 
-    public static float getScaleFactor(Mob mob, double mul1, double mul2, double mul3) {
+    public static float getScaleFactor(Mob mob, double mul1, double mul2, double mul3, double mul4) {
         double basicFactor = mob.getBoundingBox().getSize();
         double resultFactor = mul1 * (basicFactor / 1.05 - 1) + 1;
         TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
@@ -82,6 +88,9 @@ public class TamableToolUtils {
         }
         if (canWanderFly) {
             resultFactor *= mul3;
+        }
+        if (mob.isBaby()) {
+            resultFactor *= mul4;
         }
         return (float) resultFactor;
     }
@@ -116,5 +125,15 @@ public class TamableToolUtils {
             }
         }
         return shouldMobFriendly(attacker, target);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    public static <T extends Entity> EntityRenderer<T> getRenderer(T entity) {
+        EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
+        return (EntityRenderer<T>) renderManager.getRenderer(entity);
+    }
+
+    public static boolean hasYoungModel(Entity entity) {
+        return getRenderer(entity) instanceof LivingEntityRenderer<?,?> livingEntityRenderer && livingEntityRenderer.getModel() instanceof AgeableListModel;
     }
 }

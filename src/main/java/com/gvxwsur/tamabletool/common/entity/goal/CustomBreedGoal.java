@@ -1,6 +1,6 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
-import com.gvxwsur.tamabletool.common.entity.helper.AgeableEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.BreedableHelper;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.server.level.ServerLevel;
@@ -13,28 +13,31 @@ import javax.annotation.Nullable;
 import java.util.EnumSet;
 
 public class CustomBreedGoal extends Goal {
+    protected final float MAX_PARTNER_FINDING_DISTANCE;
+    protected final float MAX_CAN_BREED_DISTANCE;
     protected final Mob mob;
     protected final TamableEntity tamableHelper;
-    protected final AgeableEntity ageableHelper;
+    protected final BreedableHelper breedableHelper;
     protected final Level level;
-    @Nullable
-    protected Player partner;
+    @Nullable protected Player partner;
     private int loveTime;
     private final double speedModifier;
 
     public CustomBreedGoal(Mob p_25125_, double p_25126_) {
         this.mob = p_25125_;
         this.tamableHelper = (TamableEntity) p_25125_;
-        this.ageableHelper = (AgeableEntity) p_25125_;
+        this.breedableHelper = (BreedableHelper) p_25125_;
         this.level = p_25125_.level();
         this.speedModifier = p_25126_;
+        this.MAX_PARTNER_FINDING_DISTANCE = 8.0F * TamableToolUtils.getScaleFactor(p_25125_);
+        this.MAX_CAN_BREED_DISTANCE = 3.0F * TamableToolUtils.getScaleFactor(p_25125_);
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
     public boolean canUse() {
         if (!TamableToolUtils.isTame(this.mob)) {
             return false;
-        } else if (!this.ageableHelper.tamabletool$isInLove()) {
+        } else if (!this.breedableHelper.tamabletool$isInLove()) {
             return false;
         } else {
             this.partner = this.getFreePartner();
@@ -43,7 +46,7 @@ public class CustomBreedGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
-        return this.partner != null && this.partner.isAlive() && this.ageableHelper.tamabletool$isInLove() && this.loveTime < 60;
+        return this.partner != null && this.partner.isAlive() && this.breedableHelper.tamabletool$isInLove() && this.loveTime < 60;
     }
 
     public void stop() {
@@ -56,7 +59,7 @@ public class CustomBreedGoal extends Goal {
             this.mob.getLookControl().setLookAt(this.partner, 10.0F, (float)this.mob.getMaxHeadXRot());
             this.mob.getNavigation().moveTo(this.partner, this.speedModifier);
             ++this.loveTime;
-            if (this.loveTime >= this.adjustedTickDelay(60) && this.mob.distanceToSqr(this.partner) < 9.0) {
+            if (this.loveTime >= this.adjustedTickDelay(60) && this.mob.distanceToSqr(this.partner) < MAX_CAN_BREED_DISTANCE * MAX_CAN_BREED_DISTANCE) {
                 this.breed();
             }
         }
@@ -65,7 +68,7 @@ public class CustomBreedGoal extends Goal {
     @Nullable
     private Player getFreePartner() {
         Player player = null;
-        if (this.tamableHelper.getOwner() instanceof Player player1 && this.ageableHelper.tamabletool$canMate(player1) && player1.distanceToSqr(this.mob) < 8.0 * 8.0) {
+        if (this.tamableHelper.getOwner() instanceof Player player1 && this.breedableHelper.tamabletool$canMate(player1) && player1.distanceToSqr(this.mob) < MAX_PARTNER_FINDING_DISTANCE * MAX_PARTNER_FINDING_DISTANCE) {
             player = player1;
         }
 
@@ -73,6 +76,6 @@ public class CustomBreedGoal extends Goal {
     }
 
     protected void breed() {
-        this.ageableHelper.tamabletool$spawnChildFromBreeding((ServerLevel)this.level, this.partner);
+        this.breedableHelper.tamabletool$spawnChildFromBreeding((ServerLevel)this.level, this.partner);
     }
 }
