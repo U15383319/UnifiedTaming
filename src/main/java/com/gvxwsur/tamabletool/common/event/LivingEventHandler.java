@@ -1,10 +1,7 @@
 package com.gvxwsur.tamabletool.common.event;
 
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
-import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.NeutralEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.UniformPartEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.*;
 import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.server.level.ServerPlayer;
@@ -73,6 +70,11 @@ public class LivingEventHandler {
         boolean isLoadedFromDisk = event.loadedFromDisk();
         Level level = entity.level();
         if (!level.isClientSide && entity instanceof Mob mob) {
+            if (mob.isBaby() && !isLoadedFromDisk) {
+                if (!((BreedableHelper) mob).tamabletool$isBaby()) {
+                    ((BreedableHelper) mob).tamabletool$setBaby(true);
+                }
+            }
             if (TamableToolConfig.compatibleMobSummonedTamed.get() && mob.getSpawnType() == MobSpawnType.MOB_SUMMONED && !isLoadedFromDisk) {
                 Mob mobOwner = level.getNearestEntity(Mob.class, TargetingConditions.forNonCombat().copy().range(8).selector(owner -> owner.getClass() != mob.getClass() && owner.getType().getCategory().isFriendly() == mob.getType().getCategory().isFriendly()), mob, mob.getX(), mob.getY(), mob.getZ(), mob.getBoundingBox().inflate(8));
                 if (mobOwner != null) {
