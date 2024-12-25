@@ -2,9 +2,12 @@ package com.gvxwsur.tamabletool.mixin;
 
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.TamableCommand;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
+import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Animal;
@@ -35,6 +38,7 @@ public abstract class TamableAnimalMixin extends Animal implements OwnableEntity
     public void setOrderedToSit(boolean p_21840_, CallbackInfo ci) {
         if (TamableToolConfig.compatibleVanillaTamable.get()) {
             ((CommandEntity) this).tamabletool$setOrderedToSit(p_21840_);
+            MessageSender.sendCommandMessage(this, true);
         }
     }
 

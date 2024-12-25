@@ -1,7 +1,7 @@
 package com.gvxwsur.tamabletool.common.entity.util;
 
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
-import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -11,38 +11,27 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.Locale;
 
 public class MessageSender {
-    private static final Map<UUID, Boolean> quietMap = new HashMap<>();
 
-    public static void setQuiet(boolean quiet, Mob mob) {
-        LivingEntity owner = TamableToolUtils.getOwner(mob);
-        if (owner != null) {
-            quietMap.put(owner.getUUID(), quiet);
-        }
-    }
-
-    private static boolean checkSendCondition(Mob mob) {
-        if (!TamableToolConfig.showTamableMessage.get()) {
+    private static boolean checkSendCondition(Mob mob, boolean pActionBar) {
+        if (!TamableToolConfig.showImportantTamableMessage.get() && !pActionBar) {
             return false;
         }
         LivingEntity owner = TamableToolUtils.getOwner(mob);
-        return owner != null && !quietMap.getOrDefault(owner.getUUID(), false);
+        return owner != null;
     }
 
-    // taming message will not be sent automatically
-    public static void sendTamingMessage(Mob mob, Player player) {
-        if (!checkSendCondition(mob)) {
+    public static void sendTamingMessage(Mob mob, Player player, boolean pActionBar) {
+        if (!checkSendCondition(mob, pActionBar)) {
             return;
         }
-        player.displayClientMessage(Component.translatable("tamabletool.tame", mob.getDisplayName()), true);
+        player.displayClientMessage(Component.translatable("tamabletool.tame", mob.getDisplayName()), pActionBar);
     }
 
-    public static void sendDeathMessage(Mob mob, Component deathMessage) {
-        if (!checkSendCondition(mob)) {
+    public static void sendDeathMessage(Mob mob, Component deathMessage, boolean pActionBar) {
+        if (!checkSendCondition(mob, pActionBar)) {
             return;
         }
         if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
@@ -50,35 +39,45 @@ public class MessageSender {
                 if (!TamableToolConfig.compatibleVanillaTamable.get() && mob instanceof TamableAnimal) {
                     return;
                 }
-                player.displayClientMessage(deathMessage, false);
+                player.displayClientMessage(deathMessage, pActionBar);
             }
         }
     }
 
-    public static void sendCommandMessage(Mob mob, String command) {
-        if (!checkSendCondition(mob)) {
+    public static void sendCommandMessage(Mob mob, boolean pActionBar) {
+        if (!checkSendCondition(mob, pActionBar)) {
             return;
         }
         if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
-            player.displayClientMessage(Component.translatable("tamabletool.command." + command, mob.getDisplayName()), true);
+            String command = ((CommandEntity) mob).tamabletool$getCommand().toString().toLowerCase(Locale.ROOT);
+            player.displayClientMessage(Component.translatable("tamabletool.command." + command, mob.getDisplayName()), pActionBar);
         }
     }
 
-    public static void sendRideModeSwitchMessage(Mob mob, boolean manual) {
-        if (!checkSendCondition(mob)) {
+    public static void sendRideModeSwitchMessage(Mob mob, boolean manual, boolean pActionBar) {
+        if (!checkSendCondition(mob, pActionBar)) {
             return;
         }
         if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
-            player.displayClientMessage(Component.translatable("tamabletool.ride." + (manual ? "manual" : "automatic"), mob.getDisplayName()), true);
+            player.displayClientMessage(Component.translatable("tamabletool.ride." + (manual ? "manual" : "automatic"), mob.getDisplayName()), pActionBar);
         }
     }
 
-    public static void sendConvertingMessage(Mob mob, Mob outcomeMob) {
-        if (!checkSendCondition(mob)) {
+    public static void sendConvertingMessage(Mob mob, Mob outcomeMob, boolean pActionBar) {
+        if (!checkSendCondition(mob, pActionBar)) {
             return;
         }
         if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
-            player.displayClientMessage(Component.translatable("tamabletool.convert", mob.getDisplayName(), outcomeMob.getDisplayName()), false);
+            player.displayClientMessage(Component.translatable("tamabletool.convert", mob.getDisplayName(), outcomeMob.getDisplayName()), pActionBar);
+        }
+    }
+
+    public static void sendHurtWhenStopMessage(Mob mob, boolean pActionBar) {
+        if (!checkSendCondition(mob, pActionBar)) {
+            return;
+        }
+        if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
+            player.displayClientMessage(Component.translatable("tamabletool.hurt.follow", mob.getDisplayName()), pActionBar);
         }
     }
 }

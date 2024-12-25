@@ -31,7 +31,7 @@ public interface InteractEntity {
         if (ForgeRegistries.ITEMS.containsKey(location)) {
             return p_30440_.is(ForgeRegistries.ITEMS.getValue(location));
         }
-        return p_30440_.is(Items.DEBUG_STICK);
+        return p_30440_.is(Items.STRUCTURE_VOID);
     }
 
     public default boolean tamabletool$isModAssistant(ItemStack p_30440_) {

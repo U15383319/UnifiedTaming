@@ -5,5 +5,6 @@
   "tamabletool.command.stroll": "%1$s 正在漫步",
   "tamabletool.ride.manual": "%1$s 处于手动骑乘模式",
   "tamabletool.ride.automatic": "%1$s 处于自动骑乘模式",
-  "tamabletool.convert": "%1$s 转换为 %2$s"
+  "tamabletool.convert": "%1$s 转换为 %2$s",
+  "tamabletool.hurt.follow": "%1$s 在停留时受伤并尝试跟随你"
 }

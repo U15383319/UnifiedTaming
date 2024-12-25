@@ -7,7 +7,8 @@ public class TamableToolConfig {
     public static final ForgeConfigSpec.ConfigValue<Boolean> needModAssistItem;
     public static final ForgeConfigSpec.ConfigValue<String> modAssistItem;
     public static final ForgeConfigSpec.ConfigValue<String> cheatTameItem;
-    public static final ForgeConfigSpec.BooleanValue showTamableMessage;
+    public static final ForgeConfigSpec.BooleanValue showImportantTamableMessage;
+    public static final ForgeConfigSpec.DoubleValue rideSpeedModifier;
     public static final ForgeConfigSpec.BooleanValue playerFriendlyFire;
     public static final ForgeConfigSpec.BooleanValue leashedNeedTamed;
     public static final ForgeConfigSpec.BooleanValue golemCreatedTamed;
@@ -23,12 +24,13 @@ public class TamableToolConfig {
         builder.push("General Settings");
         needModAssistItem = builder.comment("Whether an item should be held in the player's assisting hand to perform interactions in this mod").define("needModAssistItem", false);
         modAssistItem = builder.comment("The item that held in the player's assisting hand to perform interactions in this mod").define("modAssistItem", "minecraft:clock");
-        cheatTameItem = builder.comment("The item that used to tame mobs without any cost").define("cheatTameItem", "minecraft:debug_stick");
-        showTamableMessage = builder.comment("Whether messages should be sent to players when something happened to their pets").define("showTamableMessage", true);
+        cheatTameItem = builder.comment("The item that used to tame mobs without any cost").define("cheatTameItem", "minecraft:structure_void");
+        showImportantTamableMessage = builder.comment("Whether some important messages should be sent to players when something happened to their pets").define("showImportantTamableMessage", true);
+        rideSpeedModifier = builder.comment("The speed modifier of the ride").defineInRange("rideSpeedModifier", 0.424, 0.0, 1.0);
         playerFriendlyFire = builder.comment("Whether players can attack their own pets").define("playerFriendlyFire", false);
         leashedNeedTamed = builder.comment("Whether leash mobs need to be tamed").define("leashedNeedTamed", true);
         golemCreatedTamed = builder.comment("Whether golem will be tamed by the nearest player when created").define("golemCreatedTamed", true);
-        merchantTamedReputation = builder.comment("The reputation value of the merchant tamed by player").defineInRange("merchantTamedReputation", 90, 0, 1000);
+        merchantTamedReputation = builder.comment("The separately counted reputation value of the merchant tamed by player").defineInRange("merchantTamedReputation", 90, 0, 1000);
         builder.pop();
         builder.push("Tamable Permission");
         builder.comment("Some of these configs are dangerous and increase the risk of mods conflicts, please use them with caution");

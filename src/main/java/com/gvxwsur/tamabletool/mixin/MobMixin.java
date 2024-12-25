@@ -189,8 +189,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             }
         }
 
-        MessageSender.setQuiet(true, (Mob) (Object) this);
-
         if (uuid != null) {
             this.tamabletool$setCommand(TamableCommand.values()[p_21815_.getInt("Command")]);
             this.tamabletool$setInSittingPose(this.tamabletool$isOrderedToSit());
@@ -198,8 +196,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             this.tamabletool$setAge(p_21815_.getInt("Age"));
             this.tamabletool$setEnvironment(TamableEnvironment.values()[p_21815_.getInt("Environment")]);
         }
-
-        MessageSender.setQuiet(false, (Mob) (Object) this);
 
         UUID nonPlayerUUID;
         if (p_21815_.hasUUID("NonPlayerOwner")) {
@@ -255,14 +251,16 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.tamabletool$resetLove();
         Entity source = p_21016_.getEntity();
         if (!(source instanceof Player player && this.tamabletool$isOwnedBy(player))) {
-            if (!this.tamabletool$isOrderedToFollow()) {
+            if (this.tamabletool$isOrderedToSit()) {
                 this.tamabletool$setOrderedToFollow(true);
+                if (!this.level().isClientSide) {
+                    MessageSender.sendHurtWhenStopMessage((Mob) (Object) this, false);
+                }
             }
         }
         return super.hurt(p_21016_, p_21017_);
     }
 
-    @Unique
     public void tamabletool$travel(Vec3 vec3) {
         Entity entity = this.getControllingPassenger();
         if (entity instanceof Player player && this.isVehicle()) {
@@ -280,8 +278,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             boolean canVerticalMove = this.tamabletool$getEnvironment().isFly() || (this.tamabletool$getEnvironment().isSwim() && this.isInWater());
             vertical = canVerticalMove ? vertical : 0;
 
-            float speed = (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
-            this.moveRelative(speed / 2.0F, new Vec3(strafe, vertical, forward));
+            float speed = (float)(this.getAttributeValue(Attributes.MOVEMENT_SPEED) * Mth.clamp(TamableToolConfig.rideSpeedModifier.get(), 0.0, 1.0));
+
+            this.moveRelative(speed, new Vec3(strafe, vertical, forward));
             this.move(MoverType.SELF, this.getDeltaMovement());
         }
     }
@@ -455,7 +454,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         Component deathMessage = this.getCombatTracker().getDeathMessage();
         super.die(p_21809_);
         if (!this.level().isClientSide && this.dead) {
-            MessageSender.sendDeathMessage((Mob)(Object) this, deathMessage);
+            MessageSender.sendDeathMessage((Mob)(Object) this, deathMessage, false);
         }
     }
 
@@ -469,9 +468,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             this.restrictTo(this.blockPosition(), 16);
         } else {
             this.restrictTo(BlockPos.ZERO, -1);
-        }
-        if (!this.level().isClientSide) {
-            MessageSender.sendCommandMessage((Mob) (Object) this, command.toString().toLowerCase());
         }
     }
 
@@ -570,6 +566,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                         if (this.tamabletool$isCommander(itemstack)) {
                             if (player.isSecondaryUseActive()) {
                                 this.tamabletool$setOrderedToSit(!this.tamabletool$isOrderedToSit());
+                                MessageSender.sendCommandMessage((Mob) (Object) this, true);
                                 this.jumping = false;
                                 this.navigation.stop();
                                 this.setTarget(null);
@@ -585,6 +582,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                         if (this.tamabletool$isMoveModeSwitcher(itemstack)) {
                             if (player.isSecondaryUseActive()) {
                                 this.tamabletool$setOrderedToStroll(!this.tamabletool$isOrderedToStroll());
+                                MessageSender.sendCommandMessage((Mob) (Object) this, true);
                                 this.jumping = false;
                                 this.navigation.stop();
                                 this.setTarget(null);
@@ -594,6 +592,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                         if (this.tamabletool$isRideModeSwitcher(itemstack)) {
                             if (!player.isSecondaryUseActive()) {
                                 this.tamabletool$setManual(!this.tamabletool$isManual());
+                                MessageSender.sendRideModeSwitchMessage((Mob) (Object) this, this.tamabletool$isManual(), true);
                                 return InteractionResult.SUCCESS;
                             }
                         }
@@ -607,7 +606,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
                 if (this.tamabletool$isCheatTamer(itemstack) || this.random.nextInt(3) == 0) {
                     this.tamabletool$tame(player);
-                    MessageSender.sendTamingMessage((Mob) (Object) this, player);
+                    MessageSender.sendTamingMessage((Mob) (Object) this, player, true);
                     this.navigation.stop();
                     this.setTarget(null);
                     // this.tamabletool$setOrderedToSit(true);
@@ -696,9 +695,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 | 2));
         } else {
             this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 & -3));
-        }
-        if (!this.level().isClientSide) {
-            MessageSender.sendRideModeSwitchMessage((Mob) (Object) this, this.tamabletool$isManual());
         }
     }
 

@@ -44,12 +44,14 @@ public class LivingEventHandler {
         LivingEntity living = event.getEntity();
         Entity attacker = event.getSource().getEntity();
         if (!living.level().isClientSide && attacker != null) {
-            if (attacker instanceof TamableEntity tamable && tamable.tamabletool$isTame()) {
-                LivingEntity owner = tamable.getOwner();
-                if (owner instanceof Player player) {
-                    ((NeutralEntity) living).tamabletool$setLastHurtByPlayer(player, 100);
-                } else {
-                    living.setLastHurtByPlayer(null);
+            if (attacker instanceof TamableEntity tamable) {
+                if (tamable.tamabletool$isTame()) {
+                    LivingEntity owner = tamable.getOwner();
+                    if (owner instanceof Player player) {
+                        ((NeutralEntity) living).tamabletool$setLastHurtByPlayer(player, 100);
+                    } else {
+                        living.setLastHurtByPlayer(null);
+                    }
                 }
             }
         }
@@ -82,7 +84,7 @@ public class LivingEventHandler {
                     Player player = level.getNearestPlayer(mob, 6);
                     if (player != null) {
                         ((TamableEntity) mob).tamabletool$tame(player);
-                        MessageSender.sendTamingMessage(mob, player);
+                        MessageSender.sendTamingMessage(mob, player, true);
                     }
                 }
             }
@@ -97,7 +99,7 @@ public class LivingEventHandler {
             if (living instanceof Mob mob && outcome instanceof Mob outcomeMob) {
                 if (TamableToolUtils.getOwner(mob) instanceof ServerPlayer player) {
                     ((TamableEntity) outcomeMob).tamabletool$tame(player);
-                    MessageSender.sendConvertingMessage(mob, outcomeMob);
+                    MessageSender.sendConvertingMessage(mob, outcomeMob, false);
                 }
             }
         }
