@@ -2,6 +2,7 @@ package com.gvxwsur.tamabletool.common.entity.util;
 
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.*;
+import com.gvxwsur.tamabletool.common.entity.helper.enumhelper.TamableEnvironment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -97,13 +98,13 @@ public class TamableToolUtils {
 
     public static boolean shouldMobFriendly(Entity attacker, LivingEntity target) {
         if (attacker instanceof Mob mob && ((TamableEntity) mob).tamabletool$isTame()) {
-            return !mob.canAttack(target);
+            return !((TamableEntity) mob).tamabletool$canTameAttack(target);
         }
         if (TamableToolConfig.compatiblePartEntity.get() && !(attacker instanceof Mob)) {
             Entity attackerAncestry = ((UniformPartEntity) attacker).getAncestry();
             if (attackerAncestry instanceof Mob attackerAncestryMob) {
                 if (((TamableEntity) attackerAncestryMob).tamabletool$isTame()) {
-                    return attackerAncestryMob == target || !attackerAncestryMob.canAttack(target);
+                    return attackerAncestryMob == target || !((TamableEntity) attackerAncestryMob).tamabletool$canTameAttack(target);
                 }
             }
         }

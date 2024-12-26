@@ -1,4 +1,4 @@
-package com.gvxwsur.tamabletool.common.entity.helper;
+package com.gvxwsur.tamabletool.common.entity.helper.enumhelper;
 
 public enum TamableEnvironment {
     GROUND,

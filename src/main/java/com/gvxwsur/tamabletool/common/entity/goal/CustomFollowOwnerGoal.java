@@ -2,8 +2,7 @@ package com.gvxwsur.tamabletool.common.entity.goal;
 
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.EnvironmentHelper;
-import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.TamableEnvironment;
+import com.gvxwsur.tamabletool.common.entity.helper.enumhelper.TamableEnvironment;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
@@ -26,7 +25,6 @@ public class CustomFollowOwnerGoal extends Goal {
     private final int MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING;
     private final int MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING;
     private final Mob mob;
-    private final TamableEntity tamableHelper;
     private final CommandEntity commandHelper;
     private LivingEntity owner;
     private final LevelReader level;
@@ -45,7 +43,6 @@ public class CustomFollowOwnerGoal extends Goal {
     public CustomFollowOwnerGoal(Mob p_25294_, double p_25295_, float p_25296_, float p_25297_, float p_25298_) {
         this.mob = p_25294_;
         this.level = p_25294_.level();
-        this.tamableHelper = (TamableEntity) p_25294_;
         this.commandHelper = (CommandEntity) p_25294_;
         this.speedModifier = p_25295_;
         this.navigation = p_25294_.getNavigation();
@@ -60,10 +57,8 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     public boolean canUse() {
-        LivingEntity $$0 = this.tamableHelper.getOwner();
+        LivingEntity $$0 = TamableToolUtils.getOwner(this.mob);
         if ($$0 == null) {
-            return false;
-        } else if (!TamableToolUtils.isTame(mob)) {
             return false;
         } else if ($$0.isSpectator()) {
             return false;

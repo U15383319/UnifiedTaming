@@ -1,11 +1,18 @@
 package com.gvxwsur.tamabletool.common.entity.helper;
 
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 public interface RideableEntity {
-    public LivingEntity getControllingPassenger();
 
-    public boolean tamabletool$isManual();
+    public default void tamabletool$travel(Vec3 vec3) {}
 
-    public void tamabletool$setManual(boolean manual);
+    // public LivingEntity getControllingPassenger();
+
+    // public boolean canBeRiddenUnderFluidType(FluidType type, Entity rider);
+
+    public default boolean tamabletool$canBeRiddenInAir(Entity rider) {
+        return true;
+    }
+
 }

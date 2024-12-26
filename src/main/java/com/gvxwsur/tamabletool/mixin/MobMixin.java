@@ -3,6 +3,8 @@ package com.gvxwsur.tamabletool.mixin;
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.goal.*;
 import com.gvxwsur.tamabletool.common.entity.helper.*;
+import com.gvxwsur.tamabletool.common.entity.helper.enumhelper.TamableCommand;
+import com.gvxwsur.tamabletool.common.entity.helper.enumhelper.TamableEnvironment;
 import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -40,6 +42,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.fluids.FluidType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -54,7 +58,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(Mob.class)
-public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity, InteractEntity, MinionEntity, CommandEntity, RideableEntity, BreedableHelper, EnvironmentHelper {
+public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity, InteractEntity, MinionEntity, CommandEntity, AiRideableEntity, BreedableHelper, EnvironmentHelper {
 
     @Shadow protected PathNavigation navigation;
 
@@ -307,14 +311,16 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         super.tickRidden(player, pTravelVector);
     }
 
-    @Nullable
-    @Override
-    public LivingEntity getControllingPassenger() {
-        Entity entity = this.getFirstPassenger();
-        if (entity instanceof Player player && this.tamabletool$isManual()) {
-            return player;
+    @Inject(method = "getControllingPassenger", at = @At("HEAD"), cancellable = true)
+    public void getControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
+        if (this.tamabletool$isTame()) {
+            Entity entity = this.getFirstPassenger();
+            if (entity instanceof Player player && this.tamabletool$isManual()) {
+                cir.setReturnValue(player);
+            } else {
+                cir.setReturnValue(null);
+            }
         }
-        return null;
     }
 
     @Inject(method = "requiresCustomPersistence", at = @At("HEAD"), cancellable = true)
@@ -409,6 +415,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Override
     public boolean canAttack(LivingEntity livingEntity) {
+        return this.tamabletool$canTameAttack(livingEntity) && super.canAttack(livingEntity);
+    }
+
+    public boolean tamabletool$canTameAttack(LivingEntity livingEntity) {
         if (this.tamabletool$isOwnedBy(livingEntity)) {
             return false;
         }
@@ -426,7 +436,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 }
             }
         }
-        return super.canAttack(livingEntity);
+        return true;
     }
 
     public boolean tamabletool$isOwnedBy(LivingEntity p_21831_) {
@@ -534,10 +544,20 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         if (this.tamabletool$isModAssistant(assistItemstack)) {
             if (this.level().isClientSide) {
                 boolean flag = this.tamabletool$isTame() || (this.tamabletool$isTamer(itemstack) || this.tamabletool$isCheatTamer(itemstack)) && !this.tamabletool$isTame();
-                boolean flag2 = this.tamabletool$isOwnedBy(player) && this.tamabletool$isRider(itemstack) && !this.isVehicle() && !this.tamabletool$isBaby() && !player.isSecondaryUseActive();
-                boolean flag3 = this.tamabletool$isOwnedBy(player) && this.tamabletool$isRideModeSwitcher(itemstack) && !this.tamabletool$isBaby() && !player.isSecondaryUseActive();
-                boolean flag4 = this.tamabletool$isTame() && this.tamabletool$isBaby() && this.tamabletool$isFood(itemstack) && this.getHealth() >= this.getMaxHealth();
-                if (flag2 || flag3 || flag4) {
+                boolean flag2 = TamableToolUtils.isOwnedBy((Mob) (Object) this, player) && this.tamabletool$isRider(itemstack) && !player.isSecondaryUseActive() && !this.isVehicle() && !this.tamabletool$isBaby();
+                boolean flag3 = this.tamabletool$isTame() && this.tamabletool$isBaby() && this.tamabletool$isFood(itemstack) && this.getHealth() >= this.getMaxHealth();
+                if (flag2) {
+                    player.startRiding(this);
+                }
+                if (flag3) {
+                    if ((Mob) (Object) this instanceof AgeableMob ageableMob) {
+                        if (!player.getAbilities().instabuild) {
+                            itemstack.shrink(1);
+                        }
+                        ageableMob.ageUp(100);
+                    }
+                }
+                if (flag2 || flag3) {
                     return InteractionResult.SUCCESS;
                 } else if (flag) {
                     return InteractionResult.CONSUME;
@@ -557,11 +577,13 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                         this.eat(this.level(), itemstack);
                         return InteractionResult.SUCCESS;
                     }
-                    if ((Mob) (Object) this instanceof AgeableMob ageableMob && this.tamabletool$isBaby()) {
-                        if (!player.getAbilities().instabuild) {
-                            itemstack.shrink(1);
+                    if (this.tamabletool$isBaby()) {
+                        if ((Mob) (Object) this instanceof AgeableMob ageableMob) {
+                            if (!player.getAbilities().instabuild) {
+                                itemstack.shrink(1);
+                            }
+                            ageableMob.ageUp(100);
                         }
-                        ageableMob.ageUp(100);
                         return InteractionResult.CONSUME;
                     }
                 } else {
@@ -635,9 +657,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "tickLeash", at = @At("TAIL"))
     protected void tickLeash(CallbackInfo ci) {
-        if (!TamableToolConfig.compatibleAnimalLeashed.get() && (Mob) (Object) this instanceof Animal) {
-            return;
-        }
         Entity $$0 = this.getLeashHolder();
         if ($$0 != null && $$0.level() == this.level()) {
             float distanceFactor = TamableToolUtils.getScaleFactor((Mob) (Object) this);
@@ -656,10 +675,29 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 this.checkSlowFallDistance();
             } else {
                 this.goalSelector.enableControlFlag(Goal.Flag.MOVE);
-                Vec3 $$6 = (new Vec3($$0.getX() - this.getX(), $$0.getY() - this.getY(), $$0.getZ() - this.getZ())).normalize().scale((double)Math.max($$1 - stopDistance, 0.0F));
+                Vec3 $$6 = (new Vec3($$0.getX() - this.getX(), $$0.getY() - this.getY(), $$0.getZ() - this.getZ())).normalize().scale(Math.max($$1 - stopDistance, 0.0F));
                 this.getNavigation().moveTo(this.getX() + $$6.x, this.getY() + $$6.y, this.getZ() + $$6.z, followSpeed);
             }
         }
+    }
+
+    @Override
+    public boolean canRiderInteract() {
+        return TamableToolConfig.canRiderInteract.get();
+    }
+
+    @Override
+    public boolean canBeRiddenUnderFluidType(FluidType type, Entity rider) {
+        if (type == ForgeMod.WATER_TYPE.get()) {
+            return this.tamabletool$getEnvironment().isSwim();
+        } else if (type == ForgeMod.LAVA_TYPE.get()) {
+            return this.fireImmune() && (this.tamabletool$getEnvironment() == TamableEnvironment.LAVA || this.tamabletool$getEnvironment().isFly());
+        }
+        return super.canBeRiddenUnderFluidType(type, rider);
+    }
+
+    public boolean tamabletool$canBeRiddenInAir(Entity rider) {
+        return !this.tamabletool$getEnvironment().isSwim() || this.tamabletool$getEnvironment().isWalk();
     }
 
     public UUID tamabletool$getNonPlayerOwnerUUID() {

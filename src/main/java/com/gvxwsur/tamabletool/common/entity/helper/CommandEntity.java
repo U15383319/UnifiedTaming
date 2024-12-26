@@ -1,5 +1,7 @@
 package com.gvxwsur.tamabletool.common.entity.helper;
 
+import com.gvxwsur.tamabletool.common.entity.helper.enumhelper.TamableCommand;
+
 public interface CommandEntity {
     public TamableCommand tamabletool$getCommand();
 

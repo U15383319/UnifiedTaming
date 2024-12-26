@@ -1,7 +1,7 @@
 package com.gvxwsur.tamabletool.mixin;
 
-import com.gvxwsur.tamabletool.common.entity.helper.EnvironmentHelper;
 import com.gvxwsur.tamabletool.common.entity.helper.NeutralEntity;
+import com.gvxwsur.tamabletool.common.entity.helper.RideableEntity;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -30,11 +30,20 @@ public abstract class LivingEntityMixin extends Entity implements Attackable, IF
         super(p_19870_, p_19871_);
     }
 
+    @Inject(method = "baseTick", at = @At("TAIL"))
+    public void baseTick(CallbackInfo ci) {
+        if (this.isAlive()) {
+            if (this.getEyeInFluidType().isAir()) {
+                if (!this.level().isClientSide && this.isPassenger() && this.getVehicle() != null && this.getVehicle().onGround() && !((RideableEntity) this.getVehicle()).tamabletool$canBeRiddenInAir(this)) {
+                    this.stopRiding();
+                }
+            }
+        }
+    }
+
     @Inject(method = "travelRidden", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;travel(Lnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.AFTER))
     private void travelRidden(Player p_278244_, Vec3 p_278231_, CallbackInfo ci) {
-        if (this instanceof EnvironmentHelper environmentHelper) {
-            environmentHelper.tamabletool$travel(p_278231_);
-        }
+        ((RideableEntity) this).tamabletool$travel(p_278231_);
     }
 
     public void tamabletool$setLastHurtByPlayer(@Nullable Player pPlayer, int time) {

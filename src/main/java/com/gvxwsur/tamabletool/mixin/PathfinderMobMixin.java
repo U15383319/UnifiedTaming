@@ -20,9 +20,6 @@ public abstract class PathfinderMobMixin extends Mob {
 
     @Inject(method = "tickLeash", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;tickLeash()V", shift = At.Shift.AFTER), cancellable = true)
     protected void tickLeash(CallbackInfo ci) {
-        if (!TamableToolConfig.compatibleAnimalLeashed.get() && (PathfinderMob) (Object) this instanceof Animal) {
-            return;
-        }
         ci.cancel();
     }
 }
