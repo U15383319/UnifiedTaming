@@ -141,7 +141,10 @@ dependencies {
     implementation fg.deobf("curse.maven:jei-238222:${jei_id}")
     implementation fg.deobf("curse.maven:jade-324717:${jade_id}")
     implementation fg.deobf("curse.maven:forgeconfigscreen-544048:${forgeconfigscreen_id}")
+    implementation fg.deobf("curse.maven:modernui-352491:${mui_id}")
     implementation fg.deobf("curse.maven:appleskin-248787:${appleskin_id}")
+
+    implementation fg.deobf("curse.maven:nofog-296468:${nofog_id}")
 
     implementation fg.deobf("curse.maven:citadel-331936:${citadel_id}")
     implementation fg.deobf("curse.maven:curiosapi-309927:${curios_id}")
@@ -162,6 +165,7 @@ dependencies {
     implementation fg.deobf("curse.maven:iceandfire-264231:${iaf_id}")
     implementation fg.deobf("curse.maven:crackerswitherstorm-621405:${witherstorm_id}")
     implementation fg.deobf("curse.maven:guardvillagers-360203:${guardvillagers_id}")
+    implementation fg.deobf("curse.maven:goety-586095:${goety_id}")
 
     implementation fg.deobf("curse.maven:farmersdelight-398521:${farmersdelight_id}")
     implementation fg.deobf("curse.maven:slashbladeresharped-1022428:${slashblade_id}")

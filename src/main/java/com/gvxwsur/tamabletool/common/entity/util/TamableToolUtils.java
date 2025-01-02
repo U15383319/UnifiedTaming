@@ -11,6 +11,9 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
+import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.*;
 
@@ -51,20 +54,27 @@ public class TamableToolUtils {
     }
 
     public static TamableEnvironment getMobEnvironment(Mob mob) {
-        if (mob.getNavigation().getNodeEvaluator() instanceof FlyNodeEvaluator) {
+        PathNavigation navigation = mob.getNavigation();
+        NodeEvaluator nodeEvaluator = navigation.getNodeEvaluator();
+        if (nodeEvaluator instanceof FlyNodeEvaluator || ModLoaded.isFlyNodeEvaluator(nodeEvaluator)) {
             return TamableEnvironment.FLY_PATH;
         }
-        if (mob.getNavigation().getNodeEvaluator() instanceof SwimNodeEvaluator) {
+        if (nodeEvaluator instanceof SwimNodeEvaluator) {
             return TamableEnvironment.WATER;
         }
-        if (mob.getNavigation().getNodeEvaluator() instanceof AmphibiousNodeEvaluator) {
+        if (ModLoaded.isLavaNodeEvaluator(nodeEvaluator)) {
+            return TamableEnvironment.LAVA;
+        }
+        if (nodeEvaluator instanceof AmphibiousNodeEvaluator) {
             return TamableEnvironment.AMPHIBIOUS;
         }
-        if (mob.getNavigation() instanceof GroundPathNavigation groundPathNavigation) {
-            if (mob instanceof FlyingMob) {
+        if (navigation instanceof GroundPathNavigation groundPathNavigation) {
+            if (mob instanceof FlyingMob || mob instanceof FlyingAnimal || ModLoaded.isFlyingMob(mob)) {
                 return TamableEnvironment.FLY_WANDER;
             } else if (groundPathNavigation.hasValidPathType(BlockPathTypes.LAVA)) {
-                return TamableEnvironment.LAVA;
+                return TamableEnvironment.LAVA_SURFACE;
+            } else if (groundPathNavigation instanceof WallClimberNavigation) {
+                return TamableEnvironment.GROUND_WALL;
             }
         }
         if (mob.isNoGravity()) {
@@ -81,13 +91,10 @@ public class TamableToolUtils {
         double basicFactor = mob.getBoundingBox().getSize();
         double resultFactor = mul1 * (basicFactor / 1.05 - 1) + 1;
         TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
-        boolean canPathFly = environment == TamableEnvironment.FLY_PATH;
-        boolean canSwim = environment == TamableEnvironment.WATER;
-        boolean canWanderFly = environment == TamableEnvironment.FLY_WANDER;
-        if (canPathFly || canSwim) {
+        if (environment == TamableEnvironment.FLY_PATH) {
             resultFactor *= mul2;
         }
-        if (canWanderFly) {
+        if (environment == TamableEnvironment.FLY_WANDER) {
             resultFactor *= mul3;
         }
         if (mob.isBaby()) {
@@ -135,6 +142,6 @@ public class TamableToolUtils {
     }
 
     public static boolean hasYoungModel(Entity entity) {
-        return getRenderer(entity) instanceof LivingEntityRenderer<?,?> livingEntityRenderer && livingEntityRenderer.getModel() instanceof AgeableListModel;
+        return ModLoaded.hasYoungModel(entity) || getRenderer(entity) instanceof LivingEntityRenderer<?,?> livingEntityRenderer && livingEntityRenderer.getModel() instanceof AgeableListModel;
     }
 }

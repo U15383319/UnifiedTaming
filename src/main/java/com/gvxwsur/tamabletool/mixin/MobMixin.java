@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -29,6 +30,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
@@ -60,23 +62,35 @@ import java.util.UUID;
 @Mixin(Mob.class)
 public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity, InteractEntity, MinionEntity, CommandEntity, AiRideableEntity, BreedableHelper, EnvironmentHelper {
 
-    @Shadow protected PathNavigation navigation;
+    @Shadow
+    protected PathNavigation navigation;
 
-    @Shadow @Final public GoalSelector goalSelector;
+    @Shadow
+    @Final
+    public GoalSelector goalSelector;
 
-    @Shadow @Final public GoalSelector targetSelector;
+    @Shadow
+    @Final
+    public GoalSelector targetSelector;
 
-    @Shadow public abstract boolean isLeashed();
+    @Shadow
+    public abstract boolean isLeashed();
 
-    @Shadow public abstract void setTarget(@Nullable LivingEntity p_21544_);
+    @Shadow
+    public abstract void setTarget(@Nullable LivingEntity p_21544_);
 
-    @Shadow public abstract void restrictTo(BlockPos p_21447_, int p_21448_);
+    @Shadow
+    public abstract void restrictTo(BlockPos p_21447_, int p_21448_);
 
-    @Shadow @Nullable public abstract Entity getLeashHolder();
+    @Shadow
+    @Nullable
+    public abstract Entity getLeashHolder();
 
-    @Shadow public abstract PathNavigation getNavigation();
+    @Shadow
+    public abstract PathNavigation getNavigation();
 
-    @Shadow public abstract void setBaby(boolean p_21451_);
+    @Shadow
+    public abstract void setBaby(boolean p_21451_);
 
     @Unique
     private static final EntityDataAccessor<Byte> tamabletool$DATA_FLAGS_ID; // sit 0 manual 1 tame(0) 2 tame(1) 3 baby 4
@@ -91,7 +105,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     private static final EntityDataAccessor<Optional<UUID>> tamabletool$DATA_NONPLAYEROWNERUUID_ID;
 
     @Unique
-    private static final EntityDataAccessor<Byte> tamabletool$DATA_TYPES_ID;
+    private static final EntityDataAccessor<Byte> tamabletool$DATA_TYPES_ID; // environment 0 1 2 3
 
     @Unique
     private boolean tamabletool$keyForward;
@@ -291,10 +305,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             float vertical = tamabletool$keyForward ? -(player.getXRot() - 10) / 22.5f : 0;
             float forward = tamabletool$keyForward ? 3 : (tamabletool$keyBack ? -0.5f : 0);
 
-            boolean canVerticalMove = this.tamabletool$getEnvironment().isFly() || (this.tamabletool$getEnvironment().isSwim() && this.isInWater());
+            boolean canVerticalMove = this.tamabletool$getEnvironment().isFly()
+                    || (this.tamabletool$getEnvironment().isWaterSwim() && this.isInWater())
+                    || (this.tamabletool$getEnvironment().isLavaSwim() && this.isInLava());
             vertical = canVerticalMove ? vertical : 0;
 
-            float speed = (float)(this.getAttributeValue(Attributes.MOVEMENT_SPEED) * Mth.clamp(TamableToolConfig.rideSpeedModifier.get(), 0.0, 1.0));
+            float speed = (float) (this.getAttributeValue(Attributes.MOVEMENT_SPEED) * Mth.clamp(TamableToolConfig.rideSpeedModifier.get(), 0.0, 1.0));
 
             this.moveRelative(speed, new Vec3(strafe, vertical, forward));
             this.move(MoverType.SELF, this.getDeltaMovement());
@@ -356,7 +372,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         } else if (p_21807_ == 6) {
             this.tamabletool$spawnTamingParticles(false);
         } else if (p_21807_ == 18) {
-            for(int i = 0; i < 7; ++i) {
+            for (int i = 0; i < 7; ++i) {
                 double d0 = this.random.nextGaussian() * 0.02;
                 double d1 = this.random.nextGaussian() * 0.02;
                 double d2 = this.random.nextGaussian() * 0.02;
@@ -409,7 +425,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.tamabletool$setTame(true);
         this.tamabletool$setOwnerUUID(p_21829_.getUUID());
         if (p_21829_ instanceof ServerPlayer player) {
-            ((AnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).tamabletool$TameAnimal$trigger(player, (Mob)(Object) this);
+            ((AnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).tamabletool$TameAnimal$trigger(player, (Mob) (Object) this);
         }
     }
 
@@ -476,7 +492,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         Component deathMessage = this.getCombatTracker().getDeathMessage();
         super.die(p_21809_);
         if (!this.level().isClientSide && this.dead) {
-            MessageSender.sendDeathMessage((Mob)(Object) this, deathMessage, false);
+            MessageSender.sendDeathMessage((Mob) (Object) this, deathMessage, false);
         }
     }
 
@@ -565,7 +581,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                     return InteractionResult.PASS;
                 }
             } else if (this.tamabletool$isTameNonPlayer()) {
-              return InteractionResult.PASS;
+                return InteractionResult.PASS;
             } else if (this.tamabletool$isTame()) {
                 if (this.tamabletool$isFood(itemstack)) {
                     if (this.getHealth() < this.getMaxHealth()) {
@@ -668,9 +684,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             this.restrictTo($$0.blockPosition(), restrictRadius);
             float $$1 = this.distanceTo($$0);
             if ($$1 > limitDistance) {
-                double $$2 = ($$0.getX() - this.getX()) / (double)$$1;
-                double $$3 = ($$0.getY() - this.getY()) / (double)$$1;
-                double $$4 = ($$0.getZ() - this.getZ()) / (double)$$1;
+                double $$2 = ($$0.getX() - this.getX()) / (double) $$1;
+                double $$3 = ($$0.getY() - this.getY()) / (double) $$1;
+                double $$4 = ($$0.getZ() - this.getZ()) / (double) $$1;
                 this.setDeltaMovement(this.getDeltaMovement().add(Math.copySign($$2 * $$2 * deltaSpeed, $$2), Math.copySign($$3 * $$3 * deltaSpeed, $$3), Math.copySign($$4 * $$4 * deltaSpeed, $$4)));
                 this.checkSlowFallDistance();
             } else {
@@ -688,16 +704,19 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Override
     public boolean canBeRiddenUnderFluidType(FluidType type, Entity rider) {
+        if (!this.canDrownInFluidType(type) && this.tamabletool$getEnvironment().isFly()) {
+            return true;
+        }
         if (type == ForgeMod.WATER_TYPE.get()) {
-            return this.tamabletool$getEnvironment().isSwim();
+            return this.tamabletool$getEnvironment().isWaterSwim();
         } else if (type == ForgeMod.LAVA_TYPE.get()) {
-            return this.fireImmune() && (this.tamabletool$getEnvironment() == TamableEnvironment.LAVA || this.tamabletool$getEnvironment().isFly());
+            return this.tamabletool$getEnvironment().isLava();
         }
         return super.canBeRiddenUnderFluidType(type, rider);
     }
 
     public boolean tamabletool$canBeRiddenInAir(Entity rider) {
-        return !this.tamabletool$getEnvironment().isSwim() || this.tamabletool$getEnvironment().isWalk();
+        return !this.tamabletool$getEnvironment().isWaterSwim() || this.tamabletool$getEnvironment().isWalk();
     }
 
     public UUID tamabletool$getNonPlayerOwnerUUID() {
@@ -781,7 +800,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public void tamabletool$setInLove() {
         this.tamabletool$inLove = 600;
-        this.level().broadcastEntityEvent(this, (byte)18);
+        this.level().broadcastEntityEvent(this, (byte) 18);
     }
 
     public void tamabletool$setInLoveTime(int p_27602_) {
@@ -832,7 +851,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 animal.resetLove();
             }
         }
-        p_277963_.broadcastEntityEvent(this, (byte)18);
+        p_277963_.broadcastEntityEvent(this, (byte) 18);
         if (p_277963_.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
             p_277963_.addFreshEntity(new ExperienceOrb(p_277963_, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
         }
@@ -841,7 +860,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public TamableEnvironment tamabletool$getEnvironment() {
         if (this.level().isClientSide) {
-            int ordinal = this.entityData.get(tamabletool$DATA_TYPES_ID) & 7;
+            int ordinal = this.entityData.get(tamabletool$DATA_TYPES_ID) & 15;
             return TamableEnvironment.values()[ordinal];
         } else {
             if (this.tamabletool$environment == null) {
@@ -853,19 +872,24 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public void tamabletool$setEnvironment(TamableEnvironment environment) {
         byte b0 = this.entityData.get(tamabletool$DATA_TYPES_ID);
-        this.entityData.set(tamabletool$DATA_TYPES_ID, (byte) (b0 & -8 | environment.ordinal() & 7));
+        this.entityData.set(tamabletool$DATA_TYPES_ID, (byte) (b0 & -16 | environment.ordinal() & 15));
         this.tamabletool$environment = environment;
     }
 
     public void tamabletool$updateEnvironment() {
+        // aiStep : tickCount % 40 == 0
         TamableEnvironment oldEnvironment = this.tamabletool$getEnvironment();
         TamableEnvironment newEnvironment = TamableToolUtils.getMobEnvironment((Mob) (Object) this);
         if (oldEnvironment != newEnvironment) {
-            if (oldEnvironment == TamableEnvironment.AMPHIBIOUS) {
+            if (oldEnvironment.isAmphibious() || oldEnvironment.isFloat()) {
                 return;
             }
-            if ((oldEnvironment == TamableEnvironment.GROUND && newEnvironment == TamableEnvironment.WATER) || (oldEnvironment == TamableEnvironment.WATER && newEnvironment == TamableEnvironment.GROUND)) {
+            if ((oldEnvironment == TamableEnvironment.GROUND && newEnvironment == TamableEnvironment.WATER)
+                    || (oldEnvironment == TamableEnvironment.WATER && newEnvironment == TamableEnvironment.GROUND)) {
                 this.tamabletool$setEnvironment(TamableEnvironment.AMPHIBIOUS);
+            } else if ((oldEnvironment == TamableEnvironment.GROUND && newEnvironment == TamableEnvironment.LAVA)
+                    || (oldEnvironment == TamableEnvironment.LAVA && newEnvironment == TamableEnvironment.GROUND)) {
+                this.tamabletool$setEnvironment(TamableEnvironment.LAVA_AMPHIBIOUS);
             } else {
                 this.tamabletool$setEnvironment(newEnvironment);
             }

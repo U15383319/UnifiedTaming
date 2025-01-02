@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
-import net.minecraftforge.common.ForgeMod;
 
 import java.util.EnumSet;
 
@@ -91,7 +90,7 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private double adjustedDistanceToSqr(LivingEntity p_25310_) {
-        return !this.canWanderFly() ? this.mob.distanceToSqr(p_25310_) : this.mob.distanceToSqr(p_25310_.getX(), this.mob.getY(), p_25310_.getZ());
+        return !(this.getEnvironment() == TamableEnvironment.FLY_WANDER) ? this.mob.distanceToSqr(p_25310_) : this.mob.distanceToSqr(p_25310_.getX(), this.mob.getY(), p_25310_.getZ());
     }
 
     public void start() {
@@ -134,8 +133,8 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean maybeTeleportTo(int p_25304_, int p_25305_, int p_25306_) {
-        if (this.canWanderFly()) {
-            p_25305_ += Mth.ceil(this.mob.getBbHeight() + this.owner.getBbHeight() + 0.5F);
+        if (this.getEnvironment() == TamableEnvironment.FLY_WANDER) {
+            p_25305_ += Mth.ceil(this.mob.getBbHeight() + this.owner.getBbHeight() + .5F);
         }
         if (Math.abs((double) p_25304_ - this.owner.getX()) < MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING && Math.abs((double) p_25306_ - this.owner.getZ()) < MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING) {
             return false;
@@ -148,65 +147,45 @@ public class CustomFollowOwnerGoal extends Goal {
         }
     }
 
-    private boolean canTeleportTo(BlockPos p_25308_) {
-        if (this.canWanderFly()) {
-            BlockState $$2 = this.level.getBlockState(p_25308_.below());
+    private boolean canTeleportTo(BlockPos blockPos) {
+        if (this.getEnvironment().isFly()) {
+            BlockState $$2 = this.level.getBlockState(blockPos.below());
+            boolean fluidFlag = true;
             if (!$$2.getFluidState().isEmpty()) {
-                return this.mob.isPushedByFluid(ForgeMod.WATER_TYPE.get()) && $$2.getFluidState().is(FluidTags.WATER)
-                        || this.mob.fireImmune() && $$2.getFluidState().is(FluidTags.LAVA);
-            } else {
-                BlockPos $$3 = p_25308_.subtract(this.mob.blockPosition());
-                return this.level.noCollision(this.mob, this.mob.getBoundingBox().move($$3));
+                fluidFlag = !this.mob.canDrownInFluidType($$2.getFluidState().getFluidType())
+                        && (!$$2.getFluidState().is(FluidTags.WATER) || !this.mob.isSensitiveToWater())
+                        && (!$$2.getFluidState().is(FluidTags.LAVA) || this.mob.fireImmune());
             }
+            BlockPos $$3 = blockPos.subtract(this.mob.blockPosition());
+            return fluidFlag && this.level.noCollision(this.mob, this.mob.getBoundingBox().move($$3));
         }
-        if (this.canSwim()) {
-            if (level.isWaterAt(p_25308_)) {
+        if (this.getEnvironment().isWaterSwim()) {
+            if (level.isWaterAt(blockPos)) {
                 return true;
-            } else if (!this.canWalk()) {
+            } else if (!this.getEnvironment().isWalk()) {
                 return false;
             }
         }
-        BlockPathTypes $$1 = WalkNodeEvaluator.getBlockPathTypeStatic(this.level, p_25308_.mutable());
-        if ($$1 != BlockPathTypes.WALKABLE) {
-            if (this.canPathFly()) {
-                p_25308_ = p_25308_.above(Mth.ceil(this.mob.getBbHeight() + this.owner.getBbHeight() + 0.5F));
-                BlockState $$2 = this.level.getBlockState(p_25308_.below());
-                if (!$$2.isAir()) {
-                    return false;
-                }
-                BlockPos $$3 = p_25308_.subtract(this.mob.blockPosition());
-                return this.level.noCollision(this.mob, this.mob.getBoundingBox().move($$3));
-            } else {
+        if (this.getEnvironment().isLava()) {
+            if (level.getFluidState(blockPos).is(FluidTags.LAVA)) {
+                return true;
+            } else if (!this.getEnvironment().isWalk()) {
                 return false;
-            }
-        } else {
-            BlockState $$2 = this.level.getBlockState(p_25308_.below());
-            if (!this.canPathFly() && $$2.getBlock() instanceof LeavesBlock) {
-                return false;
-            } else {
-                BlockPos $$3 = p_25308_.subtract(this.mob.blockPosition());
-                return this.level.noCollision(this.mob, this.mob.getBoundingBox().move($$3));
             }
         }
+        BlockPathTypes $$1 = WalkNodeEvaluator.getBlockPathTypeStatic(this.level, blockPos.mutable());
+        if ($$1 == BlockPathTypes.WALKABLE) {
+            BlockPos $$3 = blockPos.subtract(this.mob.blockPosition());
+            return this.level.noCollision(this.mob, this.mob.getBoundingBox().move($$3));
+        }
+        return false;
     }
 
     private int randomIntInclusive(int p_25301_, int p_25302_) {
         return this.mob.getRandom().nextInt(p_25302_ - p_25301_ + 1) + p_25301_;
     }
 
-    private boolean canWanderFly() {
-        return ((EnvironmentHelper) mob).tamabletool$getEnvironment() == TamableEnvironment.FLY_WANDER;
-    }
-
-    private boolean canPathFly() {
-        return ((EnvironmentHelper) mob).tamabletool$getEnvironment() == TamableEnvironment.FLY_PATH;
-    }
-
-    private boolean canSwim() {
-        return ((EnvironmentHelper) mob).tamabletool$getEnvironment().isSwim();
-    }
-
-    private boolean canWalk() {
-        return ((EnvironmentHelper) mob).tamabletool$getEnvironment().isWalk();
+    private TamableEnvironment getEnvironment() {
+        return ((EnvironmentHelper) mob).tamabletool$getEnvironment();
     }
 }

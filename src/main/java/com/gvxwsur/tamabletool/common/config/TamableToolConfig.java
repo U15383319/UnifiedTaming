@@ -26,7 +26,7 @@ public class TamableToolConfig {
         modAssistItem = builder.comment("The item that held in the player's assisting hand to perform interactions in this mod").define("modAssistItem", "minecraft:clock");
         cheatTameItem = builder.comment("The item that used to tame mobs without any cost").define("cheatTameItem", "minecraft:structure_void");
         showImportantTamableMessage = builder.comment("Whether some important messages should be sent to players when something happened to their pets").define("showImportantTamableMessage", true);
-        rideSpeedModifier = builder.comment("The speed modifier of the ride").defineInRange("rideSpeedModifier", 0.424, 0.0, 1.0);
+        rideSpeedModifier = builder.comment("The speed modifier of the ride").defineInRange("rideSpeedModifier", 0.318, 0.0, 1.0);
         canRiderInteract = builder.comment("Whether the rider can interact with the mob").define("canRiderInteract", false);
         playerFriendlyFire = builder.comment("Whether players can attack their own pets").define("playerFriendlyFire", false);
         leashedNeedTamed = builder.comment("Whether leash mobs need to be tamed").define("leashedNeedTamed", true);
