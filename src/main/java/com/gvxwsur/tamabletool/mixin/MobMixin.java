@@ -6,7 +6,6 @@ import com.gvxwsur.tamabletool.common.entity.helper.*;
 import com.gvxwsur.tamabletool.common.entity.helper.enumhelper.TamableCommand;
 import com.gvxwsur.tamabletool.common.entity.helper.enumhelper.TamableEnvironment;
 import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
-import com.gvxwsur.tamabletool.common.entity.util.ModLoaded;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.Minecraft;
@@ -190,18 +189,36 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
     public void readAdditionalSaveData(CompoundTag compoundTag, CallbackInfo ci) {
-        // UUID Owner will be ignored to ensure that this mod will not influence vanilla TamableAnimal
         UUID uuid;
-        if (compoundTag.hasUUID("PlayerOwner")) {
-            uuid = compoundTag.getUUID("PlayerOwner");
+        if (compoundTag.hasUUID("Owner")) {
+            uuid = compoundTag.getUUID("Owner");
         } else {
-            String s = compoundTag.getString("PlayerOwner");
+            String s = compoundTag.getString("Owner");
             uuid = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), s);
         }
-
+        // UUID Owner will not be set to ensure that this mod will not influence vanilla TamableAnimal
+        /*
         if (uuid != null) {
             try {
                 this.tamabletool$setOwnerUUID(uuid);
+                this.tamabletool$setTame(true);
+            } catch (Throwable var4) {
+                this.tamabletool$setTame(false);
+            }
+        }
+        */
+
+        UUID playerUUID;
+        if (compoundTag.hasUUID("PlayerOwner")) {
+            playerUUID = compoundTag.getUUID("PlayerOwner");
+        } else {
+            String s = compoundTag.getString("PlayerOwner");
+            playerUUID = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), s);
+        }
+
+        if (playerUUID != null) {
+            try {
+                this.tamabletool$setOwnerUUID(playerUUID);
                 this.tamabletool$setTame(true);
             } catch (Throwable var4) {
                 this.tamabletool$setTame(false);
@@ -224,7 +241,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             }
         }
 
-        if (uuid != null && nonPlayerUUID == null) {
+        if (playerUUID != null && nonPlayerUUID == null) {
             this.tamabletool$setCommand(TamableCommand.values()[compoundTag.getInt("Command")]);
             this.tamabletool$setInSittingPose(this.tamabletool$isOrderedToSit());
             this.tamabletool$setManual(compoundTag.getBoolean("RideMode"));
@@ -234,7 +251,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             this.tamabletool$setInLoveTime(compoundTag.getInt("InLove"));
         }
 
-        this.tamabletool$registerTameGoals();
+        if ((uuid != null || playerUUID != null) && nonPlayerUUID == null) {
+            this.tamabletool$registerTameGoals();
+        }
     }
 
     @Unique
@@ -242,7 +261,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.goalSelector.addGoal(1, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
         this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, 1.0, 10.0F, 2.0F));
         this.goalSelector.addGoal(7, new CustomBreedGoal((Mob) (Object) this, 1.0));
-        this.goalSelector.addGoal(8, new CustomRandomStrollGoal((Mob) (Object) this, 1.0));
+        if ((Mob) (Object) this instanceof PathfinderMob pathfinderMob) {
+            this.goalSelector.addGoal(8, new CustomRandomStrollGoal(pathfinderMob, 1.0));
+        }
         this.goalSelector.addGoal(10, new CustomLookAtOwnerGoal((Mob) (Object) this, Player.class, 8.0F));
 
         this.targetSelector.addGoal(1, new CustomOwnerHurtByTargetGoal((Mob) (Object) this));
@@ -430,6 +451,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 ((AnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).tamabletool$TameAnimal$trigger(player1, (Mob) (Object) this);
             }
         }
+        this.tamabletool$registerTameGoals();
     }
 
     @Override
@@ -495,7 +517,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         Component deathMessage = this.getCombatTracker().getDeathMessage();
         super.die(p_21809_);
         if (!this.level().isClientSide && this.dead) {
-            if ((Mob) (Object) this instanceof TamableAnimal || ModLoaded.hasTameModified()) {
+            if ((Mob) (Object) this instanceof TamableAnimal) {
                 return;
             }
             MessageSender.sendDeathMessage((Mob) (Object) this, deathMessage, false);
@@ -508,7 +530,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public void tamabletool$setCommand(TamableCommand command) {
         this.tamabletool$command = command;
-        if (!((Mob) (Object) this instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMoveGoals.get())) {
+        if (!((Mob) (Object) this instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMovingGoals.get())) {
             if (command == TamableCommand.STROLL) {
                 this.restrictTo(this.blockPosition(), 16);
             } else {
@@ -662,7 +684,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                     }
                 } else {
                     if ((this.tamabletool$isTamer(itemstack) && this.tamabletool$isTamingConditionSatisfied()) || this.tamabletool$isCheatTamer(itemstack)) {
-                        if (!((Mob) (Object) this instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamable.get())) {
+                        if (!((Mob) (Object) this instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableTaming.get())) {
                             if (this.tamabletool$isTamer(itemstack) && !player.getAbilities().instabuild) {
                                 itemstack.shrink(1);
                             }
@@ -839,7 +861,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         if (entity instanceof Mob mob) {
             if (TamableToolUtils.isOwnedBy((Mob) (Object) this, player)) {
                 ((TamableEntity) mob).tamabletool$tame(player);
-                ((TamableEntity) mob).tamabletool$registerTameGoals();
             }
             return mob;
         }

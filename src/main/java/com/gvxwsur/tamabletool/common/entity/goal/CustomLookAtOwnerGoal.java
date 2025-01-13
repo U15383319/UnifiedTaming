@@ -46,13 +46,11 @@ public class CustomLookAtOwnerGoal extends Goal {
     }
 
     public boolean canUse() {
-        if (this.mob.getRandom().nextFloat() >= this.probability) {
+        if (!TamableToolUtils.isTame(this.mob)) {
+            return false;
+        } else if (this.mob.getRandom().nextFloat() >= this.probability) {
             return false;
         } else {
-            if (!TamableToolUtils.isTame(this.mob)) {
-                return false;
-            }
-
             this.lookAt = this.mob.level().getNearestPlayer(this.lookAtContext, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 
             return this.lookAt != null;

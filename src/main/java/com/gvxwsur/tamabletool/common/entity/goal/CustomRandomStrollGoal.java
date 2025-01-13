@@ -4,6 +4,7 @@ import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
+import com.ibm.icu.impl.Assert;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.TamableAnimal;
@@ -16,8 +17,7 @@ import java.util.EnumSet;
 
 public class CustomRandomStrollGoal extends Goal {
     public static final int DEFAULT_INTERVAL = 120;
-    protected final Mob rawMob;
-    protected final PathfinderMob mob;
+    protected final PathfinderMob pathfinderMob;
     protected final TamableEntity tamableHelper;
     protected final CommandEntity commandHelper;
     protected double wantedX;
@@ -37,16 +37,10 @@ public class CustomRandomStrollGoal extends Goal {
     }
 
     public CustomRandomStrollGoal(Mob p_25741_, double p_25742_, int p_25743_, boolean p_25744_) {
-        this.rawMob = p_25741_;
-        if (this.rawMob instanceof PathfinderMob) {
-            this.mob = (PathfinderMob) this.rawMob;
-            this.tamableHelper = (TamableEntity) this.mob;
-            this.commandHelper = (CommandEntity) this.mob;
-        } else {
-            this.mob = null;
-            this.tamableHelper = null;
-            this.commandHelper = null;
-        }
+        Assert.assrt(p_25741_ instanceof PathfinderMob);
+        this.pathfinderMob = (PathfinderMob) p_25741_;
+        this.tamableHelper = (TamableEntity) p_25741_;
+        this.commandHelper = (CommandEntity) p_25741_;
         this.speedModifier = p_25742_;
         this.interval = p_25743_;
         this.checkNoActionTime = p_25744_;
@@ -54,26 +48,23 @@ public class CustomRandomStrollGoal extends Goal {
     }
 
     public boolean canUse() {
-        if (this.mob == null) {
+        if (!TamableToolUtils.isTame(pathfinderMob)) {
             return false;
-        } else if (!TamableToolUtils.isTame(mob)) {
+        } else if (this.pathfinderMob.isVehicle()) {
             return false;
-        } else if (this.mob.isVehicle()) {
+        } else if (!this.commandHelper.tamabletool$isOrderedToStroll()) {
             return false;
         } else {
-            if (this.mob instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMoveGoals.get()) {
-                return false;
-            }
-            if (!this.commandHelper.tamabletool$isOrderedToStroll()) {
+            if (this.pathfinderMob instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMovingGoals.get()) {
                 return false;
             }
 
             if (!this.forceTrigger) {
-                if (this.checkNoActionTime && this.mob.getNoActionTime() >= 100) {
+                if (this.checkNoActionTime && this.pathfinderMob.getNoActionTime() >= 100) {
                     return false;
                 }
 
-                if (this.mob.getRandom().nextInt(reducedTickDelay(this.interval)) != 0) {
+                if (this.pathfinderMob.getRandom().nextInt(reducedTickDelay(this.interval)) != 0) {
                     return false;
                 }
             }
@@ -93,19 +84,19 @@ public class CustomRandomStrollGoal extends Goal {
 
     @Nullable
     protected Vec3 getPosition() {
-        return DefaultRandomPos.getPos(this.mob, 10, 7);
+        return DefaultRandomPos.getPos(this.pathfinderMob, 10, 7);
     }
 
     public boolean canContinueToUse() {
-        return !this.mob.getNavigation().isDone() && !this.mob.isVehicle();
+        return !this.pathfinderMob.getNavigation().isDone() && !this.pathfinderMob.isVehicle();
     }
 
     public void start() {
-        this.mob.getNavigation().moveTo(this.wantedX, this.wantedY, this.wantedZ, this.speedModifier);
+        this.pathfinderMob.getNavigation().moveTo(this.wantedX, this.wantedY, this.wantedZ, this.speedModifier);
     }
 
     public void stop() {
-        this.mob.getNavigation().stop();
+        this.pathfinderMob.getNavigation().stop();
         super.stop();
     }
 

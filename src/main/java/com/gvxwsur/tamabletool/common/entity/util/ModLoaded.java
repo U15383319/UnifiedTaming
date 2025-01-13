@@ -35,10 +35,6 @@ public class ModLoaded {
                 || isLoaded("hmag") && mob instanceof AbstractFlyingMonsterEntity;
     }
 
-    public static boolean hasTameModified() {
-        return isLoaded("domesticationinnovation");
-    }
-
     public static boolean hasYoungModel(Entity entity) {
         return isLoaded("grimoireofgaia") && TamableToolUtils.getRenderer(entity) instanceof GaiaBabyMobRenderer;
     }

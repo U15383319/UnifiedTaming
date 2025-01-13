@@ -67,7 +67,7 @@ public class CustomFollowOwnerGoal extends Goal {
         } else if (!this.commandHelper.tamabletool$isOrderedToFollow()) {
             return false;
         } else {
-            if (this.mob instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMoveGoals.get()) {
+            if (this.mob instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMovingGoals.get()) {
                 return false;
             }
             if (this.adjustedDistanceToSqr($$0) < (double) (this.startDistance * this.startDistance)) {

@@ -38,7 +38,7 @@ public class CustomSitWhenOrderedToGoal extends Goal {
         } else if (!this.canHighFly && !this.mob.onGround()) {
             return false;
         } else {
-            if (this.mob instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMoveGoals.get()) {
+            if (this.mob instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMovingGoals.get()) {
                 return false;
             }
             LivingEntity $$0 = this.tamableHelper.getOwner();

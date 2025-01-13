@@ -14,8 +14,8 @@ public class TamableToolConfig {
     public static final ForgeConfigSpec.BooleanValue leashedNeedTamed;
     public static final ForgeConfigSpec.BooleanValue golemCreatedTamed;
     public static final ForgeConfigSpec.IntValue merchantTamedReputation;
-    public static final ForgeConfigSpec.BooleanValue compatibleVanillaTamable;
-    public static final ForgeConfigSpec.BooleanValue compatibleVanillaTamableMoveGoals;
+    public static final ForgeConfigSpec.BooleanValue compatibleVanillaTamableTaming;
+    public static final ForgeConfigSpec.BooleanValue compatibleVanillaTamableMovingGoals;
     public static final ForgeConfigSpec.BooleanValue compatiblePartEntity;
     public static final ForgeConfigSpec.BooleanValue compatibleMobSummonedTamed;
 
@@ -36,8 +36,8 @@ public class TamableToolConfig {
         builder.pop();
         builder.push("Tamable Permission");
         builder.comment("Some of these configs are dangerous and increase the risk of mods conflicts, please use them with caution");
-        compatibleVanillaTamable = builder.comment("Whether vanilla tamable mobs will use taming system of this mod").define("compatibleVanillaTamable", false);
-        compatibleVanillaTamableMoveGoals = builder.comment("Whether vanilla tamable mobs will use moving goal system of this mod").define("compatibleVanillaTamableMoveGoals", false);
+        compatibleVanillaTamableTaming = builder.comment("Whether vanilla tamable mobs will use taming system of this mod").define("compatibleVanillaTamableTaming", false);
+        compatibleVanillaTamableMovingGoals = builder.comment("Whether vanilla tamable mobs will use moving goal system of this mod").define("compatibleVanillaTamableMovingGoals", false);
         compatiblePartEntity = builder.comment("Whether multipart mobs will use taming system of this mod").define("compatiblePartEntity", true);
         compatibleMobSummonedTamed = builder.comment("Whether a mob summoned by another mob will be tamed by the nearest mob").define("compatibleMobSummonedTamed", true);
         builder.pop();

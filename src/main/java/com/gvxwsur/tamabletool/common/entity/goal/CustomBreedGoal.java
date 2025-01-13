@@ -1,6 +1,7 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
 import com.gvxwsur.tamabletool.common.entity.helper.BreedableHelper;
+import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.server.level.ServerLevel;
@@ -17,6 +18,7 @@ public class CustomBreedGoal extends Goal {
     protected final float MAX_CAN_BREED_DISTANCE;
     protected final Mob mob;
     protected final TamableEntity tamableHelper;
+    protected final CommandEntity commandHelper;
     protected final BreedableHelper breedableHelper;
     protected final Level level;
     @Nullable protected Player partner;
@@ -26,6 +28,7 @@ public class CustomBreedGoal extends Goal {
     public CustomBreedGoal(Mob p_25125_, double p_25126_) {
         this.mob = p_25125_;
         this.tamableHelper = (TamableEntity) p_25125_;
+        this.commandHelper = (CommandEntity) p_25125_;
         this.breedableHelper = (BreedableHelper) p_25125_;
         this.level = p_25125_.level();
         this.speedModifier = p_25126_;
@@ -36,6 +39,8 @@ public class CustomBreedGoal extends Goal {
 
     public boolean canUse() {
         if (!TamableToolUtils.isTame(this.mob)) {
+            return false;
+        } else if (this.commandHelper.tamabletool$unableToMove()) {
             return false;
         } else if (!this.breedableHelper.tamabletool$isInLove()) {
             return false;

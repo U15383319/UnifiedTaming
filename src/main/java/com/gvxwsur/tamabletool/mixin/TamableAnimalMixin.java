@@ -3,7 +3,6 @@ package com.gvxwsur.tamabletool.mixin;
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
-import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.TamableAnimal;
@@ -27,14 +26,14 @@ public abstract class TamableAnimalMixin extends Animal implements OwnableEntity
 
     @Inject(method = "getOwnerUUID", at = @At("HEAD"), cancellable = true)
     public void getOwnerUUID(CallbackInfoReturnable<UUID> cir) {
-        if (TamableToolConfig.compatibleVanillaTamable.get()) {
+        if (TamableToolConfig.compatibleVanillaTamableTaming.get()) {
             cir.setReturnValue(((TamableEntity)this).tamabletool$getOwnerUUID());
         }
     }
 
     @Inject(method = "tame", at = @At("HEAD"), cancellable = true)
     public void tame(Player p_21829_, CallbackInfo ci) {
-        if (TamableToolConfig.compatibleVanillaTamable.get()) {
+        if (TamableToolConfig.compatibleVanillaTamableTaming.get()) {
             ci.cancel();
         }
     }
