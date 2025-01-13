@@ -1,11 +1,12 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
+import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
-import com.gvxwsur.tamabletool.common.entity.helper.MinionEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.phys.Vec3;
@@ -60,6 +61,9 @@ public class CustomRandomStrollGoal extends Goal {
         } else if (this.mob.isVehicle()) {
             return false;
         } else {
+            if (this.mob instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMoveGoals.get()) {
+                return false;
+            }
             if (!this.commandHelper.tamabletool$isOrderedToStroll()) {
                 return false;
             }

@@ -65,7 +65,7 @@ public class TamableToolUtils {
         if (ModLoaded.isLavaNodeEvaluator(nodeEvaluator)) {
             return TamableEnvironment.LAVA;
         }
-        if (nodeEvaluator instanceof AmphibiousNodeEvaluator) {
+        if (nodeEvaluator instanceof AmphibiousNodeEvaluator || ModLoaded.isAmphibiousMob(mob)) {
             return TamableEnvironment.AMPHIBIOUS;
         }
         if (navigation instanceof GroundPathNavigation groundPathNavigation) {

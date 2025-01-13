@@ -36,9 +36,6 @@ public class MessageSender {
         }
         if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
             if (mob.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
-                if (!TamableToolConfig.compatibleVanillaTamable.get() && mob instanceof TamableAnimal) {
-                    return;
-                }
                 player.displayClientMessage(deathMessage, pActionBar);
             }
         }

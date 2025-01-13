@@ -2,6 +2,8 @@ package com.gvxwsur.tamabletool.common.entity.util;
 
 import com.github.alexthe666.alexsmobs.entity.ai.BoneSerpentNodeProcessor;
 import com.github.alexthe666.iceandfire.pathfinding.NodeProcessorFly;
+import com.github.alexthe668.domesticationinnovation.server.enchantment.DIEnchantmentRegistry;
+import com.github.alexthe668.domesticationinnovation.server.entity.TameableUtils;
 import com.github.mechalopa.hmag.world.entity.AbstractFlyingMonsterEntity;
 import gaia.client.renderer.GaiaBabyMobRenderer;
 import net.minecraft.world.entity.Entity;
@@ -24,9 +26,17 @@ public class ModLoaded {
         return isLoaded("iceandfire") && nodeEvaluator instanceof NodeProcessorFly;
     }
 
+    public static boolean isAmphibiousMob(Mob mob) {
+        return isLoaded("domesticationinnovation") && TameableUtils.isTamed(mob) && TameableUtils.hasEnchant(mob, DIEnchantmentRegistry.AMPHIBIOUS);
+    }
+
     public static boolean isFlyingMob(Mob mob) {
         return isLoaded("twilightforest") && mob instanceof Bird
                 || isLoaded("hmag") && mob instanceof AbstractFlyingMonsterEntity;
+    }
+
+    public static boolean hasTameModified() {
+        return isLoaded("domesticationinnovation");
     }
 
     public static boolean hasYoungModel(Entity entity) {

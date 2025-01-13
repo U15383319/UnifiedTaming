@@ -1,11 +1,13 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
+import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
@@ -36,6 +38,9 @@ public class CustomSitWhenOrderedToGoal extends Goal {
         } else if (!this.canHighFly && !this.mob.onGround()) {
             return false;
         } else {
+            if (this.mob instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMoveGoals.get()) {
+                return false;
+            }
             LivingEntity $$0 = this.tamableHelper.getOwner();
             if ($$0 == null) {
                 return true;

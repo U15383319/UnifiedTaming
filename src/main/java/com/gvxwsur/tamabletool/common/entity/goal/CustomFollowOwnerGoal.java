@@ -1,5 +1,6 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
+import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.EnvironmentHelper;
 import com.gvxwsur.tamabletool.common.entity.helper.enumhelper.TamableEnvironment;
@@ -9,10 +10,10 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
@@ -66,6 +67,9 @@ public class CustomFollowOwnerGoal extends Goal {
         } else if (!this.commandHelper.tamabletool$isOrderedToFollow()) {
             return false;
         } else {
+            if (this.mob instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableMoveGoals.get()) {
+                return false;
+            }
             if (this.adjustedDistanceToSqr($$0) < (double) (this.startDistance * this.startDistance)) {
                 return false;
             } else {
