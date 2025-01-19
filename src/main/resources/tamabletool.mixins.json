@@ -8,6 +8,7 @@
     "AbstractVillagerMixin",
     "AmbientCreatureMixin",
     "BredAnimalsTriggerMixin",
+    "CreeperMixin",
     "EntityMixin",
     "LivingEntityMixin",
     "MobMixin",

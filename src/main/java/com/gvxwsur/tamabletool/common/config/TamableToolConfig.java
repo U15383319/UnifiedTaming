@@ -13,7 +13,9 @@ public class TamableToolConfig {
     public static final ForgeConfigSpec.BooleanValue playerFriendlyFire;
     public static final ForgeConfigSpec.BooleanValue leashedNeedTamed;
     public static final ForgeConfigSpec.BooleanValue golemCreatedTamed;
+    public static final ForgeConfigSpec.BooleanValue selfDestructMobNotDead;
     public static final ForgeConfigSpec.IntValue merchantTamedReputation;
+
     public static final ForgeConfigSpec.BooleanValue compatibleVanillaTamableTaming;
     public static final ForgeConfigSpec.BooleanValue compatibleVanillaTamableMovingGoals;
     public static final ForgeConfigSpec.BooleanValue compatiblePartEntity;
@@ -32,6 +34,7 @@ public class TamableToolConfig {
         playerFriendlyFire = builder.comment("Whether players can attack their own pets").define("playerFriendlyFire", false);
         leashedNeedTamed = builder.comment("Whether leash mobs need to be tamed").define("leashedNeedTamed", true);
         golemCreatedTamed = builder.comment("Whether golem will be tamed by the nearest player when created").define("golemCreatedTamed", true);
+        selfDestructMobNotDead = builder.comment("Whether the mob will not die when self-destructed").define("selfDestructMobNotDead", true);
         merchantTamedReputation = builder.comment("The separately counted reputation value of the merchant tamed by player").defineInRange("merchantTamedReputation", 90, 0, 1000);
         builder.pop();
         builder.push("Tamable Permission");

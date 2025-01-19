@@ -1,11 +1,13 @@
 package com.gvxwsur.tamabletool.common.entity.goal;
 
+import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.BreedableHelper;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -45,6 +47,9 @@ public class CustomBreedGoal extends Goal {
         } else if (!this.breedableHelper.tamabletool$isInLove()) {
             return false;
         } else {
+            if (this.mob instanceof TamableAnimal && !TamableToolConfig.compatibleVanillaTamableTaming.get()) {
+                return false;
+            }
             this.partner = this.getFreePartner();
             return this.partner != null;
         }

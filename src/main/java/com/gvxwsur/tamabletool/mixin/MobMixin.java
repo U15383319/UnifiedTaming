@@ -273,7 +273,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     @Inject(method = "aiStep", at = @At("TAIL"))
     public void aiStep(CallbackInfo ci) {
         if (this.isAlive()) {
-            if (this.tickCount % 80 == 0) {
+            if (!this.firstTick && this.tickCount % 80 == 0) {
                 this.tamabletool$updateEnvironment();
             }
 
@@ -915,6 +915,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public void tamabletool$updateEnvironment() {
         // aiStep : tickCount % 80 == 0
+        if (this.isBaby() != this.tamabletool$isBaby()) {
+            this.tamabletool$setBaby(this.isBaby());
+        }
+
         TamableEnvironment oldEnvironment = this.tamabletool$getEnvironment();
         TamableEnvironment newEnvironment = TamableToolUtils.getMobEnvironment((Mob) (Object) this);
         if (oldEnvironment != newEnvironment) {

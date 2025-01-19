@@ -17,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -65,16 +66,21 @@ public class LivingEventHandler {
     }
 
     @SubscribeEvent
+    public static void onExplosion(ExplosionEvent.Start event) {
+        Entity entity = event.getExplosion().getExploder();
+        if (entity != null && !entity.level().isClientSide && entity instanceof Mob mob && TamableToolUtils.isTame(mob)) {
+            if (((CommandEntity) mob).tamabletool$unableToMove() || (mob instanceof SelfDestructEntity selfDestructEntity && selfDestructEntity.tamabletool$isDestructed())) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
         boolean isLoadedFromDisk = event.loadedFromDisk();
         Level level = entity.level();
         if (!level.isClientSide && entity instanceof Mob mob) {
-            if (mob.isBaby() && !isLoadedFromDisk) {
-                if (!((BreedableHelper) mob).tamabletool$isBaby()) {
-                    ((BreedableHelper) mob).tamabletool$setBaby(true);
-                }
-            }
             if (TamableToolConfig.compatibleMobSummonedTamed.get() && mob.getSpawnType() == MobSpawnType.MOB_SUMMONED && !isLoadedFromDisk) {
                 Mob mobOwner = level.getNearestEntity(Mob.class, TargetingConditions.forNonCombat().copy().range(8).selector(owner -> owner.getClass() != mob.getClass() && owner.getType().getCategory().isFriendly() == mob.getType().getCategory().isFriendly()), mob, mob.getX(), mob.getY(), mob.getZ(), mob.getBoundingBox().inflate(8));
                 if (mobOwner != null) {
