@@ -6,10 +6,7 @@ import com.gvxwsur.tamabletool.common.entity.util.MessageSender;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.player.Player;
@@ -88,10 +85,11 @@ public class LivingEventHandler {
                 }
             }
             if (TamableToolConfig.golemCreatedTamed.get() && mob instanceof AbstractGolem && !isLoadedFromDisk) {
-                if (mob.getSpawnType() != MobSpawnType.COMMAND && mob.getSpawnType() != MobSpawnType.MOB_SUMMONED && mob.getSpawnType() != MobSpawnType.SPAWN_EGG && mob.getSpawnType() != MobSpawnType.SPAWNER) {
+                if (mob.getSpawnType() == null) {
                     Player player = level.getNearestPlayer(mob, 6);
                     if (player != null) {
                         ((TamableEntity) mob).tamabletool$tame(player);
+                        // no need to check tamable animal
                         MessageSender.sendTamingMessage(mob, player, true);
                     }
                 }
@@ -107,6 +105,9 @@ public class LivingEventHandler {
             if (living instanceof Mob mob && outcome instanceof Mob outcomeMob) {
                 if (TamableToolUtils.getOwner(mob) instanceof ServerPlayer player) {
                     ((TamableEntity) outcomeMob).tamabletool$tame(player);
+                    if (outcomeMob instanceof TamableAnimal tamableAnimal) {
+                        tamableAnimal.tame(player);
+                    }
                     MessageSender.sendConvertingMessage(mob, outcomeMob, false);
                 }
             }

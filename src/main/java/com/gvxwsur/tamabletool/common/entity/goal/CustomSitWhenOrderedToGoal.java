@@ -56,10 +56,8 @@ public class CustomSitWhenOrderedToGoal extends Goal {
 
     public void start() {
         this.mob.getNavigation().stop();
-        this.commandHelper.tamabletool$setInSittingPose(true);
     }
 
     public void stop() {
-        this.commandHelper.tamabletool$setInSittingPose(false);
     }
 }

@@ -8,6 +8,4 @@ public interface EnvironmentHelper {
 
     public void tamabletool$setEnvironment(TamableEnvironment environment);
 
-    public void tamabletool$updateEnvironment();
-
 }

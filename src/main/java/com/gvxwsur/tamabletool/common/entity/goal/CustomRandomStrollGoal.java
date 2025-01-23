@@ -4,7 +4,6 @@ import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.CommandEntity;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
-import com.ibm.icu.impl.Assert;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.TamableAnimal;
@@ -37,7 +36,7 @@ public class CustomRandomStrollGoal extends Goal {
     }
 
     public CustomRandomStrollGoal(Mob p_25741_, double p_25742_, int p_25743_, boolean p_25744_) {
-        Assert.assrt(p_25741_ instanceof PathfinderMob);
+        // Assert.assrt(p_25741_ instanceof PathfinderMob);
         this.pathfinderMob = (PathfinderMob) p_25741_;
         this.tamableHelper = (TamableEntity) p_25741_;
         this.commandHelper = (CommandEntity) p_25741_;

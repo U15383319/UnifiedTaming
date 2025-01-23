@@ -3,11 +3,9 @@ package com.gvxwsur.tamabletool.common.entity.goal;
 import com.gvxwsur.tamabletool.common.config.TamableToolConfig;
 import com.gvxwsur.tamabletool.common.entity.helper.TamableEntity;
 import com.gvxwsur.tamabletool.common.entity.util.TamableToolUtils;
-import com.ibm.icu.impl.Assert;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -32,7 +30,7 @@ public class CustomLookAtOwnerGoal extends Goal {
     }
 
     public CustomLookAtOwnerGoal(Mob p_148118_, Class<? extends LivingEntity> p_148119_, float p_148120_, float p_148121_, boolean p_148122_) {
-        Assert.assrt(p_148119_ == Player.class);
+        // Assert.assrt(p_148119_ == Player.class);
         this.mob = p_148118_;
         this.lookDistance = p_148120_;
         this.probability = p_148121_;

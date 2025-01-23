@@ -50,6 +50,9 @@ public class TamableToolUtils {
     public static void tameMobOwner(Mob mob1, Mob mob2) {
         if (((TamableEntity) mob2).getOwner() instanceof ServerPlayer player) {
             ((TamableEntity) mob1).tamabletool$tame(player);
+            if (mob1 instanceof TamableAnimal tamableAnimal) {
+                tamableAnimal.tame(player);
+            }
         }
     }
 

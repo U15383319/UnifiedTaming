@@ -13,7 +13,6 @@
     "LivingEntityMixin",
     "MobMixin",
     "PathfinderMobMixin",
-    "TamableAnimalMixin",
     "TameAnimalTriggerMixin"
   ],
   "client": [

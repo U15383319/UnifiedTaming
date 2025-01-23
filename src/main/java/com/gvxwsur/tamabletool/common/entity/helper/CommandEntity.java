@@ -7,8 +7,6 @@ public interface CommandEntity {
 
     public void tamabletool$setCommand(TamableCommand command);
 
-    public void tamabletool$setInSittingPose(boolean p_21838_);
-
     public default boolean tamabletool$isOrderedToSit() {
         return tamabletool$getCommand() == TamableCommand.SIT;
     }
