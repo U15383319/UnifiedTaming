@@ -35,15 +35,15 @@ public abstract class AbstractVillagerMixin extends AgeableMob implements Invent
 
     @Inject(method = "setTradingPlayer", at = @At("HEAD"))
     public void setTradingPlayer(@Nullable Player p_35314_, CallbackInfo ci) {
-        this.tamabletool$updateSpecialPrices(p_35314_);
+        this.unified_taming$updateSpecialPrices(p_35314_);
     }
 
-    public int tamabletool$getPlayerReputation(Player p_35533_) {
+    public int unified_taming$getPlayerReputation(Player p_35533_) {
         return UnifiedTamingUtils.isOwnedBy(this, p_35533_) ? UnifiedTamingConfig.merchantTamedReputation.get() : 0;
     }
 
-    public void tamabletool$updateSpecialPrices(Player p_35541_) {
-        int i = this.tamabletool$getPlayerReputation(p_35541_);
+    public void unified_taming$updateSpecialPrices(Player p_35541_) {
+        int i = this.unified_taming$getPlayerReputation(p_35541_);
         if (i != 0) {
             Iterator var3 = this.getOffers().iterator();
 

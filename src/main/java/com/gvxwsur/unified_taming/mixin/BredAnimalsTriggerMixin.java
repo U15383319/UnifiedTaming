@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 @Mixin(BredAnimalsTrigger.class)
 public abstract class BredAnimalsTriggerMixin extends SimpleCriterionTrigger<BredAnimalsTrigger.TriggerInstance> implements AnimalTriggerHelper {
     @Unique
-    public void tamabletool$BredAnimals$trigger(ServerPlayer p_147279_, Mob p_147280_, Player p_147281_, @Nullable Mob p_147282_) {
+    public void unified_taming$BredAnimals$trigger(ServerPlayer p_147279_, Mob p_147280_, Player p_147281_, @Nullable Mob p_147282_) {
         LootContext $$4 = EntityPredicate.createContext(p_147279_, p_147280_);
         LootContext $$5 = EntityPredicate.createContext(p_147279_, p_147281_);
         LootContext $$6 = p_147282_ != null ? EntityPredicate.createContext(p_147279_, p_147282_) : null;

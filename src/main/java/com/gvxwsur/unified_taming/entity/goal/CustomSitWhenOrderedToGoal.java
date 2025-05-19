@@ -27,7 +27,7 @@ public class CustomSitWhenOrderedToGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
-        return this.commandHelper.tamabletool$isOrderedToSit();
+        return this.commandHelper.unified_taming$isOrderedToSit();
     }
 
     public boolean canUse() {
@@ -45,7 +45,7 @@ public class CustomSitWhenOrderedToGoal extends Goal {
             if ($$0 == null) {
                 return true;
             } else {
-                return this.adjustedDistanceToSqr($$0) < 144.0 && $$0.getLastHurtByMob() != null ? false : this.commandHelper.tamabletool$isOrderedToSit();
+                return this.adjustedDistanceToSqr($$0) < 144.0 && $$0.getLastHurtByMob() != null ? false : this.commandHelper.unified_taming$isOrderedToSit();
             }
         }
     }

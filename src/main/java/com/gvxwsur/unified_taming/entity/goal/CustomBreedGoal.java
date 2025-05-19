@@ -42,9 +42,9 @@ public class CustomBreedGoal extends Goal {
     public boolean canUse() {
         if (!UnifiedTamingUtils.isTame(this.mob)) {
             return false;
-        } else if (this.commandHelper.tamabletool$unableToMove()) {
+        } else if (this.commandHelper.unified_taming$unableToMove()) {
             return false;
-        } else if (!this.breedableHelper.tamabletool$isInLove()) {
+        } else if (!this.breedableHelper.unified_taming$isInLove()) {
             return false;
         } else {
             if (this.mob instanceof TamableAnimal && !UnifiedTamingConfig.compatibleVanillaTamableTaming.get()) {
@@ -56,7 +56,7 @@ public class CustomBreedGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
-        return this.partner != null && this.partner.isAlive() && this.breedableHelper.tamabletool$isInLove() && this.loveTime < 60;
+        return this.partner != null && this.partner.isAlive() && this.breedableHelper.unified_taming$isInLove() && this.loveTime < 60;
     }
 
     public void stop() {
@@ -78,7 +78,7 @@ public class CustomBreedGoal extends Goal {
     @Nullable
     private Player getFreePartner() {
         Player player = null;
-        if (this.tamableHelper.getOwner() instanceof Player player1 && this.breedableHelper.tamabletool$canMate(player1) && player1.distanceToSqr(this.mob) < MAX_PARTNER_FINDING_DISTANCE * MAX_PARTNER_FINDING_DISTANCE) {
+        if (this.tamableHelper.getOwner() instanceof Player player1 && this.breedableHelper.unified_taming$canMate(player1) && player1.distanceToSqr(this.mob) < MAX_PARTNER_FINDING_DISTANCE * MAX_PARTNER_FINDING_DISTANCE) {
             player = player1;
         }
 
@@ -86,6 +86,6 @@ public class CustomBreedGoal extends Goal {
     }
 
     protected void breed() {
-        this.breedableHelper.tamabletool$spawnChildFromBreeding((ServerLevel)this.level, this.partner);
+        this.breedableHelper.unified_taming$spawnChildFromBreeding((ServerLevel)this.level, this.partner);
     }
 }

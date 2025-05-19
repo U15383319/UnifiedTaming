@@ -51,7 +51,7 @@ public class CustomRandomStrollGoal extends Goal {
             return false;
         } else if (this.pathfinderMob.isVehicle()) {
             return false;
-        } else if (!this.commandHelper.tamabletool$isOrderedToStroll()) {
+        } else if (!this.commandHelper.unified_taming$isOrderedToStroll()) {
             return false;
         } else {
             if (this.pathfinderMob instanceof TamableAnimal && !UnifiedTamingConfig.compatibleVanillaTamableMovingGoals.get()) {

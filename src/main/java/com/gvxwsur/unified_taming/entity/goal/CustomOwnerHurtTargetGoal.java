@@ -23,7 +23,7 @@ public class CustomOwnerHurtTargetGoal extends TargetGoal {
     }
 
     public boolean canUse() {
-        if (this.tamableHelper.tamabletool$isTame() && !this.commandHelper.tamabletool$isOrderedToSit()) {
+        if (this.tamableHelper.unified_taming$isTame() && !this.commandHelper.unified_taming$isOrderedToSit()) {
             LivingEntity $$0 = this.tamableHelper.getOwner();
             if ($$0 == null) {
                 return false;

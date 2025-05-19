@@ -32,15 +32,15 @@ public class UnifiedTamingUtils {
         if (mob1.isAlliedTo(mob2)) {
             return true;
         }
-        return !((TamableEntity) mob1).tamabletool$isTame() && !((TamableEntity) mob2).tamabletool$isTame() && !mob1.getType().getCategory().isFriendly() && !mob2.getType().getCategory().isFriendly();
+        return !((TamableEntity) mob1).unified_taming$isTame() && !((TamableEntity) mob2).unified_taming$isTame() && !mob1.getType().getCategory().isFriendly() && !mob2.getType().getCategory().isFriendly();
     }
 
     public static boolean isTame(Mob mob) {
-        return ((TamableEntity) mob).tamabletool$isTame() && !((MinionEntity) mob).tamabletool$isTameNonPlayer();
+        return ((TamableEntity) mob).unified_taming$isTame() && !((MinionEntity) mob).unified_taming$isTameNonPlayer();
     }
 
     public static boolean isOwnedBy(Mob mob, Player player) {
-        return isTame(mob) && ((TamableEntity) mob).tamabletool$isOwnedBy(player);
+        return isTame(mob) && ((TamableEntity) mob).unified_taming$isOwnedBy(player);
     }
 
     public static LivingEntity getOwner(Mob mob) {
@@ -48,17 +48,17 @@ public class UnifiedTamingUtils {
     }
 
     public static boolean hasSameOwner(Mob mob1, Mob mob2) {
-        return ((TamableEntity) mob2).getOwner() instanceof ServerPlayer player && ((TamableEntity) mob1).tamabletool$isOwnedBy(player);
+        return ((TamableEntity) mob2).getOwner() instanceof ServerPlayer player && ((TamableEntity) mob1).unified_taming$isOwnedBy(player);
     }
 
     public static void tameMob(Mob mob1, Mob mob2) {
-        ((MinionEntity) mob1).tamabletool$tameNonPlayer(mob2);
+        ((MinionEntity) mob1).unified_taming$tameNonPlayer(mob2);
         tameMobOwner(mob1, mob2);
     }
 
     public static void tameMobOwner(Mob mob1, Mob mob2) {
         if (((TamableEntity) mob2).getOwner() instanceof ServerPlayer player) {
-            ((TamableEntity) mob1).tamabletool$tame(player);
+            ((TamableEntity) mob1).unified_taming$tame(player);
             if (mob1 instanceof TamableAnimal tamableAnimal) {
                 tamableAnimal.tame(player);
             }
@@ -130,7 +130,7 @@ public class UnifiedTamingUtils {
     public static float getScaleFactor(Mob mob, double mul1, double mul2, double mul3, double mul4) {
         double basicFactor = mob.getBoundingBox().getSize();
         double resultFactor = mul1 * (basicFactor / 1.05 - 1) + 1;
-        TamableEnvironment environment = ((EnvironmentHelper) mob).tamabletool$getEnvironment();
+        TamableEnvironment environment = ((EnvironmentHelper) mob).unified_taming$getEnvironment();
         if (environment == TamableEnvironment.FLY_PATH) {
             resultFactor *= mul2;
         }
@@ -144,14 +144,14 @@ public class UnifiedTamingUtils {
     }
 
     public static boolean shouldMobFriendly(Entity attacker, LivingEntity target) {
-        if (attacker instanceof Mob mob && ((TamableEntity) mob).tamabletool$isTame()) {
-            return !((TamableEntity) mob).tamabletool$canTameAttack(target);
+        if (attacker instanceof Mob mob && ((TamableEntity) mob).unified_taming$isTame()) {
+            return !((TamableEntity) mob).unified_taming$canTameAttack(target);
         }
         if (UnifiedTamingConfig.compatiblePartEntity.get() && !(attacker instanceof Mob)) {
             Entity attackerAncestry = ((UniformPartEntity) attacker).getAncestry();
             if (attackerAncestry instanceof Mob attackerAncestryMob) {
-                if (((TamableEntity) attackerAncestryMob).tamabletool$isTame()) {
-                    return attackerAncestryMob == target || !((TamableEntity) attackerAncestryMob).tamabletool$canTameAttack(target);
+                if (((TamableEntity) attackerAncestryMob).unified_taming$isTame()) {
+                    return attackerAncestryMob == target || !((TamableEntity) attackerAncestryMob).unified_taming$canTameAttack(target);
                 }
             }
         }
@@ -160,13 +160,13 @@ public class UnifiedTamingUtils {
 
     public static boolean shouldFireFriendly(Entity attacker, LivingEntity target) {
         if (UnifiedTamingConfig.playerFriendlyFire.get() && attacker instanceof ServerPlayer player) {
-            if (target instanceof Mob mob && ((TamableEntity) mob).tamabletool$isOwnedBy(player)) {
+            if (target instanceof Mob mob && ((TamableEntity) mob).unified_taming$isOwnedBy(player)) {
                 return true;
             }
             if (UnifiedTamingConfig.compatiblePartEntity.get() && !(target instanceof Mob)) {
                 Entity targetAncestry = ((UniformPartEntity) target).getAncestry();
                 if (targetAncestry instanceof Mob targetAncestryMob) {
-                    if (((TamableEntity) targetAncestryMob).tamabletool$isOwnedBy(player)) {
+                    if (((TamableEntity) targetAncestryMob).unified_taming$isOwnedBy(player)) {
                         return true;
                     }
                 }

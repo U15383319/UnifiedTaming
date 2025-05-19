@@ -4,8 +4,8 @@ import com.gvxwsur.unified_taming.entity.types.TamableEnvironment;
 
 public interface EnvironmentHelper {
 
-    public TamableEnvironment tamabletool$getEnvironment();
+    public TamableEnvironment unified_taming$getEnvironment();
 
-    public void tamabletool$setEnvironment(TamableEnvironment environment);
+    public void unified_taming$setEnvironment(TamableEnvironment environment);
 
 }

@@ -26,7 +26,7 @@ public class MessageSender {
         if (!checkSendCondition(mob, pActionBar)) {
             return;
         }
-        player.displayClientMessage(Component.translatable("tamabletool.tame", mob.getDisplayName()), pActionBar);
+        player.displayClientMessage(Component.translatable("unified_taming.tame", mob.getDisplayName()), pActionBar);
     }
 
     public static void sendDeathMessage(Mob mob, Component deathMessage, boolean pActionBar) {
@@ -45,8 +45,8 @@ public class MessageSender {
             return;
         }
         if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
-            String command = ((CommandEntity) mob).tamabletool$getCommand().toString().toLowerCase(Locale.ROOT);
-            player.displayClientMessage(Component.translatable("tamabletool.command." + command, mob.getDisplayName()), pActionBar);
+            String command = ((CommandEntity) mob).unified_taming$getCommand().toString().toLowerCase(Locale.ROOT);
+            player.displayClientMessage(Component.translatable("unified_taming.command." + command, mob.getDisplayName()), pActionBar);
         }
     }
 
@@ -55,7 +55,7 @@ public class MessageSender {
             return;
         }
         if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
-            player.displayClientMessage(Component.translatable("tamabletool.ride." + (manual ? "manual" : "automatic"), mob.getDisplayName()), pActionBar);
+            player.displayClientMessage(Component.translatable("unified_taming.ride." + (manual ? "manual" : "automatic"), mob.getDisplayName()), pActionBar);
         }
     }
 
@@ -64,7 +64,7 @@ public class MessageSender {
             return;
         }
         if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
-            player.displayClientMessage(Component.translatable("tamabletool.convert", mob.getDisplayName(), outcomeMob.getDisplayName()), pActionBar);
+            player.displayClientMessage(Component.translatable("unified_taming.convert", mob.getDisplayName(), outcomeMob.getDisplayName()), pActionBar);
         }
     }
 
@@ -73,7 +73,7 @@ public class MessageSender {
             return;
         }
         if (((TamableEntity) mob).getOwner() instanceof ServerPlayer player) {
-            player.displayClientMessage(Component.translatable("tamabletool.hurt.follow", mob.getDisplayName()), pActionBar);
+            player.displayClientMessage(Component.translatable("unified_taming.hurt.follow", mob.getDisplayName()), pActionBar);
         }
     }
 }

@@ -37,7 +37,7 @@ public class CustomLookAtOwnerGoal extends Goal {
         this.onlyHorizontal = p_148122_;
         this.setFlags(EnumSet.of(Goal.Flag.LOOK));
         this.lookAtContext = TargetingConditions.forNonCombat().range((double) p_148120_).selector((p_25531_) -> {
-            return EntitySelector.notRiding(p_148118_).and(entity -> entity instanceof LivingEntity living && ((TamableEntity) p_148118_).tamabletool$isOwnedBy(living)).test(p_25531_);
+            return EntitySelector.notRiding(p_148118_).and(entity -> entity instanceof LivingEntity living && ((TamableEntity) p_148118_).unified_taming$isOwnedBy(living)).test(p_25531_);
         });
     }
 

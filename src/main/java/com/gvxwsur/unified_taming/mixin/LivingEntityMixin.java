@@ -34,7 +34,7 @@ public abstract class LivingEntityMixin extends Entity implements Attackable, IF
     public void baseTick(CallbackInfo ci) {
         if (this.isAlive()) {
             if (this.getEyeInFluidType().isAir()) {
-                if (!this.level().isClientSide && this.isPassenger() && this.getVehicle() != null && this.getVehicle().onGround() && !((RideableEntity) this.getVehicle()).tamabletool$canBeRiddenInAir(this)) {
+                if (!this.level().isClientSide && this.isPassenger() && this.getVehicle() != null && this.getVehicle().onGround() && !((RideableEntity) this.getVehicle()).unified_taming$canBeRiddenInAir(this)) {
                     this.stopRiding();
                 }
             }
@@ -43,15 +43,15 @@ public abstract class LivingEntityMixin extends Entity implements Attackable, IF
 
     @Inject(method = "travelRidden", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;travel(Lnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.AFTER))
     private void travelRidden(Player p_278244_, Vec3 p_278231_, CallbackInfo ci) {
-        ((RideableEntity) this).tamabletool$travel(p_278231_);
+        ((RideableEntity) this).unified_taming$travel(p_278231_);
     }
 
-    public void tamabletool$setLastHurtByPlayer(@Nullable Player pPlayer, int time) {
+    public void unified_taming$setLastHurtByPlayer(@Nullable Player pPlayer, int time) {
         this.lastHurtByPlayer = pPlayer;
         this.lastHurtByPlayerTime = time;
     }
 
-    public void tamabletool$setLastHurtByMob(@Nullable LivingEntity p_21039_, int timestamp) {
+    public void unified_taming$setLastHurtByMob(@Nullable LivingEntity p_21039_, int timestamp) {
         this.lastHurtByMob = p_21039_;
         this.lastHurtByMobTimestamp = timestamp;
     }

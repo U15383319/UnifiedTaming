@@ -8,25 +8,25 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public interface InteractEntity {
 
-    public boolean tamabletool$isFood(ItemStack stack);
+    public boolean unified_taming$isFood(ItemStack stack);
 
-    public boolean tamabletool$isRider(ItemStack stack);
+    public boolean unified_taming$isRider(ItemStack stack);
 
-    public boolean tamabletool$isCommander(ItemStack stack);
+    public boolean unified_taming$isCommander(ItemStack stack);
 
-    public boolean tamabletool$isRideModeSwitcher(ItemStack stack);
+    public boolean unified_taming$isRideModeSwitcher(ItemStack stack);
 
-    public boolean tamabletool$isMoveModeSwitcher(ItemStack stack);
+    public boolean unified_taming$isMoveModeSwitcher(ItemStack stack);
 
-    public boolean tamabletool$isCarrier(ItemStack stack);
+    public boolean unified_taming$isCarrier(ItemStack stack);
 
-    public boolean tamabletool$isCarryReleaser(ItemStack stack);
+    public boolean unified_taming$isCarryReleaser(ItemStack stack);
 
-    public boolean tamabletool$isTamer(ItemStack stack);
+    public boolean unified_taming$isTamer(ItemStack stack);
 
-    public boolean tamabletool$isTamingConditionSatisfied();
+    public boolean unified_taming$isTamingConditionSatisfied();
 
-    public default boolean tamabletool$isCheatTamer(ItemStack stack) {
+    public default boolean unified_taming$isCheatTamer(ItemStack stack) {
         ResourceLocation location = new ResourceLocation(UnifiedTamingConfig.cheatTameItem.get());
         if (ForgeRegistries.ITEMS.containsKey(location)) {
             return stack.is(ForgeRegistries.ITEMS.getValue(location));
@@ -34,7 +34,7 @@ public interface InteractEntity {
         return stack.is(Items.STRUCTURE_VOID);
     }
 
-    public default boolean tamabletool$isModAssistant(ItemStack stack) {
+    public default boolean unified_taming$isModAssistant(ItemStack stack) {
         if (!UnifiedTamingConfig.needModAssistItem.get()) {
             return true;
         }

@@ -8,21 +8,21 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 
 public interface TamableEntity extends OwnableEntity {
-    public boolean tamabletool$canTameAttack(LivingEntity livingEntity);
+    public boolean unified_taming$canTameAttack(LivingEntity livingEntity);
 
-    public UUID tamabletool$getOwnerUUID();
+    public UUID unified_taming$getOwnerUUID();
 
-    public boolean tamabletool$isTame();
+    public boolean unified_taming$isTame();
 
-    public void tamabletool$setTame(boolean p_21836_);
+    public void unified_taming$setTame(boolean p_21836_);
 
-    public boolean tamabletool$isInSittingPose();
+    public boolean unified_taming$isInSittingPose();
 
-    public void tamabletool$setOwnerUUID(@Nullable UUID p_21817_);
+    public void unified_taming$setOwnerUUID(@Nullable UUID p_21817_);
 
-    public void tamabletool$tame(Player p_21829_);
+    public void unified_taming$tame(Player p_21829_);
 
-    public boolean tamabletool$isOwnedBy(LivingEntity p_21831_);
+    public boolean unified_taming$isOwnedBy(LivingEntity p_21831_);
 
-    public void tamabletool$registerTameGoals();
+    public void unified_taming$registerTameGoals();
 }

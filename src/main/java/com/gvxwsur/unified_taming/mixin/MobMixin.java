@@ -92,77 +92,77 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public abstract void setBaby(boolean p_21451_);
 
     @Unique
-    private static final EntityDataAccessor<Byte> tamabletool$DATA_FLAGS_ID; // sit 0 manual 1 tame(0) 2 tame(1) 3 baby 4
+    private static final EntityDataAccessor<Byte> unified_taming$DATA_FLAGS_ID; // sit 0 manual 1 tame(0) 2 tame(1) 3 baby 4
 
     @Unique
-    private static final EntityDataAccessor<Optional<UUID>> tamabletool$DATA_OWNERUUID_ID;
+    private static final EntityDataAccessor<Optional<UUID>> unified_taming$DATA_OWNERUUID_ID;
 
     @Unique
-    private TamableCommand tamabletool$command;
+    private TamableCommand unified_taming$command;
 
     @Unique
-    private static final EntityDataAccessor<Optional<UUID>> tamabletool$DATA_NONPLAYEROWNERUUID_ID;
+    private static final EntityDataAccessor<Optional<UUID>> unified_taming$DATA_NONPLAYEROWNERUUID_ID;
 
     @Unique
-    private static final EntityDataAccessor<Byte> tamabletool$DATA_TYPES_ID; // environment 0 1 2 3
+    private static final EntityDataAccessor<Byte> unified_taming$DATA_TYPES_ID; // environment 0 1 2 3
 
     @Unique
-    private boolean tamabletool$keyForward;
+    private boolean unified_taming$keyForward;
     @Unique
-    private boolean tamabletool$keyBack;
+    private boolean unified_taming$keyBack;
     @Unique
-    private boolean tamabletool$keyLeft;
+    private boolean unified_taming$keyLeft;
     @Unique
-    private boolean tamabletool$keyRight;
+    private boolean unified_taming$keyRight;
 
     @Unique
-    private boolean tamabletool$isManual;
+    private boolean unified_taming$isManual;
 
     @Unique
-    private TamableEnvironment tamabletool$environment;
+    private TamableEnvironment unified_taming$environment;
 
     @Unique
-    private int tamabletool$inLove;
+    private int unified_taming$inLove;
 
     protected MobMixin(EntityType<? extends LivingEntity> p_21683_, Level p_21684_) {
         super(p_21683_, p_21684_);
-        this.tamabletool$keyForward = false;
-        this.tamabletool$keyBack = false;
-        this.tamabletool$keyLeft = false;
-        this.tamabletool$keyRight = false;
+        this.unified_taming$keyForward = false;
+        this.unified_taming$keyBack = false;
+        this.unified_taming$keyLeft = false;
+        this.unified_taming$keyRight = false;
     }
 
     @Unique
     @OnlyIn(Dist.CLIENT)
-    private static boolean tamabletool$keyForward() {
+    private static boolean unified_taming$keyForward() {
         return Minecraft.getInstance().options.keyUp.isDown();
     }
 
     @Unique
     @OnlyIn(Dist.CLIENT)
-    private static boolean tamabletool$keyBack() {
+    private static boolean unified_taming$keyBack() {
         return Minecraft.getInstance().options.keyDown.isDown();
     }
 
     @Unique
     @OnlyIn(Dist.CLIENT)
-    private static boolean tamabletool$keyLeft() {
+    private static boolean unified_taming$keyLeft() {
         return Minecraft.getInstance().options.keyLeft.isDown();
     }
 
     @Unique
     @OnlyIn(Dist.CLIENT)
-    private static boolean tamabletool$keyRight() {
+    private static boolean unified_taming$keyRight() {
         return Minecraft.getInstance().options.keyRight.isDown();
     }
 
 
     @Inject(method = "defineSynchedData", at = @At("TAIL"))
     protected void defineSynchedData(CallbackInfo ci) {
-        this.entityData.define(tamabletool$DATA_FLAGS_ID, (byte) 0);
-        this.entityData.define(tamabletool$DATA_OWNERUUID_ID, Optional.empty());
-        this.entityData.define(tamabletool$DATA_NONPLAYEROWNERUUID_ID, Optional.empty());
-        this.entityData.define(tamabletool$DATA_TYPES_ID, (byte) 0);
+        this.entityData.define(unified_taming$DATA_FLAGS_ID, (byte) 0);
+        this.entityData.define(unified_taming$DATA_OWNERUUID_ID, Optional.empty());
+        this.entityData.define(unified_taming$DATA_NONPLAYEROWNERUUID_ID, Optional.empty());
+        this.entityData.define(unified_taming$DATA_TYPES_ID, (byte) 0);
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
@@ -171,20 +171,20 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             compoundTag.putUUID("Owner", this.getOwnerUUID());
         }
 
-        if (this.tamabletool$getOwnerUUID() != null) {
-            compoundTag.putUUID("PlayerOwner", this.tamabletool$getOwnerUUID());
+        if (this.unified_taming$getOwnerUUID() != null) {
+            compoundTag.putUUID("PlayerOwner", this.unified_taming$getOwnerUUID());
         }
 
-        if (this.tamabletool$getNonPlayerOwnerUUID() != null) {
-            compoundTag.putUUID("NonPlayerOwner", this.tamabletool$getNonPlayerOwnerUUID());
+        if (this.unified_taming$getNonPlayerOwnerUUID() != null) {
+            compoundTag.putUUID("NonPlayerOwner", this.unified_taming$getNonPlayerOwnerUUID());
         }
 
-        if (this.tamabletool$getOwnerUUID() != null && this.tamabletool$getNonPlayerOwnerUUID() == null) {
-            compoundTag.putInt("Command", this.tamabletool$getCommand().ordinal());
-            compoundTag.putBoolean("RideMode", this.tamabletool$isManual());
-            compoundTag.putInt("Environment", this.tamabletool$getEnvironment().ordinal());
-            compoundTag.putBoolean("IsBaby", this.tamabletool$isBaby());
-            compoundTag.putInt("InLove", this.tamabletool$getInLoveTime());
+        if (this.unified_taming$getOwnerUUID() != null && this.unified_taming$getNonPlayerOwnerUUID() == null) {
+            compoundTag.putInt("Command", this.unified_taming$getCommand().ordinal());
+            compoundTag.putBoolean("RideMode", this.unified_taming$isManual());
+            compoundTag.putInt("Environment", this.unified_taming$getEnvironment().ordinal());
+            compoundTag.putBoolean("IsBaby", this.unified_taming$isBaby());
+            compoundTag.putInt("InLove", this.unified_taming$getInLoveTime());
         }
     }
 
@@ -201,10 +201,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         /*
         if (uuid != null) {
             try {
-                this.tamabletool$setOwnerUUID(uuid);
-                this.tamabletool$setTame(true);
+                this.unified_taming$setOwnerUUID(uuid);
+                this.unified_taming$setTame(true);
             } catch (Throwable var4) {
-                this.tamabletool$setTame(false);
+                this.unified_taming$setTame(false);
             }
         }
         */
@@ -219,10 +219,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
         if (playerUUID != null) {
             try {
-                this.tamabletool$setOwnerUUID(playerUUID);
-                this.tamabletool$setTame(true);
+                this.unified_taming$setOwnerUUID(playerUUID);
+                this.unified_taming$setTame(true);
             } catch (Throwable var4) {
-                this.tamabletool$setTame(false);
+                this.unified_taming$setTame(false);
             }
         }
 
@@ -235,29 +235,29 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
         if (nonPlayerUUID != null) {
             try {
-                this.tamabletool$setNonPlayerOwnerUUID(nonPlayerUUID);
-                this.tamabletool$setTameNonPlayer(true);
+                this.unified_taming$setNonPlayerOwnerUUID(nonPlayerUUID);
+                this.unified_taming$setTameNonPlayer(true);
             } catch (Throwable var4) {
-                this.tamabletool$setTameNonPlayer(false);
+                this.unified_taming$setTameNonPlayer(false);
             }
         }
 
         if (playerUUID != null && nonPlayerUUID == null) {
-            this.tamabletool$setCommand(TamableCommand.values()[compoundTag.getInt("Command")]);
-            this.tamabletool$setManual(compoundTag.getBoolean("RideMode"));
-            this.tamabletool$setEnvironment(TamableEnvironment.values()[compoundTag.getInt("Environment")]);
+            this.unified_taming$setCommand(TamableCommand.values()[compoundTag.getInt("Command")]);
+            this.unified_taming$setManual(compoundTag.getBoolean("RideMode"));
+            this.unified_taming$setEnvironment(TamableEnvironment.values()[compoundTag.getInt("Environment")]);
             this.setBaby(compoundTag.getBoolean("IsBaby"));
-            this.tamabletool$setBaby(compoundTag.getBoolean("IsBaby"));
-            this.tamabletool$setInLoveTime(compoundTag.getInt("InLove"));
+            this.unified_taming$setBaby(compoundTag.getBoolean("IsBaby"));
+            this.unified_taming$setInLoveTime(compoundTag.getInt("InLove"));
         }
 
         if ((uuid != null || playerUUID != null) && nonPlayerUUID == null) {
-            this.tamabletool$registerTameGoals();
+            this.unified_taming$registerTameGoals();
         }
     }
 
     @Unique
-    public void tamabletool$registerTameGoals() {
+    public void unified_taming$registerTameGoals() {
         this.goalSelector.addGoal(1, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
         this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, 1.0, 10.0F, 2.0F));
         this.goalSelector.addGoal(7, new CustomBreedGoal((Mob) (Object) this, 1.0));
@@ -274,23 +274,23 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public void aiStep(CallbackInfo ci) {
         if (this.isAlive()) {
             if (!this.firstTick && this.tickCount % 20 == 0) {
-                if (this.getOwnerUUID() != null && this.getOwnerUUID() != this.tamabletool$getOwnerUUID()) {
-                    this.tamabletool$setOwnerUUID(this.getOwnerUUID());
-                    this.tamabletool$setTame(true);
+                if (this.getOwnerUUID() != null && this.getOwnerUUID() != this.unified_taming$getOwnerUUID()) {
+                    this.unified_taming$setOwnerUUID(this.getOwnerUUID());
+                    this.unified_taming$setTame(true);
                 }
-                if (this.isBaby() != this.tamabletool$isBaby()) {
-                    this.tamabletool$setBaby(this.isBaby());
+                if (this.isBaby() != this.unified_taming$isBaby()) {
+                    this.unified_taming$setBaby(this.isBaby());
                 }
             }
 
-            if (this.tamabletool$isTame()) {
-                int inLove = this.tamabletool$getInLoveTime();
+            if (this.unified_taming$isTame()) {
+                int inLove = this.unified_taming$getInLoveTime();
                 if (inLove < 0) {
                     ++inLove;
-                    this.tamabletool$setInLoveTime(inLove);
+                    this.unified_taming$setInLoveTime(inLove);
                 } else if (inLove > 0) {
                     --inLove;
-                    this.tamabletool$setInLoveTime(inLove);
+                    this.unified_taming$setInLoveTime(inLove);
                     if (inLove % 10 == 0) {
                         double d0 = this.random.nextGaussian() * 0.02;
                         double d1 = this.random.nextGaussian() * 0.02;
@@ -304,11 +304,11 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Override
     public boolean hurt(DamageSource p_21016_, float p_21017_) {
-        this.tamabletool$setInLoveTime(0);
+        this.unified_taming$setInLoveTime(0);
         Entity source = p_21016_.getEntity();
-        if (!(source instanceof Player player && this.tamabletool$isOwnedBy(player))) {
-            if (this.tamabletool$isOrderedToSit()) {
-                this.tamabletool$setOrderedToFollow(true);
+        if (!(source instanceof Player player && this.unified_taming$isOwnedBy(player))) {
+            if (this.unified_taming$isOrderedToSit()) {
+                this.unified_taming$setOrderedToFollow(true);
                 if (!this.level().isClientSide) {
                     MessageSender.sendHurtWhenStopMessage((Mob) (Object) this, false);
                 }
@@ -317,23 +317,23 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return super.hurt(p_21016_, p_21017_);
     }
 
-    public void tamabletool$travel(Vec3 vec3) {
+    public void unified_taming$travel(Vec3 vec3) {
         Entity entity = this.getControllingPassenger();
         if (entity instanceof Player player && this.isVehicle()) {
             if (level().isClientSide) {
-                tamabletool$keyForward = tamabletool$keyForward();
-                tamabletool$keyBack = tamabletool$keyBack();
-                tamabletool$keyLeft = tamabletool$keyLeft();
-                tamabletool$keyRight = tamabletool$keyRight();
+                unified_taming$keyForward = unified_taming$keyForward();
+                unified_taming$keyBack = unified_taming$keyBack();
+                unified_taming$keyLeft = unified_taming$keyLeft();
+                unified_taming$keyRight = unified_taming$keyRight();
             }
 
-            float strafe = tamabletool$keyLeft ? 0.5f : (tamabletool$keyRight ? -0.5f : 0);
-            float vertical = tamabletool$keyForward ? -(player.getXRot() - 10) / 22.5f : 0;
-            float forward = tamabletool$keyForward ? 3 : (tamabletool$keyBack ? -0.5f : 0);
+            float strafe = unified_taming$keyLeft ? 0.5f : (unified_taming$keyRight ? -0.5f : 0);
+            float vertical = unified_taming$keyForward ? -(player.getXRot() - 10) / 22.5f : 0;
+            float forward = unified_taming$keyForward ? 3 : (unified_taming$keyBack ? -0.5f : 0);
 
-            boolean canVerticalMove = this.tamabletool$getEnvironment().isFly()
-                    || (this.tamabletool$getEnvironment().isWaterSwim() && this.isInWater())
-                    || (this.tamabletool$getEnvironment().isLavaSwim() && this.isInLava());
+            boolean canVerticalMove = this.unified_taming$getEnvironment().isFly()
+                    || (this.unified_taming$getEnvironment().isWaterSwim() && this.isInWater())
+                    || (this.unified_taming$getEnvironment().isLavaSwim() && this.isInLava());
             vertical = canVerticalMove ? vertical : 0;
 
             float speed = (float) (this.getAttributeValue(Attributes.MOVEMENT_SPEED) * Mth.clamp(UnifiedTamingConfig.rideSpeedModifier.get(), 0.0, 1.0));
@@ -355,9 +355,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "getControllingPassenger", at = @At("HEAD"), cancellable = true)
     public void getControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
-        if (this.tamabletool$isTame()) {
+        if (this.unified_taming$isTame()) {
             Entity entity = this.getFirstPassenger();
-            if (entity instanceof Player player && this.tamabletool$isManual()) {
+            if (entity instanceof Player player && this.unified_taming$isManual()) {
                 cir.setReturnValue(player);
             } else {
                 cir.setReturnValue(null);
@@ -376,7 +376,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     @Unique
-    protected void tamabletool$spawnTamingParticles(boolean p_21835_) {
+    protected void unified_taming$spawnTamingParticles(boolean p_21835_) {
         ParticleOptions particleoptions = ParticleTypes.HEART;
         if (!p_21835_) {
             particleoptions = ParticleTypes.SMOKE;
@@ -394,9 +394,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     @Inject(method = "handleEntityEvent", at = @At("HEAD"))
     public void handleEntityEvent(byte p_21807_, CallbackInfo ci) {
         if (p_21807_ == 7) {
-            this.tamabletool$spawnTamingParticles(true);
+            this.unified_taming$spawnTamingParticles(true);
         } else if (p_21807_ == 6) {
-            this.tamabletool$spawnTamingParticles(false);
+            this.unified_taming$spawnTamingParticles(false);
         } else if (p_21807_ == 18) {
             for (int i = 0; i < 7; ++i) {
                 double d0 = this.random.nextGaussian() * 0.02;
@@ -407,49 +407,49 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         }
     }
 
-    public boolean tamabletool$isTame() {
-        return (this.entityData.get(tamabletool$DATA_FLAGS_ID) & 4) != 0;
+    public boolean unified_taming$isTame() {
+        return (this.entityData.get(unified_taming$DATA_FLAGS_ID) & 4) != 0;
     }
 
-    public void tamabletool$setTame(boolean p_21836_) {
-        byte b0 = this.entityData.get(tamabletool$DATA_FLAGS_ID);
+    public void unified_taming$setTame(boolean p_21836_) {
+        byte b0 = this.entityData.get(unified_taming$DATA_FLAGS_ID);
         if (p_21836_) {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 | 4));
+            this.entityData.set(unified_taming$DATA_FLAGS_ID, (byte) (b0 | 4));
         } else {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 & -5));
+            this.entityData.set(unified_taming$DATA_FLAGS_ID, (byte) (b0 & -5));
         }
     }
 
     @Nullable
     public UUID getOwnerUUID() {
-        return tamabletool$getOwnerUUID();
+        return unified_taming$getOwnerUUID();
     }
 
     @Nullable
-    public UUID tamabletool$getOwnerUUID() {
-        return (UUID) ((Optional) this.entityData.get(tamabletool$DATA_OWNERUUID_ID)).orElse(null);
+    public UUID unified_taming$getOwnerUUID() {
+        return (UUID) ((Optional) this.entityData.get(unified_taming$DATA_OWNERUUID_ID)).orElse(null);
     }
 
-    public void tamabletool$setOwnerUUID(@Nullable UUID p_21817_) {
-        this.entityData.set(tamabletool$DATA_OWNERUUID_ID, Optional.ofNullable(p_21817_));
+    public void unified_taming$setOwnerUUID(@Nullable UUID p_21817_) {
+        this.entityData.set(unified_taming$DATA_OWNERUUID_ID, Optional.ofNullable(p_21817_));
     }
 
-    public void tamabletool$tame(Player player) {
-        this.tamabletool$setTame(true);
-        this.tamabletool$setOwnerUUID(player.getUUID());
+    public void unified_taming$tame(Player player) {
+        this.unified_taming$setTame(true);
+        this.unified_taming$setOwnerUUID(player.getUUID());
         if (player instanceof ServerPlayer player1) {
-            ((AnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).tamabletool$TameAnimal$trigger(player1, (Mob) (Object) this);
+            ((AnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).unified_taming$TameAnimal$trigger(player1, (Mob) (Object) this);
         }
-        this.tamabletool$registerTameGoals();
+        this.unified_taming$registerTameGoals();
     }
 
     @Override
     public boolean canAttack(@NotNull LivingEntity livingEntity) {
-        return this.tamabletool$canTameAttack(livingEntity) && super.canAttack(livingEntity);
+        return this.unified_taming$canTameAttack(livingEntity) && super.canAttack(livingEntity);
     }
 
-    public boolean tamabletool$canTameAttack(LivingEntity livingEntity) {
-        if (this.tamabletool$isOwnedBy(livingEntity)) {
+    public boolean unified_taming$canTameAttack(LivingEntity livingEntity) {
+        if (this.unified_taming$isOwnedBy(livingEntity)) {
             return false;
         }
         if (livingEntity instanceof Mob mob && UnifiedTamingUtils.hasSameOwner((Mob) (Object) this, mob)) {
@@ -469,13 +469,13 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return true;
     }
 
-    public boolean tamabletool$isOwnedBy(LivingEntity p_21831_) {
+    public boolean unified_taming$isOwnedBy(LivingEntity p_21831_) {
         return p_21831_ == this.getOwner();
     }
 
     @Override
     public Team getTeam() {
-        if (this.tamabletool$isTame()) {
+        if (this.unified_taming$isTame()) {
             LivingEntity livingentity = this.getOwner();
             if (livingentity != null) {
                 return livingentity.getTeam();
@@ -487,7 +487,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Override
     public boolean isAlliedTo(Entity p_21833_) {
-        if (this.tamabletool$isTame()) {
+        if (this.unified_taming$isTame()) {
             LivingEntity livingentity = this.getOwner();
             if (p_21833_ == livingentity) {
                 return true;
@@ -513,12 +513,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         }
     }
 
-    public TamableCommand tamabletool$getCommand() {
-        return this.tamabletool$command == null ? TamableCommand.FOLLOW : this.tamabletool$command;
+    public TamableCommand unified_taming$getCommand() {
+        return this.unified_taming$command == null ? TamableCommand.FOLLOW : this.unified_taming$command;
     }
 
-    public void tamabletool$setCommand(TamableCommand command) {
-        this.tamabletool$command = command;
+    public void unified_taming$setCommand(TamableCommand command) {
+        this.unified_taming$command = command;
         if (!((Mob) (Object) this instanceof TamableAnimal && !UnifiedTamingConfig.compatibleVanillaTamableMovingGoals.get())) {
             if (command == TamableCommand.STROLL) {
                 this.restrictTo(this.blockPosition(), 16);
@@ -532,51 +532,51 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     static {
-        tamabletool$DATA_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
-        tamabletool$DATA_OWNERUUID_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.OPTIONAL_UUID);
-        tamabletool$DATA_NONPLAYEROWNERUUID_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.OPTIONAL_UUID);
-        tamabletool$DATA_TYPES_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
+        unified_taming$DATA_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
+        unified_taming$DATA_OWNERUUID_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.OPTIONAL_UUID);
+        unified_taming$DATA_NONPLAYEROWNERUUID_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.OPTIONAL_UUID);
+        unified_taming$DATA_TYPES_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
     }
 
-    public boolean tamabletool$isFood(ItemStack stack) {
+    public boolean unified_taming$isFood(ItemStack stack) {
         return stack.isEdible();
     }
 
-    public boolean tamabletool$isRider(ItemStack stack) {
+    public boolean unified_taming$isRider(ItemStack stack) {
         return stack.isEmpty();
     }
 
-    public boolean tamabletool$isCommander(ItemStack stack) {
+    public boolean unified_taming$isCommander(ItemStack stack) {
         return stack.isEmpty();
     }
 
-    public boolean tamabletool$isRideModeSwitcher(ItemStack stack) {
+    public boolean unified_taming$isRideModeSwitcher(ItemStack stack) {
         return stack.is(Items.COMPASS);
     }
 
-    public boolean tamabletool$isMoveModeSwitcher(ItemStack stack) {
+    public boolean unified_taming$isMoveModeSwitcher(ItemStack stack) {
         return stack.is(Items.COMPASS);
     }
 
-    public boolean tamabletool$isTamer(ItemStack stack) {
+    public boolean unified_taming$isTamer(ItemStack stack) {
         return stack.is(Items.BOOK);
     }
 
-    public boolean tamabletool$isCarrier(ItemStack stack) {
+    public boolean unified_taming$isCarrier(ItemStack stack) {
         return stack.is(Items.CLOCK);
     }
 
-    public boolean tamabletool$isCarryReleaser(ItemStack stack) {
+    public boolean unified_taming$isCarryReleaser(ItemStack stack) {
         return stack.is(Items.CLOCK);
     }
 
-    public boolean tamabletool$isTamingConditionSatisfied() {
+    public boolean unified_taming$isTamingConditionSatisfied() {
         return this.getHealth() <= Mth.clamp(this.getMaxHealth() / 5, 4.0, 12.0);
     }
 
     @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
     public final void interact(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        InteractionResult interactionresult = this.tamabletool$tameInteract(player, hand);
+        InteractionResult interactionresult = this.unified_taming$tameInteract(player, hand);
         if (interactionresult.consumesAction()) {
             this.gameEvent(GameEvent.ENTITY_INTERACT, player);
             cir.setReturnValue(interactionresult);
@@ -584,16 +584,16 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     }
 
     @Unique
-    public InteractionResult tamabletool$tameInteract(Player player, InteractionHand hand) {
+    public InteractionResult unified_taming$tameInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         ItemStack assistItemstack = hand == InteractionHand.MAIN_HAND ? player.getOffhandItem() : player.getMainHandItem();
-        if (this.tamabletool$isModAssistant(assistItemstack)) {
+        if (this.unified_taming$isModAssistant(assistItemstack)) {
             if (this.level().isClientSide) {
                 // client side
-                boolean flag = this.tamabletool$isTame() || (this.tamabletool$isTamer(itemstack) || this.tamabletool$isCheatTamer(itemstack)) && !this.tamabletool$isTame();
-                boolean flag2 = UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player) && !player.isSecondaryUseActive() && this.tamabletool$isRider(itemstack) && !this.isVehicle() && !this.tamabletool$isBaby();
-                boolean flag3 = this.tamabletool$isTame() && this.tamabletool$isBaby() && this.tamabletool$isFood(itemstack) && this.getHealth() >= this.getMaxHealth();
-                boolean flag4 = UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player) && !player.isSecondaryUseActive() && this.tamabletool$isCarrier(itemstack) && !player.isVehicle() && !player.isBaby();
+                boolean flag = this.unified_taming$isTame() || (this.unified_taming$isTamer(itemstack) || this.unified_taming$isCheatTamer(itemstack)) && !this.unified_taming$isTame();
+                boolean flag2 = UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player) && !player.isSecondaryUseActive() && this.unified_taming$isRider(itemstack) && !this.isVehicle() && !this.unified_taming$isBaby();
+                boolean flag3 = this.unified_taming$isTame() && this.unified_taming$isBaby() && this.unified_taming$isFood(itemstack) && this.getHealth() >= this.getMaxHealth();
+                boolean flag4 = UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player) && !player.isSecondaryUseActive() && this.unified_taming$isCarrier(itemstack) && !player.isVehicle() && !player.isBaby();
                 if (flag2) {
                     player.startRiding(this);
                 }
@@ -617,8 +617,8 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 }
             } else {
                 // server side
-                if (this.tamabletool$isTame()) {
-                    if (this.tamabletool$isFood(itemstack)) {
+                if (this.unified_taming$isTame()) {
+                    if (this.unified_taming$isFood(itemstack)) {
                         if (this.getHealth() < this.getMaxHealth()) {
                             if (itemstack.isEdible()) {
                                 FoodProperties foodProperties = itemstack.getFoodProperties(this);
@@ -628,7 +628,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                             this.eat(this.level(), itemstack);
                             return InteractionResult.SUCCESS;
                         }
-                        if (this.tamabletool$isBaby()) {
+                        if (this.unified_taming$isBaby()) {
                             if ((Mob) (Object) this instanceof AgeableMob ageableMob) {
                                 if (!player.getAbilities().instabuild) {
                                     itemstack.shrink(1);
@@ -639,18 +639,18 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                         }
                     } else {
                         if (UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player)) {
-                            if (this.tamabletool$isBreedFood(itemstack)) {
-                                if (this.tamabletool$canFallInLove()) {
+                            if (this.unified_taming$isBreedFood(itemstack)) {
+                                if (this.unified_taming$canFallInLove()) {
                                     if (!player.getAbilities().instabuild) {
                                         itemstack.shrink(1);
                                     }
-                                    this.tamabletool$setInLove();
+                                    this.unified_taming$setInLove();
                                     return InteractionResult.SUCCESS;
                                 }
                             }
-                            if (this.tamabletool$isCommander(itemstack)) {
+                            if (this.unified_taming$isCommander(itemstack)) {
                                 if (player.isSecondaryUseActive()) {
-                                    this.tamabletool$setOrderedToSit(!this.tamabletool$isOrderedToSit());
+                                    this.unified_taming$setOrderedToSit(!this.unified_taming$isOrderedToSit());
                                     MessageSender.sendCommandMessage((Mob) (Object) this, true);
                                     this.jumping = false;
                                     this.navigation.stop();
@@ -658,16 +658,16 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                                     return InteractionResult.SUCCESS;
                                 }
                             }
-                            if (this.tamabletool$isRider(itemstack)) {
+                            if (this.unified_taming$isRider(itemstack)) {
                                 if (!player.isSecondaryUseActive()
-                                        && !this.isVehicle() && !this.tamabletool$isBaby()) {
+                                        && !this.isVehicle() && !this.unified_taming$isBaby()) {
                                     player.startRiding(this);
                                     return InteractionResult.CONSUME;
                                 }
                             }
-                            if (this.tamabletool$isMoveModeSwitcher(itemstack)) {
+                            if (this.unified_taming$isMoveModeSwitcher(itemstack)) {
                                 if (player.isSecondaryUseActive()) {
-                                    this.tamabletool$setOrderedToStroll(!this.tamabletool$isOrderedToStroll());
+                                    this.unified_taming$setOrderedToStroll(!this.unified_taming$isOrderedToStroll());
                                     MessageSender.sendCommandMessage((Mob) (Object) this, true);
                                     this.jumping = false;
                                     this.navigation.stop();
@@ -675,15 +675,15 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                                     return InteractionResult.SUCCESS;
                                 }
                             }
-                            if (this.tamabletool$isRideModeSwitcher(itemstack)) {
+                            if (this.unified_taming$isRideModeSwitcher(itemstack)) {
                                 if (!player.isSecondaryUseActive()
-                                        && !this.tamabletool$isBaby()) {
-                                    this.tamabletool$setManual(!this.tamabletool$isManual());
-                                    MessageSender.sendRideModeSwitchMessage((Mob) (Object) this, this.tamabletool$isManual(), true);
+                                        && !this.unified_taming$isBaby()) {
+                                    this.unified_taming$setManual(!this.unified_taming$isManual());
+                                    MessageSender.sendRideModeSwitchMessage((Mob) (Object) this, this.unified_taming$isManual(), true);
                                     return InteractionResult.SUCCESS;
                                 }
                             }
-                            if (this.tamabletool$isCarrier(itemstack)) {
+                            if (this.unified_taming$isCarrier(itemstack)) {
                                 if (!player.isSecondaryUseActive() && !player.isVehicle() && !player.isBaby()) {
                                     this.startRiding(player);
                                     return InteractionResult.CONSUME;
@@ -693,21 +693,21 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                         return InteractionResult.PASS;
                     }
                 } else {
-                    if ((this.tamabletool$isTamer(itemstack) && this.tamabletool$isTamingConditionSatisfied()) || this.tamabletool$isCheatTamer(itemstack)) {
+                    if ((this.unified_taming$isTamer(itemstack) && this.unified_taming$isTamingConditionSatisfied()) || this.unified_taming$isCheatTamer(itemstack)) {
                         if (!((Mob) (Object) this instanceof TamableAnimal && !UnifiedTamingConfig.compatibleVanillaTamableTaming.get())) {
-                            if (this.tamabletool$isTamer(itemstack) && !player.getAbilities().instabuild) {
+                            if (this.unified_taming$isTamer(itemstack) && !player.getAbilities().instabuild) {
                                 itemstack.shrink(1);
                             }
 
-                            if (this.tamabletool$isCheatTamer(itemstack) || this.random.nextInt(3) == 0) {
-                                this.tamabletool$tame(player);
+                            if (this.unified_taming$isCheatTamer(itemstack) || this.random.nextInt(3) == 0) {
+                                this.unified_taming$tame(player);
                                 if ((Mob) (Object) this instanceof TamableAnimal tamableAnimal) {
                                     tamableAnimal.tame(player);
                                 }
                                 MessageSender.sendTamingMessage((Mob) (Object) this, player, true);
                                 this.navigation.stop();
                                 this.setTarget(null);
-                                // this.tamabletool$setOrderedToSit(true);
+                                // this.unified_taming$setOrderedToSit(true);
                                 this.level().broadcastEntityEvent(this, (byte) 7);
                             } else {
                                 this.level().broadcastEntityEvent(this, (byte) 6);
@@ -755,125 +755,125 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Override
     public boolean canBeRiddenUnderFluidType(FluidType type, Entity rider) {
-        if (!this.canDrownInFluidType(type) && this.tamabletool$getEnvironment().isFly()) {
+        if (!this.canDrownInFluidType(type) && this.unified_taming$getEnvironment().isFly()) {
             return true;
         }
         if (type == ForgeMod.WATER_TYPE.get()) {
-            return this.tamabletool$getEnvironment().isWaterSwim();
+            return this.unified_taming$getEnvironment().isWaterSwim();
         } else if (type == ForgeMod.LAVA_TYPE.get()) {
-            return this.tamabletool$getEnvironment().isLava();
+            return this.unified_taming$getEnvironment().isLava();
         }
         return super.canBeRiddenUnderFluidType(type, rider);
     }
 
-    public boolean tamabletool$canBeRiddenInAir(Entity rider) {
-        return !this.tamabletool$getEnvironment().isWaterSwim() || this.tamabletool$getEnvironment().isWalk();
+    public boolean unified_taming$canBeRiddenInAir(Entity rider) {
+        return !this.unified_taming$getEnvironment().isWaterSwim() || this.unified_taming$getEnvironment().isWalk();
     }
 
-    public UUID tamabletool$getNonPlayerOwnerUUID() {
-        return (UUID) ((Optional) this.entityData.get(tamabletool$DATA_NONPLAYEROWNERUUID_ID)).orElse(null);
+    public UUID unified_taming$getNonPlayerOwnerUUID() {
+        return (UUID) ((Optional) this.entityData.get(unified_taming$DATA_NONPLAYEROWNERUUID_ID)).orElse(null);
     }
 
-    public boolean tamabletool$isTameNonPlayer() {
-        return (this.entityData.get(tamabletool$DATA_FLAGS_ID) & 8) != 0;
+    public boolean unified_taming$isTameNonPlayer() {
+        return (this.entityData.get(unified_taming$DATA_FLAGS_ID) & 8) != 0;
     }
 
-    public void tamabletool$setTameNonPlayer(boolean p_21836_) {
-        byte b0 = this.entityData.get(tamabletool$DATA_FLAGS_ID);
+    public void unified_taming$setTameNonPlayer(boolean p_21836_) {
+        byte b0 = this.entityData.get(unified_taming$DATA_FLAGS_ID);
         if (p_21836_) {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 | 8));
+            this.entityData.set(unified_taming$DATA_FLAGS_ID, (byte) (b0 | 8));
         } else {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 & -9));
+            this.entityData.set(unified_taming$DATA_FLAGS_ID, (byte) (b0 & -9));
         }
     }
 
-    public void tamabletool$setNonPlayerOwnerUUID(@Nullable UUID p_21817_) {
-        this.entityData.set(tamabletool$DATA_NONPLAYEROWNERUUID_ID, Optional.ofNullable(p_21817_));
+    public void unified_taming$setNonPlayerOwnerUUID(@Nullable UUID p_21817_) {
+        this.entityData.set(unified_taming$DATA_NONPLAYEROWNERUUID_ID, Optional.ofNullable(p_21817_));
     }
 
-    public void tamabletool$tameNonPlayer(Mob p_21829_) {
-        this.tamabletool$setTameNonPlayer(true);
-        this.tamabletool$setNonPlayerOwnerUUID(p_21829_.getUUID());
+    public void unified_taming$tameNonPlayer(Mob p_21829_) {
+        this.unified_taming$setTameNonPlayer(true);
+        this.unified_taming$setNonPlayerOwnerUUID(p_21829_.getUUID());
     }
 
-    public boolean tamabletool$unableToMove() {
-        return this.tamabletool$isOrderedToSit() || this.isPassenger() || this.isLeashed();
+    public boolean unified_taming$unableToMove() {
+        return this.unified_taming$isOrderedToSit() || this.isPassenger() || this.isLeashed();
     }
 
-    public boolean tamabletool$isManual() {
+    public boolean unified_taming$isManual() {
         if (this.level().isClientSide) {
-            return (this.entityData.get(tamabletool$DATA_FLAGS_ID) & 2) != 0;
+            return (this.entityData.get(unified_taming$DATA_FLAGS_ID) & 2) != 0;
         } else {
-            return tamabletool$isManual;
+            return unified_taming$isManual;
         }
     }
 
-    public void tamabletool$setManual(boolean p_21836_) {
-        this.tamabletool$isManual = p_21836_;
-        byte b0 = this.entityData.get(tamabletool$DATA_FLAGS_ID);
+    public void unified_taming$setManual(boolean p_21836_) {
+        this.unified_taming$isManual = p_21836_;
+        byte b0 = this.entityData.get(unified_taming$DATA_FLAGS_ID);
         if (p_21836_) {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 | 2));
+            this.entityData.set(unified_taming$DATA_FLAGS_ID, (byte) (b0 | 2));
         } else {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 & -3));
+            this.entityData.set(unified_taming$DATA_FLAGS_ID, (byte) (b0 & -3));
         }
     }
 
     @Override
     public boolean isBaby() {
-        return this.tamabletool$isBaby();
+        return this.unified_taming$isBaby();
     }
 
     @Inject(method = "setBaby", at = @At("HEAD"))
     public void setBaby(boolean p_146756_, CallbackInfo ci) {
-        this.tamabletool$setBaby(p_146756_);
+        this.unified_taming$setBaby(p_146756_);
     }
 
-    public boolean tamabletool$isBaby() {
-        return (this.entityData.get(tamabletool$DATA_FLAGS_ID) & 16) != 0;
+    public boolean unified_taming$isBaby() {
+        return (this.entityData.get(unified_taming$DATA_FLAGS_ID) & 16) != 0;
     }
 
-    public void tamabletool$setBaby(boolean p_146756_) {
-        byte b0 = this.entityData.get(tamabletool$DATA_FLAGS_ID);
+    public void unified_taming$setBaby(boolean p_146756_) {
+        byte b0 = this.entityData.get(unified_taming$DATA_FLAGS_ID);
         if (p_146756_) {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 | 16));
+            this.entityData.set(unified_taming$DATA_FLAGS_ID, (byte) (b0 | 16));
         } else {
-            this.entityData.set(tamabletool$DATA_FLAGS_ID, (byte) (b0 & -17));
+            this.entityData.set(unified_taming$DATA_FLAGS_ID, (byte) (b0 & -17));
         }
     }
 
-    public boolean tamabletool$isBreedFood(ItemStack stack) {
+    public boolean unified_taming$isBreedFood(ItemStack stack) {
         return !stack.isEdible() && stack.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof CakeBlock;
     }
 
-    public boolean tamabletool$canFallInLove() {
-        return !this.tamabletool$isBaby() && this.tamabletool$getInLoveTime() == 0 && this.getHealth() >= this.getMaxHealth();
+    public boolean unified_taming$canFallInLove() {
+        return !this.unified_taming$isBaby() && this.unified_taming$getInLoveTime() == 0 && this.getHealth() >= this.getMaxHealth();
     }
 
-    public void tamabletool$setInLove() {
-        this.tamabletool$inLove = 600;
+    public void unified_taming$setInLove() {
+        this.unified_taming$inLove = 600;
         this.level().broadcastEntityEvent(this, (byte) 18);
     }
 
-    public void tamabletool$setInLoveTime(int p_27602_) {
-        this.tamabletool$inLove = p_27602_;
+    public void unified_taming$setInLoveTime(int p_27602_) {
+        this.unified_taming$inLove = p_27602_;
     }
 
-    public int tamabletool$getInLoveTime() {
-        return this.tamabletool$inLove;
+    public int unified_taming$getInLoveTime() {
+        return this.unified_taming$inLove;
     }
 
-    public boolean tamabletool$canMate(Player player) {
-        return UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player) && this.tamabletool$isInLove() && player.getHealth() >= player.getMaxHealth() && player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty();
+    public boolean unified_taming$canMate(Player player) {
+        return UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player) && this.unified_taming$isInLove() && player.getHealth() >= player.getMaxHealth() && player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty();
     }
 
-    public Mob tamabletool$getBreedOffspring(ServerLevel serverLevel, Player player) {
+    public Mob unified_taming$getBreedOffspring(ServerLevel serverLevel, Player player) {
         if (!UnifiedTamingUtils.hasYoungModel(this)) {
             return null;
         }
         Entity entity = this.getType().create(serverLevel, null, null, this.blockPosition(), MobSpawnType.BREEDING, false, false);
         if (entity instanceof Mob mob) {
             if (UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player)) {
-                ((TamableEntity) mob).tamabletool$tame(player);
+                ((TamableEntity) mob).unified_taming$tame(player);
                 if (mob instanceof TamableAnimal tamableAnimal) {
                     tamableAnimal.tame(player);
                 }
@@ -883,21 +883,21 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return null;
     }
 
-    public void tamabletool$spawnChildFromBreeding(ServerLevel p_27564_, Player p_27565_) {
-        Mob mob = this.tamabletool$getBreedOffspring(p_27564_, p_27565_);
+    public void unified_taming$spawnChildFromBreeding(ServerLevel p_27564_, Player p_27565_) {
+        Mob mob = this.unified_taming$getBreedOffspring(p_27564_, p_27565_);
         if (mob != null) {
             mob.setBaby(true);
-            ((BreedableHelper) mob).tamabletool$setBaby(true);
+            ((BreedableHelper) mob).unified_taming$setBaby(true);
             mob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
-            this.tamabletool$finalizeSpawnChildFromBreeding(p_27564_, p_27565_, mob);
+            this.unified_taming$finalizeSpawnChildFromBreeding(p_27564_, p_27565_, mob);
             p_27564_.addFreshEntityWithPassengers(mob);
         }
     }
 
-    public void tamabletool$finalizeSpawnChildFromBreeding(ServerLevel p_277963_, Player p_277357_, @Nullable Mob p_277516_) {
+    public void unified_taming$finalizeSpawnChildFromBreeding(ServerLevel p_277963_, Player p_277357_, @Nullable Mob p_277516_) {
         p_277357_.awardStat(Stats.ANIMALS_BRED);
-        ((AnimalTriggerHelper) CriteriaTriggers.BRED_ANIMALS).tamabletool$BredAnimals$trigger((ServerPlayer) p_277357_, (Mob) (Object) this, p_277357_, p_277516_);
-        this.tamabletool$setInLoveTime(-6000);
+        ((AnimalTriggerHelper) CriteriaTriggers.BRED_ANIMALS).unified_taming$BredAnimals$trigger((ServerPlayer) p_277357_, (Mob) (Object) this, p_277357_, p_277516_);
+        this.unified_taming$setInLoveTime(-6000);
         if ((Mob) (Object) this instanceof AgeableMob ageableMob) {
             ageableMob.setAge(6000);
             if (ageableMob instanceof Animal animal) {
@@ -911,21 +911,21 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     }
 
-    public TamableEnvironment tamabletool$getEnvironment() {
+    public TamableEnvironment unified_taming$getEnvironment() {
         if (this.level().isClientSide) {
-            int ordinal = this.entityData.get(tamabletool$DATA_TYPES_ID) & 15;
+            int ordinal = this.entityData.get(unified_taming$DATA_TYPES_ID) & 15;
             return TamableEnvironment.values()[ordinal];
         } else {
-            if (this.tamabletool$environment == null) {
-                this.tamabletool$setEnvironment(UnifiedTamingUtils.getMobEnvironment((Mob) (Object) this));
+            if (this.unified_taming$environment == null) {
+                this.unified_taming$setEnvironment(UnifiedTamingUtils.getMobEnvironment((Mob) (Object) this));
             }
-            return this.tamabletool$environment;
+            return this.unified_taming$environment;
         }
     }
 
-    public void tamabletool$setEnvironment(TamableEnvironment environment) {
-        byte b0 = this.entityData.get(tamabletool$DATA_TYPES_ID);
-        this.entityData.set(tamabletool$DATA_TYPES_ID, (byte) (b0 & -16 | environment.ordinal() & 15));
-        this.tamabletool$environment = environment;
+    public void unified_taming$setEnvironment(TamableEnvironment environment) {
+        byte b0 = this.entityData.get(unified_taming$DATA_TYPES_ID);
+        this.entityData.set(unified_taming$DATA_TYPES_ID, (byte) (b0 & -16 | environment.ordinal() & 15));
+        this.unified_taming$environment = environment;
     }
 }

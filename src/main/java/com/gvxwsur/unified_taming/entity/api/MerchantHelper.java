@@ -3,7 +3,7 @@ package com.gvxwsur.unified_taming.entity.api;
 import net.minecraft.world.entity.player.Player;
 
 public interface MerchantHelper {
-    public void tamabletool$updateSpecialPrices(Player p_35541_);
+    public void unified_taming$updateSpecialPrices(Player p_35541_);
 
-    public int tamabletool$getPlayerReputation(Player p_35533_);
+    public int unified_taming$getPlayerReputation(Player p_35533_);
 }

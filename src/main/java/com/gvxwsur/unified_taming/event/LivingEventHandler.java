@@ -44,10 +44,10 @@ public class LivingEventHandler {
         Entity attacker = event.getSource().getEntity();
         if (!living.level().isClientSide && attacker != null) {
             if (attacker instanceof TamableEntity tamable) {
-                if (tamable.tamabletool$isTame()) {
+                if (tamable.unified_taming$isTame()) {
                     LivingEntity owner = tamable.getOwner();
                     if (owner instanceof Player player) {
-                        ((NeutralEntity) living).tamabletool$setLastHurtByPlayer(player, 100);
+                        ((NeutralEntity) living).unified_taming$setLastHurtByPlayer(player, 100);
                     } else {
                         living.setLastHurtByPlayer(null);
                     }
@@ -60,7 +60,7 @@ public class LivingEventHandler {
     public static void onEntityTeleport(EntityTeleportEvent event) {
         Entity entity = event.getEntity();
         if (!entity.level().isClientSide && entity instanceof Mob mob && UnifiedTamingUtils.isTame(mob)) {
-            if (((CommandEntity) mob).tamabletool$unableToMove()) {
+            if (((CommandEntity) mob).unified_taming$unableToMove()) {
                 event.setCanceled(true);
             }
         }
@@ -82,7 +82,7 @@ public class LivingEventHandler {
                 if (mob.getSpawnType() == null) {
                     Player player = level.getNearestPlayer(mob, 6);
                     if (player != null) {
-                        ((TamableEntity) mob).tamabletool$tame(player);
+                        ((TamableEntity) mob).unified_taming$tame(player);
                         // no need to check tamable animal
                         MessageSender.sendTamingMessage(mob, player, true);
                     }
@@ -98,7 +98,7 @@ public class LivingEventHandler {
         if (!living.level().isClientSide) {
             if (living instanceof Mob mob && outcome instanceof Mob outcomeMob) {
                 if (UnifiedTamingUtils.getOwner(mob) instanceof ServerPlayer player) {
-                    ((TamableEntity) outcomeMob).tamabletool$tame(player);
+                    ((TamableEntity) outcomeMob).unified_taming$tame(player);
                     if (outcomeMob instanceof TamableAnimal tamableAnimal) {
                         tamableAnimal.tame(player);
                     }
@@ -138,11 +138,11 @@ public class LivingEventHandler {
         Player player = event.getEntity();
         ItemStack stack = event.getItemStack();
         Entity passenger = player.getFirstPassenger();
-        if (passenger instanceof InteractEntity interactEntity && interactEntity.tamabletool$isCarryReleaser(stack)) {
+        if (passenger instanceof InteractEntity interactEntity && interactEntity.unified_taming$isCarryReleaser(stack)) {
             passenger.stopRiding();
         }
         Entity vehicle = player.getVehicle();
-        if (vehicle instanceof InteractEntity interactEntity && interactEntity.tamabletool$isCarryReleaser(stack)) {
+        if (vehicle instanceof InteractEntity interactEntity && interactEntity.unified_taming$isCarryReleaser(stack)) {
             player.stopRiding();
         }
     }

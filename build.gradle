@@ -160,19 +160,20 @@ dependencies {
     implementation fg.deobf("curse.maven:touhoulittlemaid-355044:${tlm_id}")
     implementation fg.deobf("curse.maven:grimoireofgaia-228948:${gaia_id}")
     implementation fg.deobf("curse.maven:hostilemobsandgirls-537613:${hmag_id}")
-    implementation fg.deobf("curse.maven:l2library-620203:${l2_id}")
-    implementation fg.deobf("curse.maven:modulargolems-690937:${modulargolems_id}")
+    //implementation fg.deobf("curse.maven:l2library-620203:${l2_id}")
+    //implementation fg.deobf("curse.maven:modulargolems-690937:${modulargolems_id}")
     implementation fg.deobf("curse.maven:theaether-255308:${aether_id}")
-    implementation fg.deobf("curse.maven:iceandfire-264231:${iaf_id}")
-    implementation fg.deobf("curse.maven:crackerswitherstorm-621405:${witherstorm_id}")
-    implementation fg.deobf("curse.maven:goety-586095:${goety_id}")
+    //implementation fg.deobf("curse.maven:iceandfire-264231:${iaf_id}")
+    //implementation fg.deobf("curse.maven:crackerswitherstorm-621405:${witherstorm_id}")
+    //implementation fg.deobf("curse.maven:goety-586095:${goety_id}")
 
+    implementation fg.deobf("curse.maven:domesticationinnovation-591149:4911955")
     //implementation fg.deobf("libs:domesticationinnovation-${di_id}:1.20.1")
     runtimeOnly fg.deobf("curse.maven:farmersdelight-398521:${farmersdelight_id}")
     implementation fg.deobf("curse.maven:slashbladeresharped-1022428:${slashblade_id}")
 
-    runtimeOnly fg.deobf("curse.maven:entitytexturefeatures-568563:${etf_id}")
-    runtimeOnly fg.deobf("curse.maven:entitymodelfeatures-844662:${emf_id}")
+    //runtimeOnly fg.deobf("curse.maven:entitytexturefeatures-568563:${etf_id}")
+    //runtimeOnly fg.deobf("curse.maven:entitymodelfeatures-844662:${emf_id}")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

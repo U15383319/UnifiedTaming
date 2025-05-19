@@ -64,7 +64,7 @@ public class CustomFollowOwnerGoal extends Goal {
             return false;
         } else if (this.unableToMove()) {
             return false;
-        } else if (!this.commandHelper.tamabletool$isOrderedToFollow()) {
+        } else if (!this.commandHelper.unified_taming$isOrderedToFollow()) {
             return false;
         } else {
             if (this.mob instanceof TamableAnimal && !UnifiedTamingConfig.compatibleVanillaTamableMovingGoals.get()) {
@@ -90,7 +90,7 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private boolean unableToMove() {
-        return this.commandHelper.tamabletool$unableToMove();
+        return this.commandHelper.unified_taming$unableToMove();
     }
 
     private double adjustedDistanceToSqr(LivingEntity p_25310_) {
@@ -190,6 +190,6 @@ public class CustomFollowOwnerGoal extends Goal {
     }
 
     private TamableEnvironment getEnvironment() {
-        return ((EnvironmentHelper) mob).tamabletool$getEnvironment();
+        return ((EnvironmentHelper) mob).unified_taming$getEnvironment();
     }
 }

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 @Mixin(TameAnimalTrigger.class)
 public abstract class TameAnimalTriggerMixin extends SimpleCriterionTrigger<TameAnimalTrigger.TriggerInstance> implements AnimalTriggerHelper {
     @Unique
-    public void tamabletool$TameAnimal$trigger(ServerPlayer p_68830_, Mob p_68831_) {
+    public void unified_taming$TameAnimal$trigger(ServerPlayer p_68830_, Mob p_68831_) {
         LootContext $$2 = EntityPredicate.createContext(p_68830_, p_68831_);
         this.trigger(p_68830_, (p_68838_) -> {
             return p_68838_.matches($$2);
