@@ -1,0 +1,10 @@
+{
+  "unified_taming.tame": "%1$s is tamed by you",
+  "unified_taming.command.sit": "%1$s is stopping",
+  "unified_taming.command.follow": "%1$s is following",
+  "unified_taming.command.stroll": "%1$s is strolling",
+  "unified_taming.ride.manual": "%1$s is in manual riding mode",
+  "unified_taming.ride.automatic": "%1$s is in automatic riding mode",
+  "unified_taming.convert": "%1$s is converting to %2$s",
+  "unified_taming.hurt.follow": "%1$s is hurt when stopping and trying to follow you"
+}

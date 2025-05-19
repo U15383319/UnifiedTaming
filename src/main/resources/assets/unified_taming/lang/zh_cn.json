@@ -1,0 +1,10 @@
+{
+  "unified_taming.tame": "%1$s 被你驯服",
+  "unified_taming.command.sit": "%1$s 正在停留",
+  "unified_taming.command.follow": "%1$s 正在跟随",
+  "unified_taming.command.stroll": "%1$s 正在漫步",
+  "unified_taming.ride.manual": "%1$s 处于手动骑乘模式",
+  "unified_taming.ride.automatic": "%1$s 处于自动骑乘模式",
+  "unified_taming.convert": "%1$s 转换为 %2$s",
+  "unified_taming.hurt.follow": "%1$s 在停留时受伤并尝试跟随你"
+}

@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.gvxwsur.unified_taming.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "unified_taming.refmap.json",
+  "mixins": [
+    "AbstractVillagerMixin",
+    "AmbientCreatureMixin",
+    "BredAnimalsTriggerMixin",
+    "EntityMixin",
+    "LivingEntityMixin",
+    "MobMixin",
+    "PathfinderMobMixin",
+    "PlayerMixin",
+    "TameAnimalTriggerMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
