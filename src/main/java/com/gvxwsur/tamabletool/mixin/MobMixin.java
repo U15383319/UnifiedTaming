@@ -274,7 +274,13 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     public void aiStep(CallbackInfo ci) {
         if (this.isAlive()) {
             if (!this.firstTick && this.tickCount % 20 == 0) {
-                this.tamabletool$updateInformation();
+                if (this.getOwnerUUID() != null && this.getOwnerUUID() != this.tamabletool$getOwnerUUID()) {
+                    this.tamabletool$setOwnerUUID(this.getOwnerUUID());
+                    this.tamabletool$setTame(true);
+                }
+                if (this.isBaby() != this.tamabletool$isBaby()) {
+                    this.tamabletool$setBaby(this.isBaby());
+                }
             }
 
             if (this.tamabletool$isTame()) {
@@ -532,28 +538,36 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         tamabletool$DATA_TYPES_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
     }
 
-    public boolean tamabletool$isFood(ItemStack p_30440_) {
-        return p_30440_.isEdible();
+    public boolean tamabletool$isFood(ItemStack stack) {
+        return stack.isEdible();
     }
 
-    public boolean tamabletool$isRider(ItemStack p_30440_) {
-        return p_30440_.isEmpty();
+    public boolean tamabletool$isRider(ItemStack stack) {
+        return stack.isEmpty();
     }
 
-    public boolean tamabletool$isCommander(ItemStack p_30440_) {
-        return p_30440_.isEmpty();
+    public boolean tamabletool$isCommander(ItemStack stack) {
+        return stack.isEmpty();
     }
 
-    public boolean tamabletool$isRideModeSwitcher(ItemStack p_30440_) {
-        return p_30440_.is(Items.COMPASS);
+    public boolean tamabletool$isRideModeSwitcher(ItemStack stack) {
+        return stack.is(Items.COMPASS);
     }
 
-    public boolean tamabletool$isMoveModeSwitcher(ItemStack p_30440_) {
-        return p_30440_.is(Items.COMPASS);
+    public boolean tamabletool$isMoveModeSwitcher(ItemStack stack) {
+        return stack.is(Items.COMPASS);
     }
 
-    public boolean tamabletool$isTamer(ItemStack p_30440_) {
-        return p_30440_.is(Items.BOOK);
+    public boolean tamabletool$isTamer(ItemStack stack) {
+        return stack.is(Items.BOOK);
+    }
+
+    public boolean tamabletool$isCarrier(ItemStack stack) {
+        return stack.is(Items.CLOCK);
+    }
+
+    public boolean tamabletool$isCarryReleaser(ItemStack stack) {
+        return stack.is(Items.CLOCK);
     }
 
     public boolean tamabletool$isTamingConditionSatisfied() {
@@ -577,10 +591,14 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             if (this.level().isClientSide) {
                 // client side
                 boolean flag = this.tamabletool$isTame() || (this.tamabletool$isTamer(itemstack) || this.tamabletool$isCheatTamer(itemstack)) && !this.tamabletool$isTame();
-                boolean flag2 = TamableToolUtils.isOwnedBy((Mob) (Object) this, player) && this.tamabletool$isRider(itemstack) && !player.isSecondaryUseActive() && !this.isVehicle() && !this.tamabletool$isBaby();
+                boolean flag2 = TamableToolUtils.isOwnedBy((Mob) (Object) this, player) && !player.isSecondaryUseActive() && this.tamabletool$isRider(itemstack) && !this.isVehicle() && !this.tamabletool$isBaby();
                 boolean flag3 = this.tamabletool$isTame() && this.tamabletool$isBaby() && this.tamabletool$isFood(itemstack) && this.getHealth() >= this.getMaxHealth();
+                boolean flag4 = TamableToolUtils.isOwnedBy((Mob) (Object) this, player) && !player.isSecondaryUseActive() && this.tamabletool$isCarrier(itemstack) && !player.isVehicle() && !player.isBaby();
                 if (flag2) {
                     player.startRiding(this);
+                }
+                if (flag4) {
+                    this.startRiding(player);
                 }
                 if (flag3) {
                     if ((Mob) (Object) this instanceof AgeableMob ageableMob) {
@@ -590,7 +608,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                         ageableMob.ageUp(100);
                     }
                 }
-                if (flag2 || flag3) {
+                if (flag2 || flag3 || flag4) {
                     return InteractionResult.SUCCESS;
                 } else if (flag) {
                     return InteractionResult.CONSUME;
@@ -663,6 +681,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                                     this.tamabletool$setManual(!this.tamabletool$isManual());
                                     MessageSender.sendRideModeSwitchMessage((Mob) (Object) this, this.tamabletool$isManual(), true);
                                     return InteractionResult.SUCCESS;
+                                }
+                            }
+                            if (this.tamabletool$isCarrier(itemstack)) {
+                                if (!player.isSecondaryUseActive() && !player.isVehicle() && !player.isBaby()) {
+                                    this.startRiding(player);
+                                    return InteractionResult.CONSUME;
                                 }
                             }
                         }
@@ -903,36 +927,5 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         byte b0 = this.entityData.get(tamabletool$DATA_TYPES_ID);
         this.entityData.set(tamabletool$DATA_TYPES_ID, (byte) (b0 & -16 | environment.ordinal() & 15));
         this.tamabletool$environment = environment;
-    }
-
-    @Unique
-    public void tamabletool$updateInformation() {
-        // aiStep : tickCount % 20 == 0
-        if (this.getOwnerUUID() != null && this.getOwnerUUID() != this.tamabletool$getOwnerUUID()) {
-            this.tamabletool$setOwnerUUID(this.getOwnerUUID());
-            this.tamabletool$setTame(true);
-        }
-        if (this.isBaby() != this.tamabletool$isBaby()) {
-            this.tamabletool$setBaby(this.isBaby());
-        }
-
-        if (this.tickCount % 80 == 0) {
-            TamableEnvironment oldEnvironment = this.tamabletool$getEnvironment();
-            TamableEnvironment newEnvironment = TamableToolUtils.getMobEnvironment((Mob) (Object) this);
-            if (oldEnvironment != newEnvironment) {
-                if (oldEnvironment.isAmphibious() || oldEnvironment.isFloat()) {
-                    return;
-                }
-                if ((oldEnvironment == TamableEnvironment.GROUND && newEnvironment == TamableEnvironment.WATER)
-                        || (oldEnvironment == TamableEnvironment.WATER && newEnvironment == TamableEnvironment.GROUND)) {
-                    this.tamabletool$setEnvironment(TamableEnvironment.AMPHIBIOUS);
-                } else if ((oldEnvironment == TamableEnvironment.GROUND && newEnvironment == TamableEnvironment.LAVA)
-                        || (oldEnvironment == TamableEnvironment.LAVA && newEnvironment == TamableEnvironment.GROUND)) {
-                    this.tamabletool$setEnvironment(TamableEnvironment.LAVA_AMPHIBIOUS);
-                } else {
-                    this.tamabletool$setEnvironment(newEnvironment);
-                }
-            }
-        }
     }
 }

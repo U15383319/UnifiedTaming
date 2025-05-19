@@ -12,36 +12,40 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public interface InteractEntity {
 
-    public boolean tamabletool$isFood(ItemStack p_30440_);
+    public boolean tamabletool$isFood(ItemStack stack);
 
-    public boolean tamabletool$isRider(ItemStack p_30440_);
+    public boolean tamabletool$isRider(ItemStack stack);
 
-    public boolean tamabletool$isCommander(ItemStack p_30440_);
+    public boolean tamabletool$isCommander(ItemStack stack);
 
-    public boolean tamabletool$isRideModeSwitcher(ItemStack p_30440_);
+    public boolean tamabletool$isRideModeSwitcher(ItemStack stack);
 
-    public boolean tamabletool$isMoveModeSwitcher(ItemStack p_30440_);
+    public boolean tamabletool$isMoveModeSwitcher(ItemStack stack);
 
-    public boolean tamabletool$isTamer(ItemStack p_30440_);
+    public boolean tamabletool$isCarrier(ItemStack stack);
+
+    public boolean tamabletool$isCarryReleaser(ItemStack stack);
+
+    public boolean tamabletool$isTamer(ItemStack stack);
 
     public boolean tamabletool$isTamingConditionSatisfied();
 
-    public default boolean tamabletool$isCheatTamer(ItemStack p_30440_) {
+    public default boolean tamabletool$isCheatTamer(ItemStack stack) {
         ResourceLocation location = new ResourceLocation(TamableToolConfig.cheatTameItem.get());
         if (ForgeRegistries.ITEMS.containsKey(location)) {
-            return p_30440_.is(ForgeRegistries.ITEMS.getValue(location));
+            return stack.is(ForgeRegistries.ITEMS.getValue(location));
         }
-        return p_30440_.is(Items.STRUCTURE_VOID);
+        return stack.is(Items.STRUCTURE_VOID);
     }
 
-    public default boolean tamabletool$isModAssistant(ItemStack p_30440_) {
+    public default boolean tamabletool$isModAssistant(ItemStack stack) {
         if (!TamableToolConfig.needModAssistItem.get()) {
             return true;
         }
         ResourceLocation location = new ResourceLocation(TamableToolConfig.modAssistItem.get());
         if (ForgeRegistries.ITEMS.containsKey(location)) {
-            return p_30440_.is(ForgeRegistries.ITEMS.getValue(location));
+            return stack.is(ForgeRegistries.ITEMS.getValue(location));
         }
-        return p_30440_.is(Items.CLOCK);
+        return stack.is(Items.ENCHANTED_BOOK);
     }
 }

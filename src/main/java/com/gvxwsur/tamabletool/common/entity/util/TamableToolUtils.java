@@ -16,8 +16,14 @@ import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.lang.reflect.Field;
 
 public class TamableToolUtils {
+
+    private static final Log log = LogFactory.getLog(TamableToolUtils.class);
 
     public static boolean isAlliedTo(Mob mob1, Mob mob2) {
         if (mob1.isAlliedTo(mob2)) {
@@ -57,7 +63,35 @@ public class TamableToolUtils {
     }
 
     public static TamableEnvironment getMobEnvironment(Mob mob) {
-        PathNavigation navigation = mob.getNavigation();
+        TamableEnvironment result = judgeMobEnvironmentByNavigation(mob, mob.getNavigation());
+        try {
+            Field[] fields = mob.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                if (PathNavigation.class.isAssignableFrom(field.getType())) {
+                    field.setAccessible(true);
+                    PathNavigation navigation = (PathNavigation) field.get(mob);
+                    if (navigation.equals(mob.getNavigation())) {
+                        continue;
+                    }
+                    TamableEnvironment environment = judgeMobEnvironmentByNavigation(mob, navigation);
+                    if (environment != result) {
+                        if (environment.isFloat()) {
+                            result = environment;
+                        } else if (environment.isGround() && result.isWaterSwim() || environment.isWaterSwim() && result.isGround()) {
+                            result = TamableEnvironment.AMPHIBIOUS;
+                        } else if (environment.isGround() && result.isLavaSwim() || environment.isLavaSwim() && result.isGround()) {
+                            result = TamableEnvironment.LAVA_AMPHIBIOUS;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to get mob environment", e);
+        }
+        return result;
+    }
+
+    private static TamableEnvironment judgeMobEnvironmentByNavigation(Mob mob, PathNavigation navigation) {
         NodeEvaluator nodeEvaluator = navigation.getNodeEvaluator();
         if (nodeEvaluator instanceof FlyNodeEvaluator || ModLoaded.isFlyNodeEvaluator(nodeEvaluator)) {
             return TamableEnvironment.FLY_PATH;

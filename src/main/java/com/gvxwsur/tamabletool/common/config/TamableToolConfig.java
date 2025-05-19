@@ -26,7 +26,7 @@ public class TamableToolConfig {
         builder.comment("Tamable Tool Config");
         builder.push("General Settings");
         needModAssistItem = builder.comment("Whether an item should be held in the player's assisting hand to perform interactions in this mod").define("needModAssistItem", false);
-        modAssistItem = builder.comment("The item that held in the player's assisting hand to perform interactions in this mod").define("modAssistItem", "minecraft:clock");
+        modAssistItem = builder.comment("The item that held in the player's assisting hand to perform interactions in this mod").define("modAssistItem", "minecraft:enchanted_book");
         cheatTameItem = builder.comment("The item that used to tame mobs without any cost").define("cheatTameItem", "minecraft:structure_void");
         showImportantTamableMessage = builder.comment("Whether some important messages should be sent to players when something happened to their pets").define("showImportantTamableMessage", true);
         rideSpeedModifier = builder.comment("The speed modifier of the ride").defineInRange("rideSpeedModifier", 0.318, 0.0, 1.0);
@@ -34,7 +34,7 @@ public class TamableToolConfig {
         playerFriendlyFire = builder.comment("Whether players can attack their own pets").define("playerFriendlyFire", false);
         leashedNeedTamed = builder.comment("Whether leash mobs need to be tamed").define("leashedNeedTamed", true);
         golemCreatedTamed = builder.comment("Whether golem will be tamed by the nearest player when created").define("golemCreatedTamed", true);
-        selfDestructMobNotDead = builder.comment("Whether the mob will not die when self-destructed").define("selfDestructMobNotDead", true);
+        selfDestructMobNotDead = builder.comment("Whether the mob will not die when self-destructed").define("selfDestructMobNotDead", false);
         merchantTamedReputation = builder.comment("The separately counted reputation value of the merchant tamed by player").defineInRange("merchantTamedReputation", 90, 0, 1000);
         builder.pop();
         builder.push("Tamable Permission");

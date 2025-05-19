@@ -138,15 +138,14 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    implementation fg.deobf("curse.maven:jei-238222:${jei_id}")
-    implementation fg.deobf("curse.maven:jade-324717:${jade_id}")
-    implementation fg.deobf("curse.maven:forgeconfigscreen-544048:${forgeconfigscreen_id}")
-    implementation fg.deobf("libs:BetterPvP-${betterpvp_id}-Forge:1.20")
-    implementation fg.deobf("curse.maven:xaerosworldmap-317780:${xwm_id}")
-    implementation fg.deobf("curse.maven:modernui-352491:${mui_id}")
-    implementation fg.deobf("curse.maven:appleskin-248787:${appleskin_id}")
+    runtimeOnly fg.deobf("curse.maven:jei-238222:${jei_id}")
+    runtimeOnly fg.deobf("curse.maven:jade-324717:${jade_id}")
+    runtimeOnly fg.deobf("curse.maven:forgeconfigscreen-544048:${forgeconfigscreen_id}")
+    runtimeOnly fg.deobf("libs:BetterPvP-${betterpvp_id}-Forge:1.20")
+    runtimeOnly fg.deobf("curse.maven:xaerosworldmap-317780:${xwm_id}")
+    runtimeOnly fg.deobf("curse.maven:appleskin-248787:${appleskin_id}")
 
-    implementation fg.deobf("curse.maven:nofog-296468:${nofog_id}")
+    runtimeOnly fg.deobf("curse.maven:nofog-296468:${nofog_id}")
 
     implementation fg.deobf("curse.maven:citadel-331936:${citadel_id}")
     implementation fg.deobf("curse.maven:curiosapi-309927:${curios_id}")
@@ -169,11 +168,11 @@ dependencies {
     implementation fg.deobf("curse.maven:goety-586095:${goety_id}")
 
     implementation fg.deobf("libs:domesticationinnovation-${di_id}:1.20.1")
-    implementation fg.deobf("curse.maven:farmersdelight-398521:${farmersdelight_id}")
+    runtimeOnly fg.deobf("curse.maven:farmersdelight-398521:${farmersdelight_id}")
     implementation fg.deobf("curse.maven:slashbladeresharped-1022428:${slashblade_id}")
 
-    implementation fg.deobf("curse.maven:entitytexturefeatures-568563:${etf_id}")
-    implementation fg.deobf("curse.maven:entitymodelfeatures-844662:${emf_id}")
+    runtimeOnly fg.deobf("curse.maven:entitytexturefeatures-568563:${etf_id}")
+    runtimeOnly fg.deobf("curse.maven:entitymodelfeatures-844662:${emf_id}")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

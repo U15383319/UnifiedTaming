@@ -10,10 +10,12 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -136,6 +138,20 @@ public class LivingEventHandler {
             if (TamableToolUtils.shouldFireFriendly(source, living)) {
                 event.getEffectInstance().duration = 0;
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
+        Player player = event.getEntity();
+        ItemStack stack = event.getItemStack();
+        Entity passenger = player.getFirstPassenger();
+        if (passenger instanceof InteractEntity interactEntity && interactEntity.tamabletool$isCarryReleaser(stack)) {
+            passenger.stopRiding();
+        }
+        Entity vehicle = player.getVehicle();
+        if (vehicle instanceof InteractEntity interactEntity && interactEntity.tamabletool$isCarryReleaser(stack)) {
+            player.stopRiding();
         }
     }
 }
