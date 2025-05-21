@@ -15,4 +15,12 @@ public interface RideableEntity {
         return true;
     }
 
+    public default boolean unified_taming$isManual() {
+        return true;
+    }
+
+    public default void unified_taming$setManual(boolean manual) {
+
+    }
+
 }

@@ -4,10 +4,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 
 public class UnifiedTamingConfig {
     public static final ForgeConfigSpec CFG;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> needModAssistItem;
-    public static final ForgeConfigSpec.ConfigValue<String> modAssistItem;
-    public static final ForgeConfigSpec.ConfigValue<String> cheatTameItem;
-    public static final ForgeConfigSpec.BooleanValue showImportantTamableMessage;
+    public static final ForgeConfigSpec.IntValue showTamableMessage;
     public static final ForgeConfigSpec.DoubleValue rideSpeedModifier;
     public static final ForgeConfigSpec.BooleanValue canRiderInteract;
     public static final ForgeConfigSpec.BooleanValue playerFriendlyFire;
@@ -24,10 +21,7 @@ public class UnifiedTamingConfig {
         final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("Tamable Tool Config");
         builder.push("General Settings");
-        needModAssistItem = builder.comment("Whether an item should be held in the player's assisting hand to perform interactions in this mod").define("needModAssistItem", false);
-        modAssistItem = builder.comment("The item that held in the player's assisting hand to perform interactions in this mod").define("modAssistItem", "minecraft:enchanted_book");
-        cheatTameItem = builder.comment("The item that used to tame mobs without any cost").define("cheatTameItem", "minecraft:structure_void");
-        showImportantTamableMessage = builder.comment("Whether some important messages should be sent to players when something happened to their pets").define("showImportantTamableMessage", true);
+        showTamableMessage = builder.comment("Whether some of the messages should be sent to players when something happened to their pets, 0 means should not send messages, 1 means should send important messages, 2 means should always send messages").defineInRange("showImportantTamableMessage", 2, 0, 2);
         rideSpeedModifier = builder.comment("The speed modifier of the ride").defineInRange("rideSpeedModifier", 0.318, 0.0, 1.0);
         canRiderInteract = builder.comment("Whether the rider can interact with the mob").define("canRiderInteract", false);
         playerFriendlyFire = builder.comment("Whether players can attack their own pets").define("playerFriendlyFire", false);

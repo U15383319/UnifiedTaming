@@ -163,7 +163,7 @@ dependencies {
     //implementation fg.deobf("curse.maven:l2library-620203:${l2_id}")
     //implementation fg.deobf("curse.maven:modulargolems-690937:${modulargolems_id}")
     implementation fg.deobf("curse.maven:theaether-255308:${aether_id}")
-    //implementation fg.deobf("curse.maven:iceandfire-264231:${iaf_id}")
+    implementation fg.deobf("curse.maven:iceandfire-264231:${iaf_id}")
     //implementation fg.deobf("curse.maven:crackerswitherstorm-621405:${witherstorm_id}")
     //implementation fg.deobf("curse.maven:goety-586095:${goety_id}")
 

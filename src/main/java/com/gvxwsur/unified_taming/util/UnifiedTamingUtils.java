@@ -4,13 +4,13 @@ import com.gvxwsur.unified_taming.config.UnifiedTamingConfig;
 import com.gvxwsur.unified_taming.entity.api.EnvironmentHelper;
 import com.gvxwsur.unified_taming.entity.api.MinionEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
-import com.gvxwsur.unified_taming.entity.api.UniformPartEntity;
 import com.gvxwsur.unified_taming.entity.types.TamableEnvironment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -23,10 +23,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class UnifiedTamingUtils {
 
-    private static final Log log = LogFactory.getLog(UnifiedTamingUtils.class);
+    public static final Log log = LogFactory.getLog(UnifiedTamingUtils.class);
 
     public static boolean isAlliedTo(Mob mob1, Mob mob2) {
         if (mob1.isAlliedTo(mob2)) {
@@ -143,12 +144,12 @@ public class UnifiedTamingUtils {
         return (float) resultFactor;
     }
 
-    public static boolean shouldMobFriendly(Entity attacker, LivingEntity target) {
+    public static boolean shouldMobFireFriendly(Entity attacker, LivingEntity target) {
         if (attacker instanceof Mob mob && ((TamableEntity) mob).unified_taming$isTame()) {
             return !((TamableEntity) mob).unified_taming$canTameAttack(target);
         }
         if (UnifiedTamingConfig.compatiblePartEntity.get() && !(attacker instanceof Mob)) {
-            Entity attackerAncestry = ((UniformPartEntity) attacker).getAncestry();
+            Entity attackerAncestry = UnifiedTamingUtils.getAncestry(attacker);
             if (attackerAncestry instanceof Mob attackerAncestryMob) {
                 if (((TamableEntity) attackerAncestryMob).unified_taming$isTame()) {
                     return attackerAncestryMob == target || !((TamableEntity) attackerAncestryMob).unified_taming$canTameAttack(target);
@@ -158,21 +159,64 @@ public class UnifiedTamingUtils {
         return false;
     }
 
-    public static boolean shouldFireFriendly(Entity attacker, LivingEntity target) {
-        if (UnifiedTamingConfig.playerFriendlyFire.get() && attacker instanceof ServerPlayer player) {
-            if (target instanceof Mob mob && ((TamableEntity) mob).unified_taming$isOwnedBy(player)) {
-                return true;
-            }
-            if (UnifiedTamingConfig.compatiblePartEntity.get() && !(target instanceof Mob)) {
-                Entity targetAncestry = ((UniformPartEntity) target).getAncestry();
-                if (targetAncestry instanceof Mob targetAncestryMob) {
-                    if (((TamableEntity) targetAncestryMob).unified_taming$isOwnedBy(player)) {
-                        return true;
-                    }
+    public static boolean shouldPlayerFireFriendly(Player player, LivingEntity target) {
+        if (target instanceof Mob mob && ((TamableEntity) mob).unified_taming$isOwnedBy(player)) {
+            return true;
+        }
+        if (UnifiedTamingConfig.compatiblePartEntity.get() && !(target instanceof Mob)) {
+            Entity targetAncestry = UnifiedTamingUtils.getAncestry(target);
+            if (targetAncestry instanceof Mob targetAncestryMob) {
+                if (((TamableEntity) targetAncestryMob).unified_taming$isOwnedBy(player)) {
+                    return true;
                 }
             }
         }
-        return shouldMobFriendly(attacker, target);
+        return false;
+    }
+
+    public static boolean shouldFireFriendly(Entity attacker, LivingEntity target) {
+        if (UnifiedTamingConfig.playerFriendlyFire.get() && attacker instanceof ServerPlayer player) {
+            return shouldPlayerFireFriendly(player, target);
+        }
+        return shouldMobFireFriendly(attacker, target);
+    }
+
+    public static Entity getAncestry(Entity entity) {
+        if (entity instanceof Mob mob) {
+            return mob;
+        }
+        Entity ancestry = null;
+        try {
+            Method method = entity.getClass().getDeclaredMethod("getParent");
+            method.setAccessible(true);
+            ancestry = (Entity) method.invoke(entity);
+            while (ancestry != null && !(ancestry instanceof Mob)) {
+                Method method1 = ancestry.getClass().getDeclaredMethod("getParent");
+                method1.setAccessible(true);
+                ancestry = (Entity) method1.invoke(ancestry);
+            }
+            if (ancestry instanceof Mob ancestryMob) {
+                return ancestryMob;
+            }
+        } catch (Exception e) {
+            if (e instanceof NoSuchMethodException) {
+                return ancestry != null ? ancestry : entity;
+            } else {
+                log.error("Failed to get ancestry", e);
+            }
+        }
+        return entity;
+    }
+
+    public static void sendMessageToOwner(Mob mob, Component component, boolean pActionBar) {
+        int messageLevel = UnifiedTamingConfig.showTamableMessage.get();
+        if (messageLevel <= 0 || (messageLevel == 1 && !pActionBar)) {
+            return;
+        }
+        LivingEntity owner = getOwner(mob);
+        if (owner instanceof ServerPlayer player) {
+            player.displayClientMessage(component, pActionBar);
+        }
     }
 
     @SuppressWarnings({"unchecked"})

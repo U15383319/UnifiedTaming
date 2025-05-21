@@ -2,11 +2,12 @@ package com.gvxwsur.unified_taming.event;
 
 import com.gvxwsur.unified_taming.config.UnifiedTamingConfig;
 import com.gvxwsur.unified_taming.entity.api.CommandEntity;
-import com.gvxwsur.unified_taming.entity.api.InteractEntity;
 import com.gvxwsur.unified_taming.entity.api.NeutralEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
-import com.gvxwsur.unified_taming.util.MessageSender;
+import com.gvxwsur.unified_taming.init.InitItems;
+import com.gvxwsur.unified_taming.item.MultiToolItem;
 import com.gvxwsur.unified_taming.util.UnifiedTamingUtils;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
@@ -31,7 +32,7 @@ public class LivingEventHandler {
 
         if (!living.level().isClientSide) {
             if (newTarget != null) {
-                if (UnifiedTamingUtils.shouldMobFriendly(living, newTarget)) {
+                if (UnifiedTamingUtils.shouldMobFireFriendly(living, newTarget)) {
                     event.setCanceled(true);
                 }
             }
@@ -84,7 +85,7 @@ public class LivingEventHandler {
                     if (player != null) {
                         ((TamableEntity) mob).unified_taming$tame(player);
                         // no need to check tamable animal
-                        MessageSender.sendTamingMessage(mob, player, true);
+                        UnifiedTamingUtils.sendMessageToOwner(mob, Component.translatable("message.unified_taming.tame", mob.getDisplayName()), true);
                     }
                 }
             }
@@ -102,7 +103,7 @@ public class LivingEventHandler {
                     if (outcomeMob instanceof TamableAnimal tamableAnimal) {
                         tamableAnimal.tame(player);
                     }
-                    MessageSender.sendConvertingMessage(mob, outcomeMob, false);
+                    UnifiedTamingUtils.sendMessageToOwner(mob, Component.translatable("message.unified_taming.convert", mob.getDisplayName(), outcomeMob.getDisplayName()), false);
                 }
             }
         }
@@ -138,11 +139,12 @@ public class LivingEventHandler {
         Player player = event.getEntity();
         ItemStack stack = event.getItemStack();
         Entity passenger = player.getFirstPassenger();
-        if (passenger instanceof InteractEntity interactEntity && interactEntity.unified_taming$isCarryReleaser(stack)) {
+        boolean stopRiding = stack.is(InitItems.MULTI_TOOL_ITEM.get()) && MultiToolItem.getModeDesc(stack).equals("STOP_RIDING");
+        if (stopRiding && passenger instanceof Mob) {
             passenger.stopRiding();
         }
         Entity vehicle = player.getVehicle();
-        if (vehicle instanceof InteractEntity interactEntity && interactEntity.unified_taming$isCarryReleaser(stack)) {
+        if (stopRiding && vehicle instanceof Mob) {
             player.stopRiding();
         }
     }

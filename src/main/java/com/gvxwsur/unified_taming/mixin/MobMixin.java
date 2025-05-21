@@ -5,7 +5,7 @@ import com.gvxwsur.unified_taming.entity.api.*;
 import com.gvxwsur.unified_taming.entity.goal.*;
 import com.gvxwsur.unified_taming.entity.types.TamableCommand;
 import com.gvxwsur.unified_taming.entity.types.TamableEnvironment;
-import com.gvxwsur.unified_taming.util.MessageSender;
+import com.gvxwsur.unified_taming.init.InitItems;
 import com.gvxwsur.unified_taming.util.UnifiedTamingUtils;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.Minecraft;
@@ -22,8 +22,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -32,12 +30,10 @@ import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CakeBlock;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import net.minecraftforge.api.distmarker.Dist;
@@ -59,10 +55,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(Mob.class)
-public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity, InteractEntity, MinionEntity, CommandEntity, AiRideableEntity, BreedableHelper, EnvironmentHelper {
-
-    @Shadow
-    protected PathNavigation navigation;
+public abstract class MobMixin extends LivingEntity implements Targeting, TamableEntity, InteractEntity, MinionEntity, CommandEntity, RideableEntity, BreedableHelper, EnvironmentHelper {
 
     @Shadow
     @Final
@@ -74,9 +67,6 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Shadow
     public abstract boolean isLeashed();
-
-    @Shadow
-    public abstract void setTarget(@Nullable LivingEntity p_21544_);
 
     @Shadow
     public abstract void restrictTo(BlockPos p_21447_, int p_21448_);
@@ -310,7 +300,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             if (this.unified_taming$isOrderedToSit()) {
                 this.unified_taming$setOrderedToFollow(true);
                 if (!this.level().isClientSide) {
-                    MessageSender.sendHurtWhenStopMessage((Mob) (Object) this, false);
+                    UnifiedTamingUtils.sendMessageToOwner((Mob) (Object) this, Component.translatable("message.unified_taming.hurt.follow", this.getDisplayName()), false);
                 }
             }
         }
@@ -456,7 +446,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             return false;
         }
         if (UnifiedTamingConfig.compatiblePartEntity.get() && !(livingEntity instanceof Mob)) {
-            Entity targetAncestry = ((UniformPartEntity) livingEntity).getAncestry();
+            Entity targetAncestry = UnifiedTamingUtils.getAncestry(livingEntity);
             if (targetAncestry instanceof Mob targetAncestryMob) {
                 if ((Object) this == targetAncestryMob) {
                     return false;
@@ -509,7 +499,9 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
             if ((Mob) (Object) this instanceof TamableAnimal) {
                 return;
             }
-            MessageSender.sendDeathMessage((Mob) (Object) this, deathMessage, false);
+            if (this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
+                UnifiedTamingUtils.sendMessageToOwner((Mob) (Object) this, deathMessage, false);
+            }
         }
     }
 
@@ -542,184 +534,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return stack.isEdible();
     }
 
-    public boolean unified_taming$isRider(ItemStack stack) {
-        return stack.isEmpty();
-    }
-
-    public boolean unified_taming$isCommander(ItemStack stack) {
-        return stack.isEmpty();
-    }
-
-    public boolean unified_taming$isRideModeSwitcher(ItemStack stack) {
-        return stack.is(Items.COMPASS);
-    }
-
-    public boolean unified_taming$isMoveModeSwitcher(ItemStack stack) {
-        return stack.is(Items.COMPASS);
-    }
-
     public boolean unified_taming$isTamer(ItemStack stack) {
-        return stack.is(Items.BOOK);
-    }
-
-    public boolean unified_taming$isCarrier(ItemStack stack) {
-        return stack.is(Items.CLOCK);
-    }
-
-    public boolean unified_taming$isCarryReleaser(ItemStack stack) {
-        return stack.is(Items.CLOCK);
+        return stack.is(InitItems.TAME_MATERIAL.get());
     }
 
     public boolean unified_taming$isTamingConditionSatisfied() {
         return this.getHealth() <= Mth.clamp(this.getMaxHealth() / 5, 4.0, 12.0);
-    }
-
-    @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
-    public final void interact(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        InteractionResult interactionresult = this.unified_taming$tameInteract(player, hand);
-        if (interactionresult.consumesAction()) {
-            this.gameEvent(GameEvent.ENTITY_INTERACT, player);
-            cir.setReturnValue(interactionresult);
-        }
-    }
-
-    @Unique
-    public InteractionResult unified_taming$tameInteract(Player player, InteractionHand hand) {
-        ItemStack itemstack = player.getItemInHand(hand);
-        ItemStack assistItemstack = hand == InteractionHand.MAIN_HAND ? player.getOffhandItem() : player.getMainHandItem();
-        if (this.unified_taming$isModAssistant(assistItemstack)) {
-            if (this.level().isClientSide) {
-                // client side
-                boolean flag = this.unified_taming$isTame() || (this.unified_taming$isTamer(itemstack) || this.unified_taming$isCheatTamer(itemstack)) && !this.unified_taming$isTame();
-                boolean flag2 = UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player) && !player.isSecondaryUseActive() && this.unified_taming$isRider(itemstack) && !this.isVehicle() && !this.unified_taming$isBaby();
-                boolean flag3 = this.unified_taming$isTame() && this.unified_taming$isBaby() && this.unified_taming$isFood(itemstack) && this.getHealth() >= this.getMaxHealth();
-                boolean flag4 = UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player) && !player.isSecondaryUseActive() && this.unified_taming$isCarrier(itemstack) && !player.isVehicle() && !player.isBaby();
-                if (flag2) {
-                    player.startRiding(this);
-                }
-                if (flag4) {
-                    this.startRiding(player);
-                }
-                if (flag3) {
-                    if ((Mob) (Object) this instanceof AgeableMob ageableMob) {
-                        if (!player.getAbilities().instabuild) {
-                            itemstack.shrink(1);
-                        }
-                        ageableMob.ageUp(100);
-                    }
-                }
-                if (flag2 || flag3 || flag4) {
-                    return InteractionResult.SUCCESS;
-                } else if (flag) {
-                    return InteractionResult.CONSUME;
-                } else {
-                    return InteractionResult.PASS;
-                }
-            } else {
-                // server side
-                if (this.unified_taming$isTame()) {
-                    if (this.unified_taming$isFood(itemstack)) {
-                        if (this.getHealth() < this.getMaxHealth()) {
-                            if (itemstack.isEdible()) {
-                                FoodProperties foodProperties = itemstack.getFoodProperties(this);
-                                float totalValue = foodProperties.getNutrition() + foodProperties.getNutrition() * foodProperties.getSaturationModifier() * 2;
-                                this.heal(totalValue);
-                            }
-                            this.eat(this.level(), itemstack);
-                            return InteractionResult.SUCCESS;
-                        }
-                        if (this.unified_taming$isBaby()) {
-                            if ((Mob) (Object) this instanceof AgeableMob ageableMob) {
-                                if (!player.getAbilities().instabuild) {
-                                    itemstack.shrink(1);
-                                }
-                                ageableMob.ageUp(100);
-                            }
-                            return InteractionResult.CONSUME;
-                        }
-                    } else {
-                        if (UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, player)) {
-                            if (this.unified_taming$isBreedFood(itemstack)) {
-                                if (this.unified_taming$canFallInLove()) {
-                                    if (!player.getAbilities().instabuild) {
-                                        itemstack.shrink(1);
-                                    }
-                                    this.unified_taming$setInLove();
-                                    return InteractionResult.SUCCESS;
-                                }
-                            }
-                            if (this.unified_taming$isCommander(itemstack)) {
-                                if (player.isSecondaryUseActive()) {
-                                    this.unified_taming$setOrderedToSit(!this.unified_taming$isOrderedToSit());
-                                    MessageSender.sendCommandMessage((Mob) (Object) this, true);
-                                    this.jumping = false;
-                                    this.navigation.stop();
-                                    this.setTarget(null);
-                                    return InteractionResult.SUCCESS;
-                                }
-                            }
-                            if (this.unified_taming$isRider(itemstack)) {
-                                if (!player.isSecondaryUseActive()
-                                        && !this.isVehicle() && !this.unified_taming$isBaby()) {
-                                    player.startRiding(this);
-                                    return InteractionResult.CONSUME;
-                                }
-                            }
-                            if (this.unified_taming$isMoveModeSwitcher(itemstack)) {
-                                if (player.isSecondaryUseActive()) {
-                                    this.unified_taming$setOrderedToStroll(!this.unified_taming$isOrderedToStroll());
-                                    MessageSender.sendCommandMessage((Mob) (Object) this, true);
-                                    this.jumping = false;
-                                    this.navigation.stop();
-                                    this.setTarget(null);
-                                    return InteractionResult.SUCCESS;
-                                }
-                            }
-                            if (this.unified_taming$isRideModeSwitcher(itemstack)) {
-                                if (!player.isSecondaryUseActive()
-                                        && !this.unified_taming$isBaby()) {
-                                    this.unified_taming$setManual(!this.unified_taming$isManual());
-                                    MessageSender.sendRideModeSwitchMessage((Mob) (Object) this, this.unified_taming$isManual(), true);
-                                    return InteractionResult.SUCCESS;
-                                }
-                            }
-                            if (this.unified_taming$isCarrier(itemstack)) {
-                                if (!player.isSecondaryUseActive() && !player.isVehicle() && !player.isBaby()) {
-                                    this.startRiding(player);
-                                    return InteractionResult.CONSUME;
-                                }
-                            }
-                        }
-                        return InteractionResult.PASS;
-                    }
-                } else {
-                    if ((this.unified_taming$isTamer(itemstack) && this.unified_taming$isTamingConditionSatisfied()) || this.unified_taming$isCheatTamer(itemstack)) {
-                        if (!((Mob) (Object) this instanceof TamableAnimal && !UnifiedTamingConfig.compatibleVanillaTamableTaming.get())) {
-                            if (this.unified_taming$isTamer(itemstack) && !player.getAbilities().instabuild) {
-                                itemstack.shrink(1);
-                            }
-
-                            if (this.unified_taming$isCheatTamer(itemstack) || this.random.nextInt(3) == 0) {
-                                this.unified_taming$tame(player);
-                                if ((Mob) (Object) this instanceof TamableAnimal tamableAnimal) {
-                                    tamableAnimal.tame(player);
-                                }
-                                MessageSender.sendTamingMessage((Mob) (Object) this, player, true);
-                                this.navigation.stop();
-                                this.setTarget(null);
-                                // this.unified_taming$setOrderedToSit(true);
-                                this.level().broadcastEntityEvent(this, (byte) 7);
-                            } else {
-                                this.level().broadcastEntityEvent(this, (byte) 6);
-                            }
-
-                            return InteractionResult.SUCCESS;
-                        }
-                    }
-                }
-            }
-        }
-        return InteractionResult.PASS;
     }
 
     @Inject(method = "tickLeash", at = @At("TAIL"))
