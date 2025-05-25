@@ -1,6 +1,7 @@
 package com.gvxwsur.unified_taming;
 
-import com.gvxwsur.unified_taming.config.UnifiedTamingConfig;
+import com.gvxwsur.unified_taming.config.CommonConfig;
+import com.gvxwsur.unified_taming.init.InitCreativeTabs;
 import com.gvxwsur.unified_taming.init.InitItems;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -13,11 +14,12 @@ public class UnifiedTaming {
     public static final String MOD_ID = "unified_taming";
 
     public UnifiedTaming() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, UnifiedTamingConfig.CFG);
         initRegister(FMLJavaModLoadingContext.get().getModEventBus());
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CommonConfig.init());
     }
 
     public static void initRegister(IEventBus bus) {
         InitItems.ITEMS.register(bus);
+        InitCreativeTabs.TABS.register(bus);
     }
 }

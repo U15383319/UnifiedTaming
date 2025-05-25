@@ -1,0 +1,16 @@
+{
+  "sortnum": 1,
+  "name": "patchouli.unified_taming.book.entries.tame.tame_material.name",
+  "icon": "unified_taming:tame_material",
+  "category": "unified_taming:tame",
+  "pages": [
+    {
+      "type": "text",
+      "text": "patchouli.unified_taming.book.entries.tame.tame_material.pages.0.text"
+    },
+    {
+      "type": "text",
+      "text": "patchouli.unified_taming.book.entries.tame.tame_material.pages.1.text"
+    }
+  ]
+}

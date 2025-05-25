@@ -1,0 +1,10 @@
+{
+  "name": "patchouli.unified_taming.book.name",
+  "landing_text": "patchouli.unified_taming.book.landing_text",
+  "model": "unified_taming:tutorial_book",
+  "creative_tab": "unified_taming.main",
+  "show_progress": false,
+  "i18n": true,
+  "use_resource_pack": true,
+  "version": 1
+}

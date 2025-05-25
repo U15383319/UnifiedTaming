@@ -1,6 +1,8 @@
 package com.gvxwsur.unified_taming.mixin;
 
-import com.gvxwsur.unified_taming.config.UnifiedTamingConfig;
+import com.gvxwsur.unified_taming.config.CommonConfig;
+import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
+import com.gvxwsur.unified_taming.config.subconfig.MiscConfig;
 import com.gvxwsur.unified_taming.entity.api.*;
 import com.gvxwsur.unified_taming.entity.goal.*;
 import com.gvxwsur.unified_taming.entity.types.TamableCommand;
@@ -326,7 +328,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                     || (this.unified_taming$getEnvironment().isLavaSwim() && this.isInLava());
             vertical = canVerticalMove ? vertical : 0;
 
-            float speed = (float) (this.getAttributeValue(Attributes.MOVEMENT_SPEED) * Mth.clamp(UnifiedTamingConfig.rideSpeedModifier.get(), 0.0, 1.0));
+            float speed = (float) (this.getAttributeValue(Attributes.MOVEMENT_SPEED) * Mth.clamp(MiscConfig.rideSpeedModifier.get(), 0.0, 1.0));
 
             this.moveRelative(speed, new Vec3(strafe, vertical, forward));
             this.move(MoverType.SELF, this.getDeltaMovement());
@@ -362,7 +364,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "canBeLeashed", at = @At("HEAD"), cancellable = true)
     public void canBeLeashed(Player p_21813_, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(!this.isLeashed() && (!UnifiedTamingConfig.leashedNeedTamed.get() || UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, p_21813_)));
+        cir.setReturnValue(!this.isLeashed() && (!MiscConfig.leashedNeedTamed.get() || UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, p_21813_)));
     }
 
     @Unique
@@ -445,7 +447,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         if (livingEntity instanceof Mob mob && UnifiedTamingUtils.hasSameOwner((Mob) (Object) this, mob)) {
             return false;
         }
-        if (UnifiedTamingConfig.compatiblePartEntity.get() && !(livingEntity instanceof Mob)) {
+        if (CompatibilityConfig.compatiblePartEntity.get() && !(livingEntity instanceof Mob)) {
             Entity targetAncestry = UnifiedTamingUtils.getAncestry(livingEntity);
             if (targetAncestry instanceof Mob targetAncestryMob) {
                 if ((Object) this == targetAncestryMob) {
@@ -511,7 +513,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public void unified_taming$setCommand(TamableCommand command) {
         this.unified_taming$command = command;
-        if (!((Mob) (Object) this instanceof TamableAnimal && !UnifiedTamingConfig.compatibleVanillaTamableMovingGoals.get())) {
+        if (!((Mob) (Object) this instanceof TamableAnimal && !CompatibilityConfig.compatibleVanillaTamableMovingGoals.get())) {
             if (command == TamableCommand.STROLL) {
                 this.restrictTo(this.blockPosition(), 16);
             } else {
@@ -570,7 +572,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Override
     public boolean canRiderInteract() {
-        return UnifiedTamingConfig.canRiderInteract.get();
+        return MiscConfig.canRiderInteract.get();
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.gvxwsur.unified_taming.event;
 
-import com.gvxwsur.unified_taming.config.UnifiedTamingConfig;
+import com.gvxwsur.unified_taming.config.CommonConfig;
+import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
+import com.gvxwsur.unified_taming.config.subconfig.MiscConfig;
 import com.gvxwsur.unified_taming.entity.api.CommandEntity;
 import com.gvxwsur.unified_taming.entity.api.NeutralEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
@@ -73,13 +75,13 @@ public class LivingEventHandler {
         boolean isLoadedFromDisk = event.loadedFromDisk();
         Level level = entity.level();
         if (!level.isClientSide && entity instanceof Mob mob) {
-            if (UnifiedTamingConfig.compatibleMobSummonedTamed.get() && mob.getSpawnType() == MobSpawnType.MOB_SUMMONED && !isLoadedFromDisk) {
+            if (CompatibilityConfig.compatibleMobSummonedTamed.get() && mob.getSpawnType() == MobSpawnType.MOB_SUMMONED && !isLoadedFromDisk) {
                 Mob mobOwner = level.getNearestEntity(Mob.class, TargetingConditions.forNonCombat().copy().range(8).selector(owner -> owner.getClass() != mob.getClass() && owner.getType().getCategory().isFriendly() == mob.getType().getCategory().isFriendly()), mob, mob.getX(), mob.getY(), mob.getZ(), mob.getBoundingBox().inflate(8));
                 if (mobOwner != null) {
                     UnifiedTamingUtils.tameMob(mob, mobOwner);
                 }
             }
-            if (UnifiedTamingConfig.golemCreatedTamed.get() && mob instanceof AbstractGolem && !isLoadedFromDisk) {
+            if (MiscConfig.golemCreatedTamed.get() && mob instanceof AbstractGolem && !isLoadedFromDisk) {
                 if (mob.getSpawnType() == null) {
                     Player player = level.getNearestPlayer(mob, 6);
                     if (player != null) {

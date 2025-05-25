@@ -1,6 +1,8 @@
 package com.gvxwsur.unified_taming.util;
 
-import com.gvxwsur.unified_taming.config.UnifiedTamingConfig;
+import com.gvxwsur.unified_taming.config.CommonConfig;
+import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
+import com.gvxwsur.unified_taming.config.subconfig.MiscConfig;
 import com.gvxwsur.unified_taming.entity.api.EnvironmentHelper;
 import com.gvxwsur.unified_taming.entity.api.MinionEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
@@ -148,7 +150,7 @@ public class UnifiedTamingUtils {
         if (attacker instanceof Mob mob && ((TamableEntity) mob).unified_taming$isTame()) {
             return !((TamableEntity) mob).unified_taming$canTameAttack(target);
         }
-        if (UnifiedTamingConfig.compatiblePartEntity.get() && !(attacker instanceof Mob)) {
+        if (CompatibilityConfig.compatiblePartEntity.get() && !(attacker instanceof Mob)) {
             Entity attackerAncestry = UnifiedTamingUtils.getAncestry(attacker);
             if (attackerAncestry instanceof Mob attackerAncestryMob) {
                 if (((TamableEntity) attackerAncestryMob).unified_taming$isTame()) {
@@ -163,7 +165,7 @@ public class UnifiedTamingUtils {
         if (target instanceof Mob mob && ((TamableEntity) mob).unified_taming$isOwnedBy(player)) {
             return true;
         }
-        if (UnifiedTamingConfig.compatiblePartEntity.get() && !(target instanceof Mob)) {
+        if (CompatibilityConfig.compatiblePartEntity.get() && !(target instanceof Mob)) {
             Entity targetAncestry = UnifiedTamingUtils.getAncestry(target);
             if (targetAncestry instanceof Mob targetAncestryMob) {
                 if (((TamableEntity) targetAncestryMob).unified_taming$isOwnedBy(player)) {
@@ -175,7 +177,7 @@ public class UnifiedTamingUtils {
     }
 
     public static boolean shouldFireFriendly(Entity attacker, LivingEntity target) {
-        if (UnifiedTamingConfig.playerFriendlyFire.get() && attacker instanceof ServerPlayer player) {
+        if (MiscConfig.playerFriendlyFire.get() && attacker instanceof ServerPlayer player) {
             return shouldPlayerFireFriendly(player, target);
         }
         return shouldMobFireFriendly(attacker, target);
@@ -209,7 +211,7 @@ public class UnifiedTamingUtils {
     }
 
     public static void sendMessageToOwner(Mob mob, Component component, boolean pActionBar) {
-        int messageLevel = UnifiedTamingConfig.showTamableMessage.get();
+        int messageLevel = MiscConfig.showTamableMessage.get();
         if (messageLevel <= 0 || (messageLevel == 1 && !pActionBar)) {
             return;
         }

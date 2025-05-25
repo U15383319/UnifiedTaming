@@ -1,6 +1,7 @@
 package com.gvxwsur.unified_taming.entity.goal;
 
-import com.gvxwsur.unified_taming.config.UnifiedTamingConfig;
+import com.gvxwsur.unified_taming.config.CommonConfig;
+import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.entity.api.BreedableHelper;
 import com.gvxwsur.unified_taming.entity.api.CommandEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
@@ -47,7 +48,7 @@ public class CustomBreedGoal extends Goal {
         } else if (!this.breedableHelper.unified_taming$isInLove()) {
             return false;
         } else {
-            if (this.mob instanceof TamableAnimal && !UnifiedTamingConfig.compatibleVanillaTamableTaming.get()) {
+            if (this.mob instanceof TamableAnimal && !CompatibilityConfig.compatibleVanillaTamableTaming.get()) {
                 return false;
             }
             this.partner = this.getFreePartner();

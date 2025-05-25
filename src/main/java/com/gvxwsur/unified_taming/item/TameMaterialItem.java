@@ -1,6 +1,7 @@
 package com.gvxwsur.unified_taming.item;
 
-import com.gvxwsur.unified_taming.config.UnifiedTamingConfig;
+import com.gvxwsur.unified_taming.config.CommonConfig;
+import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.entity.api.InteractEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
 import com.gvxwsur.unified_taming.util.UnifiedTamingUtils;
@@ -28,7 +29,7 @@ public class TameMaterialItem extends Item {
         Entity interactTarget = (livingEntity instanceof Mob) ? livingEntity : UnifiedTamingUtils.getAncestry(livingEntity);
         if (stack.getItem() instanceof TameMaterialItem && interactTarget instanceof Mob mob && !((TamableEntity) mob).unified_taming$isTame()) {
             if ((((InteractEntity)mob).unified_taming$isTamer(stack) && ((InteractEntity)mob).unified_taming$isTamingConditionSatisfied()) || ((InteractEntity)mob).unified_taming$isCheatTamer(stack)) {
-                if (!(mob instanceof TamableAnimal && !UnifiedTamingConfig.compatibleVanillaTamableTaming.get())) {
+                if (!(mob instanceof TamableAnimal && !CompatibilityConfig.compatibleVanillaTamableTaming.get())) {
                     if (!level.isClientSide()) {
                         if (((InteractEntity)mob).unified_taming$isTamer(stack) && !player.getAbilities().instabuild) {
                             stack.shrink(1);
