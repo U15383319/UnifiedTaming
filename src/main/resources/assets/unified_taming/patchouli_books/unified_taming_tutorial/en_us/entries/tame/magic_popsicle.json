@@ -1,0 +1,16 @@
+{
+  "sortnum": 1,
+  "name": "patchouli.unified_taming.book.entries.tame.magic_popsicle.name",
+  "icon": "unified_taming:magic_popsicle",
+  "category": "unified_taming:tame",
+  "pages": [
+    {
+      "type": "text",
+      "text": "patchouli.unified_taming.book.entries.tame.magic_popsicle.pages.0.text"
+    },
+    {
+      "type": "text",
+      "text": "patchouli.unified_taming.book.entries.tame.magic_popsicle.pages.1.text"
+    }
+  ]
+}

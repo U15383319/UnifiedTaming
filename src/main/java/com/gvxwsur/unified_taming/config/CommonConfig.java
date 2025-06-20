@@ -8,7 +8,6 @@ public class CommonConfig {
 
     public static ForgeConfigSpec init() {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-        builder.comment("Unified Taming Config");
         MiscConfig.init(builder);
         CompatibilityConfig.init(builder);
         return builder.build();

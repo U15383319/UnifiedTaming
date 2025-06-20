@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "unified_taming:item/magic_popsicle_creative"
+  }
+}

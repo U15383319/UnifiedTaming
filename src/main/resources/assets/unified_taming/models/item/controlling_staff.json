@@ -1,0 +1,6 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "unified_taming:item/controlling_staff"
+  }
+}

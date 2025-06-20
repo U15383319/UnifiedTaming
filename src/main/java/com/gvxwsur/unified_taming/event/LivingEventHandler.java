@@ -1,13 +1,12 @@
 package com.gvxwsur.unified_taming.event;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.config.subconfig.MiscConfig;
 import com.gvxwsur.unified_taming.entity.api.CommandEntity;
 import com.gvxwsur.unified_taming.entity.api.NeutralEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
 import com.gvxwsur.unified_taming.init.InitItems;
-import com.gvxwsur.unified_taming.item.MultiToolItem;
+import com.gvxwsur.unified_taming.item.ControllingStaffItem;
 import com.gvxwsur.unified_taming.util.UnifiedTamingUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -75,13 +74,13 @@ public class LivingEventHandler {
         boolean isLoadedFromDisk = event.loadedFromDisk();
         Level level = entity.level();
         if (!level.isClientSide && entity instanceof Mob mob) {
-            if (CompatibilityConfig.compatibleMobSummonedTamed.get() && mob.getSpawnType() == MobSpawnType.MOB_SUMMONED && !isLoadedFromDisk) {
+            if (CompatibilityConfig.COMPATIBLE_MOB_SUMMONED_TAMED.get() && mob.getSpawnType() == MobSpawnType.MOB_SUMMONED && !isLoadedFromDisk) {
                 Mob mobOwner = level.getNearestEntity(Mob.class, TargetingConditions.forNonCombat().copy().range(8).selector(owner -> owner.getClass() != mob.getClass() && owner.getType().getCategory().isFriendly() == mob.getType().getCategory().isFriendly()), mob, mob.getX(), mob.getY(), mob.getZ(), mob.getBoundingBox().inflate(8));
                 if (mobOwner != null) {
                     UnifiedTamingUtils.tameMob(mob, mobOwner);
                 }
             }
-            if (MiscConfig.golemCreatedTamed.get() && mob instanceof AbstractGolem && !isLoadedFromDisk) {
+            if (MiscConfig.GOLEM_CREATED_TAMED.get() && mob instanceof AbstractGolem && !isLoadedFromDisk) {
                 if (mob.getSpawnType() == null) {
                     Player player = level.getNearestPlayer(mob, 6);
                     if (player != null) {
@@ -141,7 +140,7 @@ public class LivingEventHandler {
         Player player = event.getEntity();
         ItemStack stack = event.getItemStack();
         Entity passenger = player.getFirstPassenger();
-        boolean stopRiding = stack.is(InitItems.MULTI_TOOL_ITEM.get()) && MultiToolItem.getModeDesc(stack).equals("STOP_RIDING");
+        boolean stopRiding = stack.is(InitItems.CONTROLLING_STAFF.get()) && ControllingStaffItem.getModeDesc(stack).equals("STOP_RIDING");
         if (stopRiding && passenger instanceof Mob) {
             passenger.stopRiding();
         }

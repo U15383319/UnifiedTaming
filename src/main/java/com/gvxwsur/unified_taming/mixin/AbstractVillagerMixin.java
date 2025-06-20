@@ -1,6 +1,5 @@
 package com.gvxwsur.unified_taming.mixin;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.MiscConfig;
 import com.gvxwsur.unified_taming.entity.api.MerchantHelper;
 import com.gvxwsur.unified_taming.util.UnifiedTamingUtils;
@@ -40,7 +39,7 @@ public abstract class AbstractVillagerMixin extends AgeableMob implements Invent
     }
 
     public int unified_taming$getPlayerReputation(Player p_35533_) {
-        return UnifiedTamingUtils.isOwnedBy(this, p_35533_) ? MiscConfig.merchantTamedReputation.get() : 0;
+        return UnifiedTamingUtils.isOwnedBy(this, p_35533_) ? MiscConfig.MERCHANT_TAMED_REPUTATION.get() : 0;
     }
 
     public void unified_taming$updateSpecialPrices(Player p_35541_) {

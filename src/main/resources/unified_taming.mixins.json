@@ -7,13 +7,11 @@
   "mixins": [
     "AbstractVillagerMixin",
     "AmbientCreatureMixin",
-    "BredAnimalsTriggerMixin",
     "EntityMixin",
     "LivingEntityMixin",
     "MobMixin",
     "PathfinderMobMixin",
-    "PlayerMixin",
-    "TameAnimalTriggerMixin"
+    "PlayerMixin"
   ],
   "client": [
   ],

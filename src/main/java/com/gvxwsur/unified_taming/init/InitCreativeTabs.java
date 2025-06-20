@@ -17,13 +17,13 @@ public class InitCreativeTabs {
 
     public static RegistryObject<CreativeModeTab> MAIN_TAB = TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("item_group.unified_taming.main"))
-            .icon(() -> MULTI_TOOL_ITEM.get().getDefaultInstance())
+            .icon(() -> CONTROLLING_STAFF.get().getDefaultInstance())
             .displayItems((par, output) -> {
                 if (ModList.get().isLoaded("patchouli")) {
-                    output.accept(ItemModBook.forBook(new ResourceLocation(UnifiedTaming.MOD_ID, "tutorial_book")));
+                    output.accept(ItemModBook.forBook(new ResourceLocation(UnifiedTaming.MOD_ID, "unified_taming_tutorial")));
                 }
-                output.accept(MULTI_TOOL_ITEM.get());
-                output.accept(TAME_MATERIAL.get());
-                output.accept(TAME_MATERIAL_CREATIVE.get());
+                output.accept(CONTROLLING_STAFF.get());
+                output.accept(MAGIC_POPSICLE.get());
+                output.accept(MAGIC_POPSICLE_CREATIVE.get());
             }).build());
 }

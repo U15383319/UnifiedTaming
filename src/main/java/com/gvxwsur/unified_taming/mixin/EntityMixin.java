@@ -1,6 +1,5 @@
 package com.gvxwsur.unified_taming.mixin;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.entity.api.RideableEntity;
 import com.gvxwsur.unified_taming.util.UnifiedTamingUtils;
@@ -30,7 +29,7 @@ public abstract class EntityMixin extends CapabilityProvider<Entity> implements 
     @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
     public void interact(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         ItemStack stack = player.getItemInHand(hand);
-        if (CompatibilityConfig.compatiblePartEntity.get()) {
+        if (CompatibilityConfig.COMPATIBLE_PART_ENTITY.get()) {
             Entity ancestry = UnifiedTamingUtils.getAncestry((Entity) (Object) this);
             if (ancestry == null) {
                 return;

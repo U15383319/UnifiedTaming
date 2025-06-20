@@ -1,6 +1,5 @@
 package com.gvxwsur.unified_taming.entity.goal;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.entity.api.CommandEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
@@ -39,7 +38,7 @@ public class CustomSitWhenOrderedToGoal extends Goal {
         } else if (!this.canHighFly && !this.mob.onGround()) {
             return false;
         } else {
-            if (this.mob instanceof TamableAnimal && !CompatibilityConfig.compatibleVanillaTamableMovingGoals.get()) {
+            if (this.mob instanceof TamableAnimal && !CompatibilityConfig.COMPATIBLE_VANILLA_TAMABLE_MOVING_GOALS.get()) {
                 return false;
             }
             LivingEntity $$0 = this.tamableHelper.getOwner();

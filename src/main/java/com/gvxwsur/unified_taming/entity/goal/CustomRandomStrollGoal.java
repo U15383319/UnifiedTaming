@@ -1,6 +1,5 @@
 package com.gvxwsur.unified_taming.entity.goal;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.entity.api.CommandEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
@@ -55,7 +54,7 @@ public class CustomRandomStrollGoal extends Goal {
         } else if (!this.commandHelper.unified_taming$isOrderedToStroll()) {
             return false;
         } else {
-            if (this.pathfinderMob instanceof TamableAnimal && !CompatibilityConfig.compatibleVanillaTamableMovingGoals.get()) {
+            if (this.pathfinderMob instanceof TamableAnimal && !CompatibilityConfig.COMPATIBLE_VANILLA_TAMABLE_MOVING_GOALS.get()) {
                 return false;
             }
 

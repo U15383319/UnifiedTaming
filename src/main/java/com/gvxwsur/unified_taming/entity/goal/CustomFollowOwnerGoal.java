@@ -1,6 +1,5 @@
 package com.gvxwsur.unified_taming.entity.goal;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.entity.api.CommandEntity;
 import com.gvxwsur.unified_taming.entity.api.EnvironmentHelper;
@@ -47,7 +46,7 @@ public class CustomFollowOwnerGoal extends Goal {
         this.commandHelper = (CommandEntity) p_25294_;
         this.speedModifier = p_25295_;
         this.navigation = p_25294_.getNavigation();
-        float distanceFactor = UnifiedTamingUtils.getScaleFactor(p_25294_);
+        float distanceFactor = UnifiedTamingUtils.getScaleFactorBySize(p_25294_);
         this.MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2 * (int) distanceFactor;
         this.MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 3 * (int) distanceFactor;
         this.MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 1 * (int) distanceFactor;
@@ -68,7 +67,7 @@ public class CustomFollowOwnerGoal extends Goal {
         } else if (!this.commandHelper.unified_taming$isOrderedToFollow()) {
             return false;
         } else {
-            if (this.mob instanceof TamableAnimal && !CompatibilityConfig.compatibleVanillaTamableMovingGoals.get()) {
+            if (this.mob instanceof TamableAnimal && !CompatibilityConfig.COMPATIBLE_VANILLA_TAMABLE_MOVING_GOALS.get()) {
                 return false;
             }
             if (this.adjustedDistanceToSqr($$0) < (double) (this.startDistance * this.startDistance)) {

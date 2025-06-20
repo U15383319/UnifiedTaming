@@ -11,6 +11,6 @@ import net.minecraftforge.fml.common.Mod;
 public class ClientSetupHandler {
     @SubscribeEvent
     public static void onClientSetup(RegisterKeyMappingsEvent event) {
-        event.register(ClientKeyHandler.MULTI_TOOL_SWITCH_KEY);
+        event.register(ClientKeyHandler.CONTROLLING_STAFF_SWITCH_KEY);
     }
 }

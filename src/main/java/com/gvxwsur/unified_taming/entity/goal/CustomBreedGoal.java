@@ -1,6 +1,5 @@
 package com.gvxwsur.unified_taming.entity.goal;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.entity.api.BreedableHelper;
 import com.gvxwsur.unified_taming.entity.api.CommandEntity;
@@ -35,8 +34,8 @@ public class CustomBreedGoal extends Goal {
         this.breedableHelper = (BreedableHelper) p_25125_;
         this.level = p_25125_.level();
         this.speedModifier = p_25126_;
-        this.MAX_PARTNER_FINDING_DISTANCE = 8.0F * UnifiedTamingUtils.getScaleFactor(p_25125_);
-        this.MAX_CAN_BREED_DISTANCE = 3.0F * UnifiedTamingUtils.getScaleFactor(p_25125_);
+        this.MAX_PARTNER_FINDING_DISTANCE = 8.0F * UnifiedTamingUtils.getScaleFactorBySize(p_25125_);
+        this.MAX_CAN_BREED_DISTANCE = 3.0F * UnifiedTamingUtils.getScaleFactorBySize(p_25125_);
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
@@ -48,7 +47,7 @@ public class CustomBreedGoal extends Goal {
         } else if (!this.breedableHelper.unified_taming$isInLove()) {
             return false;
         } else {
-            if (this.mob instanceof TamableAnimal && !CompatibilityConfig.compatibleVanillaTamableTaming.get()) {
+            if (this.mob instanceof TamableAnimal && !CompatibilityConfig.COMPATIBLE_VANILLA_TAMABLE_TAMING.get()) {
                 return false;
             }
             this.partner = this.getFreePartner();

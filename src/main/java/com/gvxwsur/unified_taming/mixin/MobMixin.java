@@ -1,6 +1,5 @@
 package com.gvxwsur.unified_taming.mixin;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.config.subconfig.MiscConfig;
 import com.gvxwsur.unified_taming.entity.api.*;
@@ -8,6 +7,8 @@ import com.gvxwsur.unified_taming.entity.goal.*;
 import com.gvxwsur.unified_taming.entity.types.TamableCommand;
 import com.gvxwsur.unified_taming.entity.types.TamableEnvironment;
 import com.gvxwsur.unified_taming.init.InitItems;
+import com.gvxwsur.unified_taming.item.MagicPopsicleItem;
+import com.gvxwsur.unified_taming.util.TriggerHelper;
 import com.gvxwsur.unified_taming.util.UnifiedTamingUtils;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.Minecraft;
@@ -24,9 +25,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -311,7 +313,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public void unified_taming$travel(Vec3 vec3) {
         Entity entity = this.getControllingPassenger();
-        if (entity instanceof Player player && this.isVehicle()) {
+        if (entity instanceof Player player && this.isVehicle() && this.unified_taming$isOwnedBy(player)) {
             if (level().isClientSide) {
                 unified_taming$keyForward = unified_taming$keyForward();
                 unified_taming$keyBack = unified_taming$keyBack();
@@ -328,7 +330,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                     || (this.unified_taming$getEnvironment().isLavaSwim() && this.isInLava());
             vertical = canVerticalMove ? vertical : 0;
 
-            float speed = (float) (this.getAttributeValue(Attributes.MOVEMENT_SPEED) * Mth.clamp(MiscConfig.rideSpeedModifier.get(), 0.0, 1.0));
+            float speed = (float) (UnifiedTamingUtils.getScaledSpeed((Mob) (Object) this) * Mth.clamp(MiscConfig.RIDE_SPEED_MODIFIER.get(), 0.0, 1.0));
 
             this.moveRelative(speed, new Vec3(strafe, vertical, forward));
             this.move(MoverType.SELF, this.getDeltaMovement());
@@ -364,7 +366,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Inject(method = "canBeLeashed", at = @At("HEAD"), cancellable = true)
     public void canBeLeashed(Player p_21813_, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(!this.isLeashed() && (!MiscConfig.leashedNeedTamed.get() || UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, p_21813_)));
+        cir.setReturnValue(!this.isLeashed() && (!MiscConfig.LEASHED_NEED_TAMED.get() || UnifiedTamingUtils.isOwnedBy((Mob) (Object) this, p_21813_)));
     }
 
     @Unique
@@ -430,7 +432,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.unified_taming$setTame(true);
         this.unified_taming$setOwnerUUID(player.getUUID());
         if (player instanceof ServerPlayer player1) {
-            ((AnimalTriggerHelper) CriteriaTriggers.TAME_ANIMAL).unified_taming$TameAnimal$trigger(player1, (Mob) (Object) this);
+            TriggerHelper.unified_taming$TameAnimal$trigger(CriteriaTriggers.TAME_ANIMAL, player1, (Mob) (Object) this);
         }
         this.unified_taming$registerTameGoals();
     }
@@ -447,7 +449,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         if (livingEntity instanceof Mob mob && UnifiedTamingUtils.hasSameOwner((Mob) (Object) this, mob)) {
             return false;
         }
-        if (CompatibilityConfig.compatiblePartEntity.get() && !(livingEntity instanceof Mob)) {
+        if (CompatibilityConfig.COMPATIBLE_PART_ENTITY.get() && !(livingEntity instanceof Mob)) {
             Entity targetAncestry = UnifiedTamingUtils.getAncestry(livingEntity);
             if (targetAncestry instanceof Mob targetAncestryMob) {
                 if ((Object) this == targetAncestryMob) {
@@ -513,7 +515,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public void unified_taming$setCommand(TamableCommand command) {
         this.unified_taming$command = command;
-        if (!((Mob) (Object) this instanceof TamableAnimal && !CompatibilityConfig.compatibleVanillaTamableMovingGoals.get())) {
+        if (!((Mob) (Object) this instanceof TamableAnimal && !CompatibilityConfig.COMPATIBLE_VANILLA_TAMABLE_MOVING_GOALS.get())) {
             if (command == TamableCommand.STROLL) {
                 this.restrictTo(this.blockPosition(), 16);
             } else {
@@ -536,19 +538,26 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return stack.isEdible();
     }
 
-    public boolean unified_taming$isTamer(ItemStack stack) {
-        return stack.is(InitItems.TAME_MATERIAL.get());
-    }
-
     public boolean unified_taming$isTamingConditionSatisfied() {
         return this.getHealth() <= Mth.clamp(this.getMaxHealth() / 5, 4.0, 12.0);
+    }
+
+    @Inject(method = "checkAndHandleImportantInteractions", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z", ordinal = 1), cancellable = true)
+    private void checkAndHandleImportantInteractions(Player p_21500_, InteractionHand p_21501_, CallbackInfoReturnable<InteractionResult> cir) {
+        ItemStack itemstack = p_21500_.getItemInHand(p_21501_);
+        if (itemstack.is(InitItems.CONTROLLING_STAFF.get()) || itemstack.getItem() instanceof MagicPopsicleItem) {
+            InteractionResult interactionresult = itemstack.interactLivingEntity(p_21500_, this, p_21501_);
+            if (interactionresult.consumesAction()) {
+                cir.setReturnValue(interactionresult);
+            }
+        }
     }
 
     @Inject(method = "tickLeash", at = @At("TAIL"))
     protected void tickLeash(CallbackInfo ci) {
         Entity $$0 = this.getLeashHolder();
         if ($$0 != null && $$0.level() == this.level()) {
-            float distanceFactor = UnifiedTamingUtils.getScaleFactor((Mob) (Object) this);
+            float distanceFactor = UnifiedTamingUtils.getScaleFactorBySize((Mob) (Object) this);
             int restrictRadius = (int) (5.0 * distanceFactor);
             float limitDistance = 6.0F * distanceFactor;
             double deltaSpeed = 0.4 * distanceFactor;
@@ -572,7 +581,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Override
     public boolean canRiderInteract() {
-        return MiscConfig.canRiderInteract.get();
+        return MiscConfig.CAN_RIDER_INTERACT.get();
     }
 
     @Override
@@ -718,7 +727,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     public void unified_taming$finalizeSpawnChildFromBreeding(ServerLevel p_277963_, Player p_277357_, @Nullable Mob p_277516_) {
         p_277357_.awardStat(Stats.ANIMALS_BRED);
-        ((AnimalTriggerHelper) CriteriaTriggers.BRED_ANIMALS).unified_taming$BredAnimals$trigger((ServerPlayer) p_277357_, (Mob) (Object) this, p_277357_, p_277516_);
+        TriggerHelper.unified_taming$BredAnimals$trigger(CriteriaTriggers.BRED_ANIMALS, (ServerPlayer) p_277357_, (Mob) (Object) this, p_277357_, p_277516_);
         this.unified_taming$setInLoveTime(-6000);
         if ((Mob) (Object) this instanceof AgeableMob ageableMob) {
             ageableMob.setAge(6000);

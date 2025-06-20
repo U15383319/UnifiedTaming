@@ -24,11 +24,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Locale;
 
-public class MultiToolItem extends Item {
+public class ControllingStaffItem extends Item {
 
     private static final String MODE_TAG = "ToolMode";
 
-    public MultiToolItem() {
+    public ControllingStaffItem() {
         super(new Properties().setNoRepair());
     }
 
@@ -36,8 +36,8 @@ public class MultiToolItem extends Item {
     public @NotNull InteractionResult interactLivingEntity(@NotNull ItemStack stack, @NotNull Player player, @NotNull LivingEntity livingEntity, @NotNull InteractionHand hand) {
         Level level = player.level();
         Entity interactTarget = (livingEntity instanceof Mob) ? livingEntity : UnifiedTamingUtils.getAncestry(livingEntity);
-        MultiToolItemMode current = getMode(stack);
-        if (stack.is(InitItems.MULTI_TOOL_ITEM.get()) && interactTarget instanceof Mob mob && UnifiedTamingUtils.isOwnedBy(mob, player)) {
+        ControllingStaffItemMode current = getMode(stack);
+        if (stack.is(InitItems.CONTROLLING_STAFF.get()) && interactTarget instanceof Mob mob && UnifiedTamingUtils.isOwnedBy(mob, player)) {
             switch (current) {
                 case FOLLOW_OR_SIT -> {
                     if (!level.isClientSide()) {
@@ -131,15 +131,15 @@ public class MultiToolItem extends Item {
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
         super.appendHoverText(stack, world, tooltip, flag);
-        MultiToolItemMode current = getMode(stack);
+        ControllingStaffItemMode current = getMode(stack);
         tooltip.add(Component.translatable(
-                "tooltip." + UnifiedTaming.MOD_ID + ".multi_tool", Component.translatable(current.getLang())
+                "tooltip." + UnifiedTaming.MOD_ID + ".controlling_staff", Component.translatable(current.getLang())
         ));
     }
 
-    private static MultiToolItemMode getMode(ItemStack stack) {
+    private static ControllingStaffItemMode getMode(ItemStack stack) {
         CompoundTag tag = stack.getOrCreateTag();
-        return MultiToolItemMode.values()[tag.getInt(MODE_TAG)];
+        return ControllingStaffItemMode.values()[tag.getInt(MODE_TAG)];
     }
 
     public static String getModeDesc(ItemStack stack) {
@@ -148,13 +148,13 @@ public class MultiToolItem extends Item {
 
     public static void switchMode(ItemStack stack, Player player) {
         int currentId = getMode(stack).ordinal();
-        int nextId = (currentId + 1) % MultiToolItemMode.values().length;
+        int nextId = (currentId + 1) % ControllingStaffItemMode.values().length;
         stack.getOrCreateTag().putInt(MODE_TAG, nextId);
-        player.displayClientMessage(Component.translatable(MultiToolItemMode.values()[nextId].getLang()), true);
+        player.displayClientMessage(Component.translatable(ControllingStaffItemMode.values()[nextId].getLang()), true);
     }
 }
 
-enum MultiToolItemMode {
+enum ControllingStaffItemMode {
     FOLLOW_OR_SIT,
     FOLLOW_OR_STROLL,
     RIDE_MODE,
@@ -164,6 +164,6 @@ enum MultiToolItemMode {
     FEED;
 
     public String getLang() {
-        return "item." + UnifiedTaming.MOD_ID + ".multi_tool." + "mode." + this.toString().toLowerCase(Locale.ROOT);
+        return "item." + UnifiedTaming.MOD_ID + ".controlling_staff." + "mode." + this.toString().toLowerCase(Locale.ROOT);
     }
 }

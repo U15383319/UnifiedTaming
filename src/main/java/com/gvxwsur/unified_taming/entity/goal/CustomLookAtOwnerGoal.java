@@ -1,6 +1,5 @@
 package com.gvxwsur.unified_taming.entity.goal;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
 import com.gvxwsur.unified_taming.util.UnifiedTamingUtils;
@@ -48,7 +47,7 @@ public class CustomLookAtOwnerGoal extends Goal {
         } else if (this.mob.getRandom().nextFloat() >= this.probability) {
             return false;
         } else {
-            if (this.mob instanceof TamableAnimal && !CompatibilityConfig.compatibleVanillaTamableMovingGoals.get()) {
+            if (this.mob instanceof TamableAnimal && !CompatibilityConfig.COMPATIBLE_VANILLA_TAMABLE_MOVING_GOALS.get()) {
                 return false;
             }
             this.lookAt = this.mob.level().getNearestPlayer(this.lookAtContext, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());

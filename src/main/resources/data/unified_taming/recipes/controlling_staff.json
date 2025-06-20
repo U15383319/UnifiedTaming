@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " AA",
+    " CA",
+    "C  "
+  ],
+  "key": {
+    "C": {
+      "tag": "forge:ingots/copper"
+    },
+    "A": {
+      "tag": "forge:gems/amethyst"
+    }
+  },
+  "result": {
+    "item": "unified_taming:controlling_staff"
+  }
+}

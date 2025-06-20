@@ -1,7 +1,6 @@
 package com.gvxwsur.unified_taming.client.input;
 
 import com.gvxwsur.unified_taming.init.InitItems;
-import com.gvxwsur.unified_taming.item.MultiToolItem;
 import com.gvxwsur.unified_taming.network.NetworkHandler;
 import com.gvxwsur.unified_taming.network.packet.ItemModeSwitchPacket;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -21,15 +20,15 @@ import org.lwjgl.glfw.GLFW;
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class ClientKeyHandler {
-    public static KeyMapping MULTI_TOOL_SWITCH_KEY = new KeyMapping("key.unified_taming.multi_tool_switch_key.desc", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, "key.category.unified_taming");
+    public static KeyMapping CONTROLLING_STAFF_SWITCH_KEY = new KeyMapping("key.unified_taming.controlling_staff_switch_key.desc", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, "key.category.unified_taming");
 
     @SubscribeEvent
     public static void onInput(InputEvent.Key event) {
-        if (MULTI_TOOL_SWITCH_KEY.matches(event.getKey(), event.getScanCode()) && MULTI_TOOL_SWITCH_KEY.consumeClick()) {
+        if (CONTROLLING_STAFF_SWITCH_KEY.matches(event.getKey(), event.getScanCode()) && CONTROLLING_STAFF_SWITCH_KEY.consumeClick()) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null) {
                 ItemStack stack = player.getMainHandItem();
-                if (stack.getItem() == InitItems.MULTI_TOOL_ITEM.get()) {
+                if (stack.getItem() == InitItems.CONTROLLING_STAFF.get()) {
                     NetworkHandler.CHANNEL.sendToServer(new ItemModeSwitchPacket());
                 }
             }

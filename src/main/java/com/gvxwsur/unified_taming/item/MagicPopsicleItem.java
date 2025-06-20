@@ -1,6 +1,5 @@
 package com.gvxwsur.unified_taming.item;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.entity.api.InteractEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
@@ -18,8 +17,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class TameMaterialItem extends Item {
-    public TameMaterialItem() {
+public class MagicPopsicleItem extends Item {
+    public MagicPopsicleItem() {
         super(new Properties().setNoRepair());
     }
 
@@ -27,9 +26,9 @@ public class TameMaterialItem extends Item {
     public @NotNull InteractionResult interactLivingEntity(@NotNull ItemStack stack, @NotNull Player player, @NotNull LivingEntity livingEntity, @NotNull InteractionHand hand) {
         Level level = player.level();
         Entity interactTarget = (livingEntity instanceof Mob) ? livingEntity : UnifiedTamingUtils.getAncestry(livingEntity);
-        if (stack.getItem() instanceof TameMaterialItem && interactTarget instanceof Mob mob && !((TamableEntity) mob).unified_taming$isTame()) {
+        if (stack.getItem() instanceof MagicPopsicleItem && interactTarget instanceof Mob mob && !((TamableEntity) mob).unified_taming$isTame()) {
             if ((((InteractEntity)mob).unified_taming$isTamer(stack) && ((InteractEntity)mob).unified_taming$isTamingConditionSatisfied()) || ((InteractEntity)mob).unified_taming$isCheatTamer(stack)) {
-                if (!(mob instanceof TamableAnimal && !CompatibilityConfig.compatibleVanillaTamableTaming.get())) {
+                if (!(mob instanceof TamableAnimal && !CompatibilityConfig.COMPATIBLE_VANILLA_TAMABLE_TAMING.get())) {
                     if (!level.isClientSide()) {
                         if (((InteractEntity)mob).unified_taming$isTamer(stack) && !player.getAbilities().instabuild) {
                             stack.shrink(1);

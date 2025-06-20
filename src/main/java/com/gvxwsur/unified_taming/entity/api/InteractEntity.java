@@ -5,14 +5,16 @@ import net.minecraft.world.item.ItemStack;
 
 public interface InteractEntity {
 
-    public boolean unified_taming$isFood(ItemStack stack);
+    boolean unified_taming$isFood(ItemStack stack);
 
-    public boolean unified_taming$isTamer(ItemStack stack);
+    default boolean unified_taming$isTamer(ItemStack stack) {
+        return stack.is(InitItems.MAGIC_POPSICLE.get());
+    }
 
-    public boolean unified_taming$isTamingConditionSatisfied();
+    boolean unified_taming$isTamingConditionSatisfied();
 
-    public default boolean unified_taming$isCheatTamer(ItemStack stack) {
-        return stack.is(InitItems.TAME_MATERIAL_CREATIVE.get());
+    default boolean unified_taming$isCheatTamer(ItemStack stack) {
+        return stack.is(InitItems.MAGIC_POPSICLE_CREATIVE.get());
     }
 
 }

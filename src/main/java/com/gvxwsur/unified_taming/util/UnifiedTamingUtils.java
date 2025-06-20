@@ -1,6 +1,5 @@
 package com.gvxwsur.unified_taming.util;
 
-import com.gvxwsur.unified_taming.config.CommonConfig;
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.config.subconfig.MiscConfig;
 import com.gvxwsur.unified_taming.entity.api.EnvironmentHelper;
@@ -15,6 +14,7 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
@@ -126,31 +126,33 @@ public class UnifiedTamingUtils {
         return TamableEnvironment.GROUND;
     }
 
-    public static float getScaleFactor(Mob mob) {
-        return getScaleFactor(mob, 0.6, 1.05, 1.44, 2.0);
-    }
-
-    public static float getScaleFactor(Mob mob, double mul1, double mul2, double mul3, double mul4) {
+    public static float getScaleFactorBySize(Mob mob) {
         double basicFactor = mob.getBoundingBox().getSize();
-        double resultFactor = mul1 * (basicFactor / 1.05 - 1) + 1;
+        double resultFactor = 0.6 * (basicFactor / 1.05 - 1) + 1;
         TamableEnvironment environment = ((EnvironmentHelper) mob).unified_taming$getEnvironment();
         if (environment == TamableEnvironment.FLY_PATH) {
-            resultFactor *= mul2;
+            resultFactor *= 1.05;
         }
         if (environment == TamableEnvironment.FLY_WANDER) {
-            resultFactor *= mul3;
+            resultFactor *= 1.44;
         }
         if (mob.isBaby()) {
-            resultFactor *= mul4;
+            resultFactor *= 2.0;
         }
         return (float) resultFactor;
+    }
+
+    public static float getScaledSpeed(Mob mob) {
+        double baseFactor = mob.getAttributeValue(Attributes.MOVEMENT_SPEED);
+        double resultFactor = 0.06 * (baseFactor / 0.23 - 1) + 1;
+        return (float) (resultFactor * 0.23);
     }
 
     public static boolean shouldMobFireFriendly(Entity attacker, LivingEntity target) {
         if (attacker instanceof Mob mob && ((TamableEntity) mob).unified_taming$isTame()) {
             return !((TamableEntity) mob).unified_taming$canTameAttack(target);
         }
-        if (CompatibilityConfig.compatiblePartEntity.get() && !(attacker instanceof Mob)) {
+        if (CompatibilityConfig.COMPATIBLE_PART_ENTITY.get() && !(attacker instanceof Mob)) {
             Entity attackerAncestry = UnifiedTamingUtils.getAncestry(attacker);
             if (attackerAncestry instanceof Mob attackerAncestryMob) {
                 if (((TamableEntity) attackerAncestryMob).unified_taming$isTame()) {
@@ -165,7 +167,7 @@ public class UnifiedTamingUtils {
         if (target instanceof Mob mob && ((TamableEntity) mob).unified_taming$isOwnedBy(player)) {
             return true;
         }
-        if (CompatibilityConfig.compatiblePartEntity.get() && !(target instanceof Mob)) {
+        if (CompatibilityConfig.COMPATIBLE_PART_ENTITY.get() && !(target instanceof Mob)) {
             Entity targetAncestry = UnifiedTamingUtils.getAncestry(target);
             if (targetAncestry instanceof Mob targetAncestryMob) {
                 if (((TamableEntity) targetAncestryMob).unified_taming$isOwnedBy(player)) {
@@ -177,7 +179,7 @@ public class UnifiedTamingUtils {
     }
 
     public static boolean shouldFireFriendly(Entity attacker, LivingEntity target) {
-        if (MiscConfig.playerFriendlyFire.get() && attacker instanceof ServerPlayer player) {
+        if (MiscConfig.PLAYER_FRIENDLY_FIRE.get() && attacker instanceof ServerPlayer player) {
             return shouldPlayerFireFriendly(player, target);
         }
         return shouldMobFireFriendly(attacker, target);
@@ -211,7 +213,7 @@ public class UnifiedTamingUtils {
     }
 
     public static void sendMessageToOwner(Mob mob, Component component, boolean pActionBar) {
-        int messageLevel = MiscConfig.showTamableMessage.get();
+        int messageLevel = MiscConfig.SHOW_TAMABLE_MESSAGE.get();
         if (messageLevel <= 0 || (messageLevel == 1 && !pActionBar)) {
             return;
         }

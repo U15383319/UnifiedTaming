@@ -168,7 +168,7 @@ dependencies {
     //implementation fg.deobf("curse.maven:goety-586095:${goety_id}")
 
     implementation fg.deobf("curse.maven:domesticationinnovation-591149:4911955")
-    //implementation fg.deobf("libs:domesticationinnovation-${di_id}:1.20.1")
+    implementation fg.deobf("libs:domesticationinnovation-${di_id}:1.20.1")
     runtimeOnly fg.deobf("curse.maven:farmersdelight-398521:${farmersdelight_id}")
     implementation fg.deobf("curse.maven:slashbladeresharped-1022428:${slashblade_id}")
 

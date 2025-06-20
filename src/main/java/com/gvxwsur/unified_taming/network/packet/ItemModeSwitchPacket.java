@@ -1,6 +1,6 @@
 package com.gvxwsur.unified_taming.network.packet;
 
-import com.gvxwsur.unified_taming.item.MultiToolItem;
+import com.gvxwsur.unified_taming.item.ControllingStaffItem;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -21,8 +21,8 @@ public class ItemModeSwitchPacket {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {
                 ItemStack stack = player.getMainHandItem();
-                if (stack.getItem() instanceof MultiToolItem) {
-                    MultiToolItem.switchMode(stack, player);
+                if (stack.getItem() instanceof ControllingStaffItem) {
+                    ControllingStaffItem.switchMode(stack, player);
                 }
             }
         });
