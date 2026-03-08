@@ -1,4 +1,4 @@
-package com.gvxwsur.unified_taming.entity.goal;
+package com.gvxwsur.unified_taming.entity.ai.goal;
 
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.entity.api.CommandEntity;

@@ -6,6 +6,7 @@ import com.gvxwsur.unified_taming.entity.api.EnvironmentHelper;
 import com.gvxwsur.unified_taming.entity.api.MinionEntity;
 import com.gvxwsur.unified_taming.entity.api.TamableEntity;
 import com.gvxwsur.unified_taming.entity.types.TamableEnvironment;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -220,6 +221,16 @@ public class UnifiedTamingUtils {
         LivingEntity owner = getOwner(mob);
         if (owner instanceof ServerPlayer player) {
             player.displayClientMessage(component, pActionBar);
+        }
+    }
+
+    public static boolean useBrain(Mob mob) {
+        try {
+            Class<?> clazz = mob.getClass();
+            clazz.getDeclaredMethod("makeBrain", Dynamic.class);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
         }
     }
 

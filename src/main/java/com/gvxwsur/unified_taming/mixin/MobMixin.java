@@ -2,8 +2,9 @@ package com.gvxwsur.unified_taming.mixin;
 
 import com.gvxwsur.unified_taming.config.subconfig.CompatibilityConfig;
 import com.gvxwsur.unified_taming.config.subconfig.MiscConfig;
+import com.gvxwsur.unified_taming.entity.ai.brain.CustomAi;
+import com.gvxwsur.unified_taming.entity.ai.goal.*;
 import com.gvxwsur.unified_taming.entity.api.*;
-import com.gvxwsur.unified_taming.entity.goal.*;
 import com.gvxwsur.unified_taming.entity.types.TamableCommand;
 import com.gvxwsur.unified_taming.entity.types.TamableEnvironment;
 import com.gvxwsur.unified_taming.init.InitItems;
@@ -29,8 +30,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
@@ -246,22 +247,18 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         }
 
         if ((uuid != null || playerUUID != null) && nonPlayerUUID == null) {
-            this.unified_taming$registerTameGoals();
+            this.unified_taming$registerTameAiSystem();
         }
     }
 
-    @Unique
-    public void unified_taming$registerTameGoals() {
-        this.goalSelector.addGoal(1, new CustomSitWhenOrderedToGoal((Mob) (Object) this));
-        this.goalSelector.addGoal(6, new CustomFollowOwnerGoal((Mob) (Object) this, 1.0, 10.0F, 2.0F));
-        this.goalSelector.addGoal(7, new CustomBreedGoal((Mob) (Object) this, 1.0));
-        if ((Mob) (Object) this instanceof PathfinderMob pathfinderMob) {
-            this.goalSelector.addGoal(8, new CustomRandomStrollGoal(pathfinderMob, 1.0));
+    @Override
+    public void unified_taming$registerTameAiSystem() {
+        if (UnifiedTamingUtils.useBrain((Mob) (Object) this)) {
+            CustomAi.makeBrain((Mob) (Object) this, (Brain<Mob>) this.brain);
+        } else {
+            GoalHelper.addTargets((Mob) (Object) this);
         }
-        this.goalSelector.addGoal(10, new CustomLookAtOwnerGoal((Mob) (Object) this, Player.class, 8.0F));
-
-        this.targetSelector.addGoal(1, new CustomOwnerHurtByTargetGoal((Mob) (Object) this));
-        this.targetSelector.addGoal(2, new CustomOwnerHurtTargetGoal((Mob) (Object) this));
+        GoalHelper.addGoals((Mob) (Object) this);
     }
 
     @Inject(method = "aiStep", at = @At("TAIL"))
@@ -434,7 +431,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         if (player instanceof ServerPlayer player1) {
             TriggerHelper.unified_taming$TameAnimal$trigger(CriteriaTriggers.TAME_ANIMAL, player1, (Mob) (Object) this);
         }
-        this.unified_taming$registerTameGoals();
+        this.unified_taming$registerTameAiSystem();
     }
 
     @Override
@@ -517,7 +514,7 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.unified_taming$command = command;
         if (!((Mob) (Object) this instanceof TamableAnimal && !CompatibilityConfig.COMPATIBLE_VANILLA_TAMABLE_MOVING_GOALS.get())) {
             if (command == TamableCommand.STROLL) {
-                this.restrictTo(this.blockPosition(), 16);
+                this.restrictTo(this.blockPosition(), (int) (8 * UnifiedTamingUtils.getScaleFactorBySize((Mob) (Object) this)));
             } else {
                 this.restrictTo(BlockPos.ZERO, -1);
             }

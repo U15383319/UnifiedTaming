@@ -43,7 +43,7 @@ public class ControllingStaffItem extends Item {
                     if (!level.isClientSide()) {
                         ((CommandEntity)mob).unified_taming$setOrderedToSit(!((CommandEntity)mob).unified_taming$isOrderedToSit());
                         String command = ((CommandEntity)mob).unified_taming$getCommand().getLang();
-                        UnifiedTamingUtils.sendMessageToOwner(mob, Component.translatable("message" + command, mob.getDisplayName()), true);
+                        UnifiedTamingUtils.sendMessageToOwner(mob, Component.translatable("message." + command, mob.getDisplayName()), true);
                         mob.setJumping(false);
                         mob.getNavigation().stop();
                         mob.setTarget(null);
@@ -109,6 +109,9 @@ public class ControllingStaffItem extends Item {
                                     mob.heal(totalValue);
                                 }
                                 mob.eat(mob.level(), stack1);
+                                if (player.getAbilities().instabuild) {
+                                    stack1.grow(1);
+                                }
                             }
                             return InteractionResult.sidedSuccess(!level.isClientSide());
                         }

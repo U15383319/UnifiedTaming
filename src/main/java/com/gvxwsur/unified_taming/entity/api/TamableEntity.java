@@ -24,5 +24,5 @@ public interface TamableEntity extends OwnableEntity {
 
     public boolean unified_taming$isOwnedBy(LivingEntity p_21831_);
 
-    public void unified_taming$registerTameGoals();
+    public void unified_taming$registerTameAiSystem();
 }
