@@ -1,12 +1,12 @@
 package com.gvxwsur.unified_taming.client.input;
 
+import com.gvxwsur.unified_taming.client.gui.ControllingStaffWheelScreen;
 import com.gvxwsur.unified_taming.init.InitItems;
-import com.gvxwsur.unified_taming.network.NetworkHandler;
-import com.gvxwsur.unified_taming.network.packet.ItemModeSwitchPacket;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -29,9 +29,17 @@ public class ClientKeyHandler {
             if (player != null) {
                 ItemStack stack = player.getMainHandItem();
                 if (stack.getItem() == InitItems.CONTROLLING_STAFF.get()) {
-                    NetworkHandler.CHANNEL.sendToServer(new ItemModeSwitchPacket());
+                    // Get current mode from item
+                    CompoundTag tag = stack.getOrCreateTag();
+                    int currentMode = tag.getInt("ToolMode");
+
+                    // Open wheel screen
+                    Minecraft.getInstance().setScreen(new ControllingStaffWheelScreen(currentMode));
                 }
             }
         }
     }
 }
+
+
+

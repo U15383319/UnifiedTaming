@@ -33,7 +33,7 @@
   "item.unified_taming.magic_popsicle_creative": "创造模式魔法冰棒",
   "item_group.unified_taming.main": "统一驯服: 主菜单",
   "key.category.unified_taming": "统一驯服",
-  "key.unified_taming.controlling_staff_switch_key.desc": "控制法杖切换模式",
+  "key.unified_taming.controlling_staff_switch_key.desc": "打开控制法杖模式轮盘",
   "message.unified_taming.tame": "%1$s 被你驯服",
   "message.unified_taming.command.sit": "%1$s 正在停留",
   "message.unified_taming.command.follow": "%1$s 正在跟随",
