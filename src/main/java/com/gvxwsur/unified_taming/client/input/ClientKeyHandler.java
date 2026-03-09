@@ -21,6 +21,8 @@ import org.lwjgl.glfw.GLFW;
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class ClientKeyHandler {
     public static KeyMapping CONTROLLING_STAFF_SWITCH_KEY = new KeyMapping("key.unified_taming.controlling_staff_switch_key.desc", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, "key.category.unified_taming");
+    public static KeyMapping RIDE_ASCEND_KEY = new KeyMapping("key.unified_taming.ride_ascend_key.desc", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_SPACE, "key.category.unified_taming");
+    public static KeyMapping RIDE_DESCEND_KEY = new KeyMapping("key.unified_taming.ride_descend_key.desc", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_CONTROL, "key.category.unified_taming");
 
     @SubscribeEvent
     public static void onInput(InputEvent.Key event) {

@@ -34,6 +34,8 @@
   "item_group.unified_taming.main": "Unified Taming: Main",
   "key.category.unified_taming": "Unified Taming",
   "key.unified_taming.controlling_staff_switch_key.desc": "Open Controlling Staff Mode Wheel",
+  "key.unified_taming.ride_ascend_key.desc": "Ride Ascend / Jump",
+  "key.unified_taming.ride_descend_key.desc": "Ride Descend",
   "message.unified_taming.tame": "%1$s is tamed by you",
   "message.unified_taming.command.sit": "%1$s is stopping",
   "message.unified_taming.command.follow": "%1$s is following",

@@ -13,6 +13,7 @@ import com.gvxwsur.unified_taming.util.TriggerHelper;
 import com.gvxwsur.unified_taming.util.UnifiedTamingUtils;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.Minecraft;
+import com.gvxwsur.unified_taming.client.input.ClientKeyHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -31,6 +32,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
@@ -56,6 +58,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -109,6 +112,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     private boolean unified_taming$keyLeft;
     @Unique
     private boolean unified_taming$keyRight;
+    @Unique
+    private boolean unified_taming$keyJump;
+    @Unique
+    private boolean unified_taming$keyDescend;
 
     @Unique
     private boolean unified_taming$isManual;
@@ -125,6 +132,8 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.unified_taming$keyBack = false;
         this.unified_taming$keyLeft = false;
         this.unified_taming$keyRight = false;
+        this.unified_taming$keyJump = false;
+        this.unified_taming$keyDescend = false;
     }
 
     @Unique
@@ -149,6 +158,18 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     @OnlyIn(Dist.CLIENT)
     private static boolean unified_taming$keyRight() {
         return Minecraft.getInstance().options.keyRight.isDown();
+    }
+
+    @Unique
+    @OnlyIn(Dist.CLIENT)
+    private static boolean unified_taming$keyJump() {
+        return ClientKeyHandler.RIDE_ASCEND_KEY.isDown();
+    }
+
+    @Unique
+    @OnlyIn(Dist.CLIENT)
+    private static boolean unified_taming$keyDescend() {
+        return ClientKeyHandler.RIDE_DESCEND_KEY.isDown();
     }
 
 
@@ -316,21 +337,44 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
                 unified_taming$keyBack = unified_taming$keyBack();
                 unified_taming$keyLeft = unified_taming$keyLeft();
                 unified_taming$keyRight = unified_taming$keyRight();
+                unified_taming$keyJump = unified_taming$keyJump();
+                unified_taming$keyDescend = unified_taming$keyDescend();
             }
 
-            float strafe = unified_taming$keyLeft ? 0.5f : (unified_taming$keyRight ? -0.5f : 0);
-            float vertical = unified_taming$keyForward ? -(player.getXRot() - 10) / 22.5f : 0;
-            float forward = unified_taming$keyForward ? 3 : (unified_taming$keyBack ? -0.5f : 0);
+            float strafe = unified_taming$keyLeft ? 1.0f : (unified_taming$keyRight ? -1.0f : 0);
+            float forward = unified_taming$keyForward ? 1.0f : (unified_taming$keyBack ? -1.0f : 0);
 
-            boolean canVerticalMove = this.unified_taming$getEnvironment().isFly()
-                    || (this.unified_taming$getEnvironment().isWaterSwim() && this.isInWater())
-                    || (this.unified_taming$getEnvironment().isLavaSwim() && this.isInLava());
-            vertical = canVerticalMove ? vertical : 0;
+            boolean canFly = this.unified_taming$getEnvironment().isFly();
+            boolean canSwim = (this.unified_taming$getEnvironment().isWaterSwim() && this.isInWater()) || (this.unified_taming$getEnvironment().isLavaSwim() && this.isInLava());
+            boolean canVerticalMove = canFly || canSwim;
 
-            float speed = (float) (UnifiedTamingUtils.getScaledSpeed((Mob) (Object) this) * Mth.clamp(MiscConfig.RIDE_SPEED_MODIFIER.get(), 0.0, 1.0));
+            double baseSpeed = Objects.requireNonNull(this.getAttribute(Attributes.MOVEMENT_SPEED)).getValue();
 
-            this.moveRelative(speed, new Vec3(strafe, vertical, forward));
-            this.move(MoverType.SELF, this.getDeltaMovement());
+            baseSpeed *= Mth.clamp(MiscConfig.RIDE_SPEED_MODIFIER.get(), 0.0, 1.0);
+
+            Vec3 movement = new Vec3(strafe, 0, forward);
+
+            if (canVerticalMove) {
+                // Flying or swimming: use ascend/descend for vertical movement like Creative mode
+                if (unified_taming$keyJump) {
+                    movement = movement.add(0, 1, 0);
+                } else if (unified_taming$keyDescend) {
+                    movement = movement.add(0, -1, 0);
+                }
+
+                this.moveRelative((float) baseSpeed, movement);
+                this.move(MoverType.SELF, this.getDeltaMovement());
+                if (canFly) {
+                    this.setDeltaMovement(this.getDeltaMovement().multiply(0.98, 0.6, 0.98)); // reduce vertical speed to make it more controllable
+                } else if (canSwim) {
+                    this.setDeltaMovement(this.getDeltaMovement().scale(0.9)); // reduce speed to make it more controllable
+                }
+            } else {
+                // Ground movement: jump is handled in tickRidden (before travel applies gravity)
+                this.moveRelative((float) baseSpeed, new Vec3(strafe, 0, forward));
+                this.move(MoverType.SELF, this.getDeltaMovement());
+                this.setDeltaMovement(this.getDeltaMovement().multiply(0.91, 0.98, 0.91)); // apply ground friction
+            }
         }
     }
 
@@ -339,7 +383,24 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         this.fallDistance = 0;
 
         this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
-        this.setRot(player.getYRot(), player.getXRot());
+        this.setYRot(player.getYRot());
+        this.setXRot(0);
+
+        // Handle jump for ground creatures (like vanilla horse does in tickRidden, before travel applies gravity)
+        if (this.unified_taming$isOwnedBy(player)) {
+            if (level().isClientSide) {
+                unified_taming$keyJump = unified_taming$keyJump();
+            }
+
+            boolean canVerticalMove = this.unified_taming$getEnvironment().isFly()
+                    || (this.unified_taming$getEnvironment().isWaterSwim() && this.isInWater())
+                    || (this.unified_taming$getEnvironment().isLavaSwim() && this.isInLava());
+
+            if (!canVerticalMove && unified_taming$keyJump && this.onGround()) {
+                this.jumpFromGround();
+                unified_taming$keyJump = false;
+            }
+        }
 
         super.tickRidden(player, pTravelVector);
     }

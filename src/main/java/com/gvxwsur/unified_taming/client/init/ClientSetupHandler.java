@@ -12,5 +12,7 @@ public class ClientSetupHandler {
     @SubscribeEvent
     public static void onClientSetup(RegisterKeyMappingsEvent event) {
         event.register(ClientKeyHandler.CONTROLLING_STAFF_SWITCH_KEY);
+        event.register(ClientKeyHandler.RIDE_ASCEND_KEY);
+        event.register(ClientKeyHandler.RIDE_DESCEND_KEY);
     }
 }

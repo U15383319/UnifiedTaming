@@ -34,6 +34,8 @@
   "item_group.unified_taming.main": "统一驯服: 主菜单",
   "key.category.unified_taming": "统一驯服",
   "key.unified_taming.controlling_staff_switch_key.desc": "打开控制法杖模式轮盘",
+  "key.unified_taming.ride_ascend_key.desc": "骑乘上升 / 跳跃",
+  "key.unified_taming.ride_descend_key.desc": "骑乘下降",
   "message.unified_taming.tame": "%1$s 被你驯服",
   "message.unified_taming.command.sit": "%1$s 正在停留",
   "message.unified_taming.command.follow": "%1$s 正在跟随",
