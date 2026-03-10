@@ -89,6 +89,12 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
     @Shadow
     public abstract void setBaby(boolean p_21451_);
 
+    @Shadow
+    public abstract boolean isNoAi();
+
+    @Shadow
+    public abstract void setNoAi(boolean p_21558_);
+
     @Unique
     private static final EntityDataAccessor<Byte> unified_taming$DATA_FLAGS_ID; // sit 0 manual 1 tame(0) 2 tame(1) 3 baby 4
 
@@ -125,6 +131,10 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
 
     @Unique
     private int unified_taming$inLove;
+
+    // temporarily change some members to use some override method
+    @Unique
+    private boolean unified_taming$isEffectiveAi;
 
     protected MobMixin(EntityType<? extends LivingEntity> p_21683_, Level p_21684_) {
         super(p_21683_, p_21684_);
@@ -282,6 +292,11 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         GoalHelper.addGoals((Mob) (Object) this);
     }
 
+    @Inject(method = "isEffectiveAi", at = @At("HEAD"), cancellable = true)
+    public void isEffectiveAi(CallbackInfoReturnable<Boolean> cir) {
+        cir.setReturnValue((super.isEffectiveAi() && !this.isNoAi()) || this.unified_taming$isEffectiveAi);
+    }
+
     @Inject(method = "aiStep", at = @At("TAIL"))
     public void aiStep(CallbackInfo ci) {
         if (this.isAlive()) {
@@ -329,53 +344,66 @@ public abstract class MobMixin extends LivingEntity implements Targeting, Tamabl
         return super.hurt(p_21016_, p_21017_);
     }
 
-    public void unified_taming$travel(Vec3 vec3) {
-        Entity entity = this.getControllingPassenger();
-        if (entity instanceof Player player && this.isVehicle() && this.unified_taming$isOwnedBy(player)) {
-            if (level().isClientSide) {
-                unified_taming$keyForward = unified_taming$keyForward();
-                unified_taming$keyBack = unified_taming$keyBack();
-                unified_taming$keyLeft = unified_taming$keyLeft();
-                unified_taming$keyRight = unified_taming$keyRight();
-                unified_taming$keyJump = unified_taming$keyJump();
-                unified_taming$keyDescend = unified_taming$keyDescend();
-            }
-
-            float strafe = unified_taming$keyLeft ? 1.0f : (unified_taming$keyRight ? -1.0f : 0);
-            float forward = unified_taming$keyForward ? 1.0f : (unified_taming$keyBack ? -1.0f : 0);
-
-            boolean canFly = this.unified_taming$getEnvironment().isFly();
-            boolean canSwim = (this.unified_taming$getEnvironment().isWaterSwim() && this.isInWater()) || (this.unified_taming$getEnvironment().isLavaSwim() && this.isInLava());
-            boolean canVerticalMove = canFly || canSwim;
-
-            double baseSpeed = Objects.requireNonNull(this.getAttribute(Attributes.MOVEMENT_SPEED)).getValue();
-
-            baseSpeed *= Mth.clamp(MiscConfig.RIDE_SPEED_MODIFIER.get(), 0.0, 1.0);
-
-            Vec3 movement = new Vec3(strafe, 0, forward);
-
-            if (canVerticalMove) {
-                // Flying or swimming: use ascend/descend for vertical movement like Creative mode
-                if (unified_taming$keyJump) {
-                    movement = movement.add(0, 1, 0);
-                } else if (unified_taming$keyDescend) {
-                    movement = movement.add(0, -1, 0);
-                }
-
-                this.moveRelative((float) baseSpeed, movement);
-                this.move(MoverType.SELF, this.getDeltaMovement());
-                if (canFly) {
-                    this.setDeltaMovement(this.getDeltaMovement().multiply(0.98, 0.6, 0.98)); // reduce vertical speed to make it more controllable
-                } else if (canSwim) {
-                    this.setDeltaMovement(this.getDeltaMovement().scale(0.9)); // reduce speed to make it more controllable
-                }
+    @Override
+    public void travelRidden(Player p_278244_, Vec3 p_278231_) {
+        Vec3 vec3 = this.getRiddenInput(p_278244_, p_278231_);
+        this.tickRidden(p_278244_, vec3);
+        if (this.isControlledByLocalInstance()) {
+            Entity entity = this.getControllingPassenger();
+            if (entity instanceof Player player && this.isVehicle() && this.unified_taming$isOwnedBy(player)) {
+                this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+                this.unified_taming$travel(vec3);
             } else {
-                // Ground movement: jump is handled in tickRidden (before travel applies gravity)
-                this.moveRelative((float) baseSpeed, new Vec3(strafe, 0, forward));
-                this.move(MoverType.SELF, this.getDeltaMovement());
-                this.setDeltaMovement(this.getDeltaMovement().multiply(0.91, 0.98, 0.91)); // apply ground friction
+                this.setSpeed(this.getRiddenSpeed(p_278244_));
+                super.travel(vec3);
+            }
+        } else {
+            this.calculateEntityAnimation(false);
+            this.setDeltaMovement(Vec3.ZERO);
+            this.tryCheckInsideBlocks();
+        }
+
+    }
+
+    public void unified_taming$travel(Vec3 vec3) {
+        if (level().isClientSide) {
+            unified_taming$keyForward = unified_taming$keyForward();
+            unified_taming$keyBack = unified_taming$keyBack();
+            unified_taming$keyLeft = unified_taming$keyLeft();
+            unified_taming$keyRight = unified_taming$keyRight();
+            unified_taming$keyJump = unified_taming$keyJump();
+            unified_taming$keyDescend = unified_taming$keyDescend();
+        }
+
+        float strafe = unified_taming$keyLeft ? 1.0f : (unified_taming$keyRight ? -1.0f : 0);
+        float forward = unified_taming$keyForward ? 1.0f : (unified_taming$keyBack ? -1.0f : 0);
+
+        boolean canFly = this.unified_taming$getEnvironment().isFly();
+        boolean canSwim = (this.unified_taming$getEnvironment().isWaterSwim() && this.isInWater()) || (this.unified_taming$getEnvironment().isLavaSwim() && this.isInLava());
+        boolean canVerticalMove = canFly || canSwim;
+
+        Vec3 movement = new Vec3(strafe, 0, forward);
+        float speed = this.getSpeed();
+
+        if (canVerticalMove) {
+            // Flying or swimming: use ascend/descend for vertical movement like Creative mode
+            if (unified_taming$keyJump) {
+                movement = movement.add(0, 0.6, 0);
+            } else if (unified_taming$keyDescend) {
+                movement = movement.add(0, -0.6, 0);
             }
         }
+
+        if (canFly) {
+            speed *= 3.42f;
+        } else if (canSwim) {
+            speed *= 0.08f;
+        }
+
+        this.unified_taming$isEffectiveAi = true;
+        this.setSpeed(speed);
+        this.travel(movement);
+        this.unified_taming$isEffectiveAi = false;
     }
 
     @Override

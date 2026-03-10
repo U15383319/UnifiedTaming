@@ -143,12 +143,6 @@ public class UnifiedTamingUtils {
         return (float) resultFactor;
     }
 
-    public static float getScaledSpeed(Mob mob) {
-        double baseFactor = mob.getAttributeValue(Attributes.MOVEMENT_SPEED);
-        double resultFactor = 0.06 * (baseFactor / 0.23 - 1) + 1;
-        return (float) (resultFactor * 0.23);
-    }
-
     public static boolean shouldMobFireFriendly(Entity attacker, LivingEntity target) {
         if (attacker instanceof Mob mob && ((TamableEntity) mob).unified_taming$isTame()) {
             return !((TamableEntity) mob).unified_taming$canTameAttack(target);

@@ -41,11 +41,6 @@ public abstract class LivingEntityMixin extends Entity implements Attackable, IF
         }
     }
 
-    @Inject(method = "travelRidden", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;travel(Lnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.AFTER))
-    private void travelRidden(Player p_278244_, Vec3 p_278231_, CallbackInfo ci) {
-        ((RideableEntity) this).unified_taming$travel(p_278231_);
-    }
-
     public void unified_taming$setLastHurtByPlayer(@Nullable Player pPlayer, int time) {
         this.lastHurtByPlayer = pPlayer;
         this.lastHurtByPlayerTime = time;
