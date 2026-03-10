@@ -39,8 +39,4 @@ public enum TamableEnvironment {
     public boolean isLava() {
         return isLavaSwim() || this == LAVA_SURFACE;
     }
-
-    public boolean isAmphibious() {
-        return this == AMPHIBIOUS || this == LAVA_AMPHIBIOUS;
-    }
 }

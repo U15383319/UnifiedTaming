@@ -34,7 +34,7 @@ public abstract class LivingEntityMixin extends Entity implements Attackable, IF
     public void baseTick(CallbackInfo ci) {
         if (this.isAlive()) {
             if (this.getEyeInFluidType().isAir()) {
-                if (!this.level().isClientSide && this.isPassenger() && this.getVehicle() != null && this.getVehicle().onGround() && !((RideableEntity) this.getVehicle()).unified_taming$canBeRiddenInAir(this)) {
+                if (!this.level().isClientSide && this.isPassenger() && this.getVehicle() != null && !this.getVehicle().isInFluidType() && this.getVehicle().onGround() && !((RideableEntity) this.getVehicle()).unified_taming$canBeRiddenInAir(this)) {
                     this.stopRiding();
                 }
             }
